@@ -126,7 +126,32 @@ function createHoleButtons() {
     
     container.appendChild(swipeArea);
     
-    // Setup swipe detection
+    // Click / tap handlers (tap to change hole)
+    leftArrow.addEventListener('click', (e) => {
+        e.stopPropagation();
+        triggerSwipeVibration('right');
+        selectHole(state.currentHole - 1);
+    });
+    rightArrow.addEventListener('click', (e) => {
+        e.stopPropagation();
+        triggerSwipeVibration('left');
+        selectHole(state.currentHole + 1);
+    });
+
+    // Tap left/right half of the area to change hole (for larger touch targets)
+    swipeArea.addEventListener('click', (e) => {
+        const rect = swipeArea.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        if (x < rect.width / 2) {
+            triggerSwipeVibration('right');
+            selectHole(state.currentHole - 1);
+        } else {
+            triggerSwipeVibration('left');
+            selectHole(state.currentHole + 1);
+        }
+    });
+
+    // Setup swipe detection (keeps background move on touchmove, but touchend no longer changes hole)
     setupSwipeDetection();
 }
 
@@ -188,8 +213,8 @@ function setupSwipeDetection() {
         touchEndX = e.changedTouches[0].screenX;
         swipeArea.style.transition = 'background-position 0.3s ease';
         swipeArea.style.backgroundPosition = 'center';
-        handleSwipe();
     }, false);
+    // Note: touchend no longer triggers hole change; taps/clicks (or arrow clicks) handle that.
 }
 
 function handleSwipe() {
