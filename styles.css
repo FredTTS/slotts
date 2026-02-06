@@ -713,6 +713,30 @@ input[type="range"]::-moz-range-thumb:hover {
     color: var(--text-secondary);
 }
 
+/* Timer compact styles */
+.timer-display {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.timer-item {
+    padding: 0.25rem 0.5rem;
+    text-align: center;
+}
+
+.timer-label {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.timer-value {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
 /* Responsive */
 @media (max-width: 640px) {
     .header-content {
@@ -743,6 +767,10 @@ input[type="range"]::-moz-range-thumb:hover {
     .club-inputs {
         grid-template-columns: 1fr;
     }
+
+    /* Further compact timer on small screens */
+    .timer-label { font-size: 0.72rem; }
+    .timer-value { font-size: 1rem; }
 }
 
 /* Layout edit / drag-and-drop helpers */
