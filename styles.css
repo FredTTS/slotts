@@ -128,7 +128,7 @@ body {
 .hole-swipe-area {
     width: 100%;
     max-width: 400px;
-    padding: 2rem 1.5rem;
+    padding: 1rem 1rem;
     background: linear-gradient(90deg, 
         var(--primary) 0%,
         var(--primary-dark) 25%,
@@ -159,7 +159,7 @@ body {
 
 /* Clean, minimal arrows */
 .swipe-arrow {
-    font-size: 1.8rem;
+    font-size: 1.2rem;
     color: rgba(255, 255, 255, 0.7);
     position: absolute;
     top: 50%;
@@ -183,7 +183,7 @@ body {
 .hole-display {
     text-align: center;
     color: white;
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
     position: relative;
     z-index: 1;
 }
@@ -196,7 +196,7 @@ body {
 }
 
 .hole-number {
-    font-size: 4rem;
+    font-size: 2rem;
     font-weight: 700;
     line-height: 1;
     color: white;
@@ -221,7 +221,7 @@ body {
 
 .swipe-hint {
     text-align: center;
-    font-size: 0.85rem;
+    font-size: 0.75rem;
     color: rgba(255, 255, 255, 0.8);
     animation: pulse 2s infinite;
 }
