@@ -280,10 +280,9 @@ function setupEventListeners() {
         });
     }
 
-    // Timer event listeners
-    document.getElementById('startTimerBtn').addEventListener('click', startTimer);
-    document.getElementById('stopTimerBtn').addEventListener('click', stopTimer);
-    document.getElementById('resetTimerBtn').addEventListener('click', resetTimer);
+    // Timer event listener: only start allowed
+    const startBtn = document.getElementById('startTimerBtn');
+    if (startBtn) startBtn.addEventListener('click', startTimer);
 }
 
 function loadLayoutOrder() {
@@ -505,30 +504,15 @@ function startTimer() {
     }
     
     state.timerRunning = true;
-    document.getElementById('startTimerBtn').style.display = 'none';
-    document.getElementById('stopTimerBtn').style.display = 'block';
+    // Disable start button to prevent restarting/stopping
+    const startBtn = document.getElementById('startTimerBtn');
+    if (startBtn) startBtn.disabled = true;
     
     state.timerIntervalId = setInterval(updateTimerDisplay, 1000);
     updateTimerDisplay();
 }
 
-function stopTimer() {
-    state.timerRunning = false;
-    if (state.timerIntervalId) {
-        clearInterval(state.timerIntervalId);
-    }
-    document.getElementById('startTimerBtn').style.display = 'block';
-    document.getElementById('stopTimerBtn').style.display = 'none';
-}
-
-function resetTimer() {
-    stopTimer();
-    state.timerStartTime = null;
-    state.timerRunning = false;
-    document.getElementById('elapsedTime').textContent = '00:00';
-    document.getElementById('startTimerBtn').style.display = 'block';
-    document.getElementById('stopTimerBtn').style.display = 'none';
-}
+// Note: stop/reset timer functions removed — timer can only be started.
 
 function updateTimerDisplay() {
     if (!state.timerStartTime) return;
