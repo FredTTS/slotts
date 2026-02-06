@@ -86,28 +86,36 @@ function createHoleButtons() {
     if (!container) return;
     container.innerHTML = '';
 
-    // Create compact select dropdown to save space
-    const select = document.createElement('select');
-    select.id = 'holeSelect';
-    select.className = 'hole-select';
-
-
-    for (let i = 1; i <= 18; i++) {
-        const opt = document.createElement('option');
-        opt.value = i;
-        opt.textContent = `Hål ${i}`;
-        select.appendChild(opt);
-    }
-
-    select.addEventListener('change', (e) => {
-        const val = parseInt(e.target.value, 10);
-        if (!isNaN(val)) selectHole(val);
-    });
-
-    // Ensure dropdown shows Hål 1 by default (visual selection) or currentHole if set
-    select.value = state.currentHole ? String(state.currentHole) : '1';
-
-    container.appendChild(select);
+    // Create swipe-friendly hole navigation
+    const swipeArea = document.createElement('div');
+    swipeArea.id = 'holeSwipeArea';
+    swipeArea.className = 'hole-swipe-area';
+    
+    const holeDisplay = document.createElement('div');
+    holeDisplay.className = 'hole-display';
+    
+    const holeNumber = document.createElement('div');
+    holeNumber.id = 'currentHoleNumber';
+    holeNumber.className = 'hole-number';
+    holeNumber.textContent = state.currentHole || '1';
+    
+    const holeLabel = document.createElement('div');
+    holeLabel.className = 'hole-label';
+    holeLabel.textContent = 'Hål';
+    
+    const swipeHint = document.createElement('div');
+    swipeHint.className = 'swipe-hint';
+    swipeHint.textContent = '👈 Svep för att välja 👉';
+    
+    holeDisplay.appendChild(holeLabel);
+    holeDisplay.appendChild(holeNumber);
+    swipeArea.appendChild(holeDisplay);
+    swipeArea.appendChild(swipeHint);
+    
+    container.appendChild(swipeArea);
+    
+    // Setup swipe detection
+    setupSwipeDetection();
 }
 
 function createClubSettings() {
@@ -142,6 +150,40 @@ function createClubSettings() {
         container.appendChild(item);
     });
 }
+
+// Swipe Detection for Hole Navigation
+let touchStartX = 0;
+let touchEndX = 0;
+
+function setupSwipeDetection() {
+    const swipeArea = document.getElementById('holeSwipeArea');
+    if (!swipeArea) return;
+
+    swipeArea.addEventListener('touchstart', (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+    }, false);
+
+    swipeArea.addEventListener('touchend', (e) => {
+        touchEndX = e.changedTouches[0].screenX;
+        handleSwipe();
+    }, false);
+}
+
+function handleSwipe() {
+    const threshold = 50; // Minimum swipe distance in pixels
+    const diff = touchStartX - touchEndX;
+
+    if (Math.abs(diff) < threshold) return; // Swipe too small, ignore
+
+    if (diff > 0) {
+        // Swiped left - next hole
+        selectHole(state.currentHole + 1);
+    } else {
+        // Swiped right - previous hole
+        selectHole(state.currentHole - 1);
+    }
+}
+
 
 // Event Listeners
 function setupEventListeners() {
@@ -335,10 +377,15 @@ function startLocationTracking() {
 
 // Hole Selection
 function selectHole(holeNumber) {
+    // Wrap around: 0 becomes 18, 19 becomes 1
+    if (holeNumber < 1) holeNumber = 18;
+    if (holeNumber > 18) holeNumber = 1;
+    
     state.currentHole = holeNumber;
-    // Update UI: set select value if present
-    const selectEl = document.getElementById('holeSelect');
-    if (selectEl) selectEl.value = holeNumber;
+    
+    // Update UI: update hole number display
+    const holeNumberEl = document.getElementById('currentHoleNumber');
+    if (holeNumberEl) holeNumberEl.textContent = holeNumber;
     
     // Show relevant sections
     document.getElementById('pinAdjustment').style.display = 'block';
