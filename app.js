@@ -577,12 +577,19 @@ function updateDistances() {
     const distanceToPin = calculateDistance(state.userPosition, pinPosition);
     const distanceToFront = calculateDistanceToFrontEdge(state.userPosition, greenPolygon);
     const distanceToBack = calculateDistanceToBackEdge(state.userPosition, greenPolygon);
+    const midDistance = (distanceToFront + distanceToBack) / 2;
+    const greenArea = greenPolygon ? calculatePolygonArea(greenPolygon) : 0;
     
     // Update UI
     document.getElementById('distanceToGreen').innerHTML = 
         `<span style="font-size: 3rem;">${Math.round(distanceToPin)}</span> <span style="font-size: 1.5rem;">m</span>`;
     document.getElementById('frontEdge').textContent = `${Math.round(distanceToFront)} m`;
-    document.getElementById('centerPin').textContent = `${Math.round(distanceToPin)} m`;
+    // Show green area in m² if available, otherwise show midpoint between front and back
+    if (greenArea > 0.5) {
+        document.getElementById('centerPin').textContent = `${Math.round(greenArea)} m²`;
+    } else {
+        document.getElementById('centerPin').textContent = `${Math.round(midDistance)} m`;
+    }
     document.getElementById('backEdge').textContent = `${Math.round(distanceToBack)} m`;
     
     // Calculate elevation
@@ -619,6 +626,24 @@ function getGreenPolygon(holeData) {
         lng: coord[0],
         lat: coord[1]
     }));
+}
+
+// Calculate polygon area in square meters using planar projection (sufficient for small areas like greens)
+function calculatePolygonArea(polygon) {
+    if (!polygon || polygon.length < 3) return 0;
+    // average latitude for longitude scaling
+    const avgLat = polygon.reduce((s, p) => s + p.lat, 0) / polygon.length;
+    const metersPerDegLat = 111320; // approx meters per degree latitude
+    const metersPerDegLon = 111320 * Math.cos(avgLat * Math.PI / 180);
+
+    const pts = polygon.map(p => ({ x: p.lng * metersPerDegLon, y: p.lat * metersPerDegLat }));
+
+    let sum = 0;
+    for (let i = 0; i < pts.length; i++) {
+        const j = (i + 1) % pts.length;
+        sum += pts[i].x * pts[j].y - pts[j].x * pts[i].y;
+    }
+    return Math.abs(sum) / 2; // square meters
 }
 
 function calculateDistance(pos1, pos2) {
