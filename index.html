@@ -108,32 +108,7 @@
                 </div>
             </section>
 
-            <!-- Weather Conditions -->
-            <section class="card weather-info" id="weatherInfo" data-layout-id="weatherInfo" style="display: none;">
-                <h3>Väderförhållanden</h3>
-                <div class="weather-grid">
-                    <div class="weather-item">
-                        <div class="weather-icon">🌡️</div>
-                        <div class="weather-label">Temperatur</div>
-                        <div class="weather-value" id="temperature">-</div>
-                    </div>
-                    <div class="weather-item">
-                        <div class="weather-icon">💨</div>
-                        <div class="weather-label">Vind</div>
-                        <div class="weather-value" id="windSpeed">-</div>
-                    </div>
-                    <div class="weather-item">
-                        <div class="weather-icon">🧭</div>
-                        <div class="weather-label">Vindriktning</div>
-                        <div class="weather-value" id="windDirection">-</div>
-                    </div>
-                    <div class="weather-item">
-                        <div class="weather-icon">💧</div>
-                        <div class="weather-label">Luftfuktighet</div>
-                        <div class="weather-value" id="humidity">-</div>
-                    </div>
-                </div>
-            </section>
+            <!-- Weather Conditions removed — metrics shown under Påverkan på avstånd -->
 
             <!-- Timer -->
             <section class="card timer-section" id="timerSection" data-layout-id="timerSection" style="display: none;">
@@ -152,9 +127,7 @@
                         <div class="timer-value" id="totalTimeLimit">4h 30m</div>
                     </div>
                 </div>
-                <div class="timer-controls">
-                    <button class="timer-btn" id="startTimerBtn">Starta</button>
-                </div>
+                <div class="timer-controls" aria-hidden="true"></div>
             </section>
         </main>
 

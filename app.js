@@ -280,9 +280,7 @@ function setupEventListeners() {
         });
     }
 
-    // Timer event listener: only start allowed
-    const startBtn = document.getElementById('startTimerBtn');
-    if (startBtn) startBtn.addEventListener('click', startTimer);
+    // Timer automatically starts when first hole is selected; no start button listener needed
 }
 
 function loadLayoutOrder() {
@@ -457,7 +455,6 @@ function selectHole(holeNumber) {
     
     // Show relevant sections
     document.getElementById('pinAdjustment').style.display = 'block';
-    document.getElementById('weatherInfo').style.display = 'block';
     document.getElementById('clubRecommendation').style.display = 'block';
     document.getElementById('timerSection').style.display = 'block';
     
@@ -504,9 +501,6 @@ function startTimer() {
     }
     
     state.timerRunning = true;
-    // Disable start button to prevent restarting/stopping
-    const startBtn = document.getElementById('startTimerBtn');
-    if (startBtn) startBtn.disabled = true;
     
     state.timerIntervalId = setInterval(updateTimerDisplay, 1000);
     updateTimerDisplay();
@@ -547,11 +541,20 @@ function updateWeatherDisplay() {
     const windSpeed = Math.round(state.weatherData.wind.speed * 10) / 10; // m/s
     const windDir = getWindDirection(state.weatherData.wind.deg);
     const humidity = state.weatherData.main.humidity;
-    
-    document.getElementById('temperature').textContent = `${temp}°C`;
-    document.getElementById('windSpeed').textContent = `${windSpeed} m/s`;
-    document.getElementById('windDirection').textContent = windDir;
-    document.getElementById('humidity').textContent = `${humidity}%`;
+    // Update any weather elements if they exist (we removed the dedicated weather card)
+    const tempEl = document.getElementById('temperature'); if (tempEl) tempEl.textContent = `${temp}°C`;
+    const windEl = document.getElementById('windSpeed'); if (windEl) windEl.textContent = `${windSpeed} m/s`;
+    const windDirEl = document.getElementById('windDirection'); if (windDirEl) windDirEl.textContent = windDir;
+    const humEl = document.getElementById('humidity'); if (humEl) humEl.textContent = `${humidity}%`;
+
+    // Also refresh the impact list so weather metrics appear under Påverkan på avstånd
+    updateImpactDetails(
+        calculateTemperatureAdjustment(state.weatherData.main.temp),
+        calculateWindAdjustment(0),
+        calculateHumidityAdjustment(state.weatherData.main.humidity),
+        calculateElevationAdjustment(0),
+        calculatePressureAdjustment(state.weatherData.main.pressure)
+    );
 }
 
 function getWindDirection(degrees) {
@@ -795,35 +798,37 @@ function updateWindAdjustment() {
 function updateImpactDetails(temp, wind, humidity, elevation, pressure) {
     const impactList = document.getElementById('impactList');
     impactList.innerHTML = '';
-    
-    const impacts = [
-        { label: 'Temperatur', value: temp },
-        { label: 'Vind', value: wind },
-        { label: 'Luftfuktighet', value: humidity },
-        { label: 'Höjdskillnad', value: elevation },
-        { label: 'Lufttryck', value: pressure }
-    ];
-    
-    impacts.forEach(impact => {
-        if (Math.abs(impact.value) < 0.5) return;
-        
+    // Build weather + impact entries. Show raw metric + adjustment in meters.
+    const rawTemp = state.weatherData ? Math.round(state.weatherData.main.temp) : null;
+    const rawWind = state.weatherData ? Math.round(state.weatherData.wind.speed * 10) / 10 : null;
+    const rawHumidity = state.weatherData ? state.weatherData.main.humidity : null;
+    const rawPressure = state.weatherData ? state.weatherData.main.pressure : null;
+
+    const entries = [];
+    // Always show weather metrics with their impact
+    entries.push({ label: 'Temperatur', raw: rawTemp !== null ? `${rawTemp}°C` : '-', adj: temp });
+    entries.push({ label: 'Vind', raw: rawWind !== null ? `${rawWind} m/s` : '-', adj: wind });
+    entries.push({ label: 'Luftfuktighet', raw: rawHumidity !== null ? `${rawHumidity}%` : '-', adj: humidity });
+    entries.push({ label: 'Lufttryck', raw: rawPressure !== null ? `${rawPressure} hPa` : '-', adj: pressure });
+
+    // Non-weather impacts (elevation) — show only if significant
+    if (Math.abs(elevation) >= 0.5) entries.push({ label: 'Höjdskillnad', raw: '-', adj: elevation });
+
+    entries.forEach(entry => {
         const item = document.createElement('div');
         item.className = 'impact-item';
-        
-        const valueClass = impact.value > 0 ? 'positive' : 'negative';
-        const sign = impact.value > 0 ? '+' : '';
-        
+
+        const valueClass = entry.adj > 0 ? 'positive' : (entry.adj < 0 ? 'negative' : 'neutral');
+        const sign = entry.adj > 0 ? '+' : '';
+
         item.innerHTML = `
-            <span class="impact-label">${impact.label}</span>
-            <span class="impact-value ${valueClass}">${sign}${Math.round(impact.value)} m</span>
+            <span class="impact-label">${entry.label}</span>
+            <span class="impact-raw">${entry.raw}</span>
+            <span class="impact-value ${valueClass}">${sign}${Math.round(entry.adj)} m</span>
         `;
-        
+
         impactList.appendChild(item);
     });
-    
-    if (impactList.children.length === 0) {
-        impactList.innerHTML = '<div class="impact-item"><span class="impact-label">Inga betydande effekter</span></div>';
-    }
 }
 
 // Service Worker Registration

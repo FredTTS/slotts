@@ -494,6 +494,35 @@ input[type="range"]::-moz-range-thumb:hover {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 0.75rem;
+}
+
+.impact-label {
+    flex: 1 1 auto;
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
+.impact-raw {
+    width: 6rem;
+    text-align: right;
+    color: var(--text-primary);
+}
+
+.impact-value {
+    width: 5rem;
+    text-align: right;
+    font-weight: 700;
+}
+
+.impact-value.positive { color: #0f766e; }
+.impact-value.negative { color: #b91c1c; }
+.impact-value.neutral { color: var(--text-secondary); }
+
+.impact-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     padding: 0.75rem;
     background: var(--background);
     border-radius: 0.5rem;
