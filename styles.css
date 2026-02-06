@@ -127,7 +127,7 @@ body {
 /* Swipe-friendly hole selector */
 .hole-swipe-area {
     width: 100%;
-    max-width: 300px;
+    max-width: 400px;
     padding: 2rem 1.5rem;
     background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
     border-radius: 1rem;
@@ -138,6 +138,10 @@ body {
     box-shadow: var(--shadow-lg);
     transition: transform 0.2s;
     margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
 }
 
 .hole-swipe-area:active {
@@ -145,10 +149,45 @@ body {
     transform: scale(0.98);
 }
 
+.swipe-arrow {
+    font-size: 2rem;
+    color: rgba(255, 255, 255, 0.6);
+    position: absolute;
+    transition: all 0.3s ease;
+    animation: arrowBounce 2s infinite;
+}
+
+.left-arrow {
+    left: 1.5rem;
+}
+
+.right-arrow {
+    right: 1.5rem;
+}
+
+.hole-swipe-area:active .left-arrow {
+    left: 0.5rem;
+}
+
+.hole-swipe-area:active .right-arrow {
+    right: 0.5rem;
+}
+
+@keyframes arrowBounce {
+    0%, 100% {
+        opacity: 0.6;
+    }
+    50% {
+        opacity: 0.9;
+    }
+}
+
 .hole-display {
     text-align: center;
     color: white;
     margin-bottom: 1rem;
+    position: relative;
+    z-index: 1;
 }
 
 .hole-label {
@@ -164,6 +203,22 @@ body {
     line-height: 1;
     color: white;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease;
+}
+
+.hole-number.slide-in {
+    animation: slideNumber 0.3s ease;
+}
+
+@keyframes slideNumber {
+    0% {
+        transform: translateY(-20px);
+        opacity: 0.3;
+    }
+    100% {
+        transform: translateY(0);
+        opacity: 1;
+    }
 }
 
 .swipe-hint {

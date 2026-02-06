@@ -91,6 +91,11 @@ function createHoleButtons() {
     swipeArea.id = 'holeSwipeArea';
     swipeArea.className = 'hole-swipe-area';
     
+    // Left arrow
+    const leftArrow = document.createElement('div');
+    leftArrow.className = 'swipe-arrow left-arrow';
+    leftArrow.textContent = '◀';
+    
     const holeDisplay = document.createElement('div');
     holeDisplay.className = 'hole-display';
     
@@ -105,11 +110,18 @@ function createHoleButtons() {
     
     const swipeHint = document.createElement('div');
     swipeHint.className = 'swipe-hint';
-    swipeHint.textContent = '👈 Svep för att välja 👉';
+    swipeHint.textContent = 'Svep för att byta';
+    
+    // Right arrow
+    const rightArrow = document.createElement('div');
+    rightArrow.className = 'swipe-arrow right-arrow';
+    rightArrow.textContent = '▶';
     
     holeDisplay.appendChild(holeLabel);
     holeDisplay.appendChild(holeNumber);
+    swipeArea.appendChild(leftArrow);
     swipeArea.appendChild(holeDisplay);
+    swipeArea.appendChild(rightArrow);
     swipeArea.appendChild(swipeHint);
     
     container.appendChild(swipeArea);
@@ -177,10 +189,20 @@ function handleSwipe() {
 
     if (diff > 0) {
         // Swiped left - next hole
+        triggerSwipeVibration('left');
         selectHole(state.currentHole + 1);
     } else {
         // Swiped right - previous hole
+        triggerSwipeVibration('right');
         selectHole(state.currentHole - 1);
+    }
+}
+
+function triggerSwipeVibration(direction) {
+    // Haptic feedback pattern for swipe
+    if (navigator.vibrate) {
+        // Short vibration pulse
+        navigator.vibrate([30, 10, 30]);
     }
 }
 
@@ -383,9 +405,20 @@ function selectHole(holeNumber) {
     
     state.currentHole = holeNumber;
     
-    // Update UI: update hole number display
+    // Update UI: update hole number display with animation
     const holeNumberEl = document.getElementById('currentHoleNumber');
-    if (holeNumberEl) holeNumberEl.textContent = holeNumber;
+    if (holeNumberEl) {
+        // Trigger slide animation
+        holeNumberEl.classList.remove('slide-in');
+        // Force reflow to restart animation
+        void holeNumberEl.offsetWidth;
+        holeNumberEl.classList.add('slide-in');
+        
+        // Update text after animation starts
+        setTimeout(() => {
+            holeNumberEl.textContent = holeNumber;
+        }, 150);
+    }
     
     // Show relevant sections
     document.getElementById('pinAdjustment').style.display = 'block';
