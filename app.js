@@ -91,11 +91,6 @@ function createHoleButtons() {
     swipeArea.id = 'holeSwipeArea';
     swipeArea.className = 'hole-swipe-area';
     
-    // Left arrow
-    const leftArrow = document.createElement('div');
-    leftArrow.className = 'swipe-arrow left-arrow';
-    leftArrow.textContent = '◀';
-    
     const holeDisplay = document.createElement('div');
     holeDisplay.className = 'hole-display';
     
@@ -112,16 +107,9 @@ function createHoleButtons() {
     swipeHint.className = 'swipe-hint';
     swipeHint.textContent = 'Svep för att byta';
     
-    // Right arrow
-    const rightArrow = document.createElement('div');
-    rightArrow.className = 'swipe-arrow right-arrow';
-    rightArrow.textContent = '▶';
-    
     holeDisplay.appendChild(holeLabel);
     holeDisplay.appendChild(holeNumber);
-    swipeArea.appendChild(leftArrow);
     swipeArea.appendChild(holeDisplay);
-    swipeArea.appendChild(rightArrow);
     swipeArea.appendChild(swipeHint);
     
     container.appendChild(swipeArea);
@@ -173,10 +161,21 @@ function setupSwipeDetection() {
 
     swipeArea.addEventListener('touchstart', (e) => {
         touchStartX = e.changedTouches[0].screenX;
+        swipeArea.style.transition = 'none';
+    }, false);
+
+    swipeArea.addEventListener('touchmove', (e) => {
+        const currentX = e.changedTouches[0].screenX;
+        const diff = touchStartX - currentX;
+        // Subtle background shift during swipe (max 20px shift)
+        const shift = Math.max(-20, Math.min(20, diff * 0.5));
+        swipeArea.style.backgroundPosition = `calc(50% + ${shift}px) center`;
     }, false);
 
     swipeArea.addEventListener('touchend', (e) => {
         touchEndX = e.changedTouches[0].screenX;
+        swipeArea.style.transition = 'background-position 0.3s ease';
+        swipeArea.style.backgroundPosition = 'center';
         handleSwipe();
     }, false);
 }

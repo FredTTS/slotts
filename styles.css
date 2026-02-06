@@ -129,7 +129,14 @@ body {
     width: 100%;
     max-width: 400px;
     padding: 2rem 1.5rem;
-    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    background: linear-gradient(90deg, 
+        var(--primary) 0%,
+        var(--primary-dark) 25%,
+        var(--primary) 50%,
+        var(--primary-dark) 75%,
+        var(--primary) 100%);
+    background-size: 200% 100%;
+    background-position: center;
     border-radius: 1rem;
     cursor: grab;
     user-select: none;
@@ -147,39 +154,6 @@ body {
 .hole-swipe-area:active {
     cursor: grabbing;
     transform: scale(0.98);
-}
-
-.swipe-arrow {
-    font-size: 2rem;
-    color: rgba(255, 255, 255, 0.6);
-    position: absolute;
-    transition: all 0.3s ease;
-    animation: arrowBounce 2s infinite;
-}
-
-.left-arrow {
-    left: 1.5rem;
-}
-
-.right-arrow {
-    right: 1.5rem;
-}
-
-.hole-swipe-area:active .left-arrow {
-    left: 0.5rem;
-}
-
-.hole-swipe-area:active .right-arrow {
-    right: 0.5rem;
-}
-
-@keyframes arrowBounce {
-    0%, 100% {
-        opacity: 0.6;
-    }
-    50% {
-        opacity: 0.9;
-    }
 }
 
 .hole-display {
