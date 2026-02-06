@@ -41,8 +41,11 @@
             <section class="card distance-display" id="distanceDisplay">
                 <div class="distance-main">
                     <div class="distance-label">Avstånd till mitten på Green</div>
-                    <div class="distance-value" id="distanceToGreen">
-                        <span class="loading">📍 Hämtar position...</span>
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 1rem;">
+                        <div class="distance-value" id="distanceToGreen">
+                            <span class="loading">📍 Hämtar position...</span>
+                        </div>
+                        <button id="imagePreviewBtn" class="image-preview-btn" title="Håll inne för att visa bild">🗺️</button>
                     </div>
                 </div>
                 <div class="distance-details" id="distanceDetails">
@@ -145,6 +148,11 @@
                     <button class="btn-primary" id="saveSettings">Spara</button>
                 </div>
             </div>
+        </div>
+
+        <!-- Image Preview Overlay -->
+        <div class="image-preview-overlay" id="imagePreviewOverlay">
+            <img id="previewImage" src="" alt="Håloversikt" />
         </div>
 
         <!-- Loading Overlay -->
