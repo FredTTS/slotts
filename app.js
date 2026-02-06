@@ -49,6 +49,17 @@ function initializeApp() {
     createHoleButtons();
     setupEventListeners();
     loadLayoutOrder();
+    // Set total (max) time for full round (18 holes x 15 min = 270 min = 04:30)
+    try {
+        const totalMinutes = 18 * 15;
+        const totalHours = Math.floor(totalMinutes / 60);
+        const totalMins = totalMinutes % 60;
+        const formatted = `${String(totalHours).padStart(2, '0')}:${String(totalMins).padStart(2, '0')}`;
+        const el = document.getElementById('totalTimeLimit');
+        if (el) el.textContent = formatted;
+    } catch (e) {
+        // ignore if element missing
+    }
     // Start app with hole 1 selected by default
     selectHole(1);
 
