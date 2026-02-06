@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#10b981">
+    <meta name="description" content="Smart Golf - Din intelligenta klubbvalsassistent">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <title>Smart Golf</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1>⛳ Cheat Code</h1>
+                <div style="display: flex; gap: .5rem; align-items: center;">
+                    <button id="editLayoutBtn" class="settings-btn" title="Redigera layout">↕</button>
+                    <button id="resetLayoutBtn" class="settings-btn" title="Återställ layout">⟲</button>
+                    <button class="settings-btn" id="settingsBtn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path d="M12 1v6m0 6v6m8.66-9l-5.2 3m-6.92 4l-5.2 3M20.66 17l-5.2-3m-6.92-4l-5.2-3"></path>
+                    </svg>
+                </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Hole Selection -->
+            <section class="card hole-selector" id="holeSelector" data-layout-id="holeSelector">
+                <h2>Välj hål</h2>
+                <div class="hole-buttons" id="holeButtons"></div>
+            </section>
+
+            <!-- Distance Display -->
+            <section class="card distance-display" id="distanceDisplay">
+                <div class="distance-main">
+                    <div class="distance-label">Avstånd till mitten på Green</div>
+                    <div class="distance-value" id="distanceToGreen">
+                        <span class="loading">📍 Hämtar position...</span>
+                    </div>
+                </div>
+                <div class="distance-details" id="distanceDetails">
+                    <div class="detail-item">
+                        <span class="detail-label">Framkant:</span>
+                        <span class="detail-value" id="frontEdge">-</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Mitt:</span>
+                        <span class="detail-value" id="centerPin">-</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Bakkant:</span>
+                        <span class="detail-value" id="backEdge">-</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Pin Position Adjustment -->
+            <section class="card pin-adjustment" id="pinAdjustment" data-layout-id="pinAdjustment" style="display: none;">
+                <h3>Flaggposition</h3>
+                <div class="adjustment-controls">
+                    <div class="adjustment-group">
+                        <label>Höger/Vänster (m)</label>
+                        <div class="slider-container">
+                            <span class="slider-label">-10m</span>
+                            <input type="range" id="pinOffsetX" min="-10" max="10" value="0" step="0.5">
+                            <span class="slider-label">+10m</span>
+                        </div>
+                        <div class="slider-value" id="pinOffsetXValue">0 m</div>
+                    </div>
+                    <div class="adjustment-group">
+                        <label>Fram/Bak (m)</label>
+                        <div class="slider-container">
+                            <span class="slider-label">-10m</span>
+                            <input type="range" id="pinOffsetY" min="-10" max="10" value="0" step="0.5">
+                            <span class="slider-label">+10m</span>
+                        </div>
+                        <div class="slider-value" id="pinOffsetYValue">0 m</div>
+                    </div>
+                    <button class="reset-btn" id="resetPin">Återställ Position</button>
+                </div>
+            </section>
+
+            <!-- Club Recommendation -->
+            <section class="card club-recommendation" id="clubRecommendation" data-layout-id="clubRecommendation" style="display: none;">
+                <h3>Rekommenderad Klubba</h3>
+                <div class="recommended-club" id="recommendedClub">
+                    <div class="club-name">-</div>
+                    <div class="club-distance">-</div>
+                </div>
+                
+                <div class="wind-adjustment" id="windAdjustment" style="display: none;">
+                    <div class="adjustment-info">
+                        <span class="adjustment-icon">🎯</span>
+                        <span id="windAdjustmentText">Sikta 0m rakt på flaggan</span>
+                    </div>
+                </div>
+
+                <div class="conditions-impact" id="conditionsImpact">
+                    <h4>Påverkan på avstånd:</h4>
+                    <div class="impact-list" id="impactList"></div>
+                </div>
+            </section>
+
+            <!-- Weather Conditions -->
+            <section class="card weather-info" id="weatherInfo" data-layout-id="weatherInfo" style="display: none;">
+                <h3>Väderförhållanden</h3>
+                <div class="weather-grid">
+                    <div class="weather-item">
+                        <div class="weather-icon">🌡️</div>
+                        <div class="weather-label">Temperatur</div>
+                        <div class="weather-value" id="temperature">-</div>
+                    </div>
+                    <div class="weather-item">
+                        <div class="weather-icon">💨</div>
+                        <div class="weather-label">Vind</div>
+                        <div class="weather-value" id="windSpeed">-</div>
+                    </div>
+                    <div class="weather-item">
+                        <div class="weather-icon">🧭</div>
+                        <div class="weather-label">Vindriktning</div>
+                        <div class="weather-value" id="windDirection">-</div>
+                    </div>
+                    <div class="weather-item">
+                        <div class="weather-icon">💧</div>
+                        <div class="weather-label">Luftfuktighet</div>
+                        <div class="weather-value" id="humidity">-</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Timer -->
+            <section class="card timer-section" id="timerSection" data-layout-id="timerSection" style="display: none;">
+                <h3>Tempo</h3>
+                <div class="timer-display">
+                    <div class="timer-item">
+                        <div class="timer-label">Förfluten tid</div>
+                        <div class="timer-value" id="elapsedTime">00:00</div>
+                    </div>
+                    <div class="timer-item">
+                        <div class="timer-label">Idealtid hit</div>
+                        <div class="timer-value" id="holeTimeLimit">15:00</div>
+                    </div>
+                    <div class="timer-item">
+                        <div class="timer-label">Idealtid totalt</div>
+                        <div class="timer-value" id="totalTimeLimit">4h 30m</div>
+                    </div>
+                </div>
+                <div class="timer-controls">
+                    <button class="timer-btn" id="startTimerBtn">Starta</button>
+                    <button class="timer-btn" id="stopTimerBtn" style="display: none;">Stoppa</button>
+                    <button class="timer-btn reset-btn" id="resetTimerBtn">Återställ</button>
+                </div>
+            </section>
+        </main>
+
+        <!-- Settings Modal -->
+        <div class="modal" id="settingsModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Klubbinställningar</h2>
+                    <button class="close-btn" id="closeSettings">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="club-list" id="clubList"></div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-primary" id="saveSettings">Spara</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading Overlay -->
+        <div class="loading-overlay" id="loadingOverlay">
+            <div class="spinner"></div>
+            <p>Laddar...</p>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
