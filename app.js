@@ -91,6 +91,11 @@ function createHoleButtons() {
     swipeArea.id = 'holeSwipeArea';
     swipeArea.className = 'hole-swipe-area';
     
+    // Left arrow - simple and clean
+    const leftArrow = document.createElement('div');
+    leftArrow.className = 'swipe-arrow left-arrow';
+    leftArrow.textContent = '‹';
+    
     const holeDisplay = document.createElement('div');
     holeDisplay.className = 'hole-display';
     
@@ -107,9 +112,16 @@ function createHoleButtons() {
     swipeHint.className = 'swipe-hint';
     swipeHint.textContent = 'Svep för att byta';
     
+    // Right arrow - simple and clean
+    const rightArrow = document.createElement('div');
+    rightArrow.className = 'swipe-arrow right-arrow';
+    rightArrow.textContent = '›';
+    
     holeDisplay.appendChild(holeLabel);
     holeDisplay.appendChild(holeNumber);
+    swipeArea.appendChild(leftArrow);
     swipeArea.appendChild(holeDisplay);
+    swipeArea.appendChild(rightArrow);
     swipeArea.appendChild(swipeHint);
     
     container.appendChild(swipeArea);

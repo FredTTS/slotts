@@ -149,11 +149,35 @@ body {
     align-items: center;
     justify-content: center;
     flex-direction: column;
+    position: relative;
 }
 
 .hole-swipe-area:active {
     cursor: grabbing;
     transform: scale(0.98);
+}
+
+/* Clean, minimal arrows */
+.swipe-arrow {
+    font-size: 1.8rem;
+    color: rgba(255, 255, 255, 0.7);
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    padding: 0.5rem 0.75rem;
+    transition: color 0.2s ease;
+}
+
+.left-arrow {
+    left: 1rem;
+}
+
+.right-arrow {
+    right: 1rem;
+}
+
+.hole-swipe-area:hover .swipe-arrow {
+    color: rgba(255, 255, 255, 0.9);
 }
 
 .hole-display {
