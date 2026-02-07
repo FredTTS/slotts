@@ -311,6 +311,10 @@ body {
     gap: 0.5rem;
 }
 
+.detail-item-full {
+    grid-column: 1 / -1;
+}
+
 .detail-label {
     font-size: 0.875rem;
     color: var(--text-secondary);
