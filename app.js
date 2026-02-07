@@ -823,6 +823,7 @@ function setupBanguideImageZoom() {
                 let scale = pinchStartScale * (dist / pinchStartDist);
                 scale = Math.max(1, Math.min(4, scale));
                 banguideImageScale = scale;
+                if (scale <= 1) banguideImageTranslate = { x: 0, y: 0 };
                 applyBanguideImageTransform(img);
             }
         } else if (e.touches.length === 1) {
