@@ -80,6 +80,7 @@ async function initializeApp() {
     showLoading();
     await loadCourseData();
     createHoleButtons();
+    populateClubSelect();
     setupEventListeners();
     loadLayoutOrder();
     // Set total (max) time for full round (18 holes x 15 min = 270 min = 04:30)
@@ -336,6 +337,9 @@ function setupEventListeners() {
     }
     const resetPinBtn = document.getElementById('resetPin');
     if (resetPinBtn) resetPinBtn.addEventListener('click', resetPinPosition);
+
+    const clubSelect = document.getElementById('clubSelect');
+    if (clubSelect) clubSelect.addEventListener('change', () => updateClubDistanceDisplay());
 
     const editBtn = document.getElementById('editLayoutBtn');
     const resetLayoutBtn = document.getElementById('resetLayoutBtn');
@@ -612,12 +616,14 @@ function selectHole(holeNumber) {
     // Show relevant sections (varje del är eget draggbart kort)
     const pinAdj = document.getElementById('pinAdjustment');
     const clubRec = document.getElementById('clubRecommendation');
+    const clubDistCard = document.getElementById('clubDistanceCard');
     const windArrowCard = document.getElementById('windArrowCard');
     const windAdjCard = document.getElementById('windAdjustmentCard');
     const conditionsCard = document.getElementById('conditionsImpactCard');
     const timerSec = document.getElementById('timerSection');
     if (pinAdj) pinAdj.style.display = 'block';
     if (clubRec) clubRec.style.display = 'block';
+    if (clubDistCard) clubDistCard.style.display = 'block';
     if (windArrowCard) windArrowCard.style.display = 'block';
     if (windAdjCard) windAdjCard.style.display = 'block';
     if (conditionsCard) conditionsCard.style.display = 'block';
@@ -1088,6 +1094,7 @@ function calculateElevation(holeData, userPos) {
 function recommendClub(distance, elevation) {
     if (!state.weatherData) {
         updateAimCard();
+        updateClubDistanceDisplay();
         return;
     }
     
@@ -1131,6 +1138,57 @@ function recommendClub(distance, elevation) {
     // Show impact details
     updateImpactDetails(tempAdjustment, windAdjustment, humidityAdjustment, 
                        elevationAdjustment, pressureAdjustment);
+
+    updateClubDistanceDisplay(totalAdjustment);
+}
+
+function populateClubSelect() {
+    const sel = document.getElementById('clubSelect');
+    if (!sel) return;
+    sel.innerHTML = '';
+    CLUBS.forEach(name => {
+        const opt = document.createElement('option');
+        opt.value = name;
+        opt.textContent = name;
+        sel.appendChild(opt);
+    });
+    updateClubDistanceDisplay();
+}
+
+function updateClubDistanceDisplay(totalAdjustmentFromRecommend) {
+    const sel = document.getElementById('clubSelect');
+    const normEl = document.getElementById('clubNormalDist');
+    const adjEl = document.getElementById('clubAdjustedDist');
+    if (!sel || !normEl || !adjEl) return;
+    const clubName = sel.value;
+    const clubData = state.clubs[clubName];
+    if (!clubData) {
+        normEl.textContent = 'Normalt: – m';
+        adjEl.textContent = 'Idag (väder + höjd): – m';
+        return;
+    }
+    const normal = Math.round(clubData.totalDistance);
+    normEl.textContent = `Normalt: ${normal} m`;
+    let totalAdj = totalAdjustmentFromRecommend;
+    if (totalAdj == null && state.weatherData && state.userPosition && state.currentHole) {
+        const holeData = getHoleData(state.currentHole);
+        const pinPos = getPinPosition(holeData);
+        if (holeData && pinPos) {
+            const dist = calculateDistance(state.userPosition, pinPos);
+            const elev = calculateElevation(holeData, state.userPosition);
+            totalAdj = calculateTemperatureAdjustment(state.weatherData.main.temp)
+                + calculateWindAdjustment(dist)
+                + calculateHumidityAdjustment(state.weatherData.main.humidity)
+                + calculateElevationAdjustment(elev)
+                + calculatePressureAdjustment(state.weatherData.main.pressure);
+        }
+    }
+    if (totalAdj != null) {
+        const today = Math.round(clubData.totalDistance + totalAdj);
+        adjEl.textContent = `Idag (väder + höjd): ${today} m`;
+    } else {
+        adjEl.textContent = 'Idag (väder + höjd): – m';
+    }
 }
 
 function calculateTemperatureAdjustment(temp) {

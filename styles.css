@@ -657,6 +657,53 @@ input[type="range"]::-moz-range-thumb:hover {
     opacity: 0.9;
 }
 
+/* Klubbval + avstånd (delat i två fält) */
+.club-distance-card .club-distance-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    align-items: start;
+}
+
+.club-distance-card .club-distance-half {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.club-distance-card .club-distance-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.club-distance-card .club-select {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    background: var(--bg);
+    color: var(--text-primary);
+}
+
+.club-distance-card .club-distance-norm,
+.club-distance-card .club-distance-today {
+    font-size: 0.9375rem;
+    color: var(--text-primary);
+}
+
+.club-distance-card .club-distance-today {
+    color: var(--primary);
+    font-weight: 600;
+}
+
+@media (max-width: 480px) {
+    .club-distance-card .club-distance-split {
+        grid-template-columns: 1fr;
+    }
+}
+
 /* Vindpil – följer vindriktning och enhetens kompass */
 .wind-arrow-block {
     display: flex;
