@@ -806,17 +806,19 @@ function updateBanguidePage() {
     }
 }
 
-// Svep vänster = banguide, svep höger = tillbaka (touch + mus)
+// Svep vänster = banguide, svep höger = tillbaka (touch + mus). Ignorera pinch-zoom (två fingrar).
 function setupPageSwipe() {
     const wrapper = document.getElementById('pagesWrapper');
     const pages = document.getElementById('pages');
     if (!wrapper || !pages) return;
     let startX = 0;
+    let multiTouch = false; // true om användaren använt två fingrar (pinch) – då byt inte sida vid touchend
     const threshold = 60;
     function handleStart(clientX) {
         startX = clientX;
     }
     function handleEnd(clientX) {
+        if (multiTouch) return; // pinch-zoom avslutad – stanna kvar på banguide
         const delta = clientX - startX;
         if (delta < -threshold) {
             pages.classList.add('show-banguide');
@@ -826,8 +828,19 @@ function setupPageSwipe() {
             setViewportZoom(false);
         }
     }
-    wrapper.addEventListener('touchstart', (e) => { handleStart(e.changedTouches[0].screenX); }, { passive: true });
-    wrapper.addEventListener('touchend', (e) => { handleEnd(e.changedTouches[0].screenX); }, { passive: true });
+    wrapper.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 2) multiTouch = true;
+        else if (e.touches.length === 1) {
+            multiTouch = false;
+            handleStart(e.touches[0].screenX);
+        }
+    }, { passive: true });
+    wrapper.addEventListener('touchmove', (e) => {
+        if (e.touches.length === 2) multiTouch = true;
+    }, { passive: true });
+    wrapper.addEventListener('touchend', (e) => {
+        if (e.changedTouches && e.changedTouches[0]) handleEnd(e.changedTouches[0].screenX);
+    }, { passive: true });
     wrapper.addEventListener('mousedown', (e) => { handleStart(e.clientX); });
     wrapper.addEventListener('mouseup', (e) => { handleEnd(e.clientX); });
 }
