@@ -124,7 +124,6 @@ body {
 }
 
 .banguide-image-wrap {
-    position: relative;
     width: 100%;
     min-height: 120px; /* undviker layout-hopp medan bilden laddas */
     border-radius: 1rem;
@@ -133,21 +132,6 @@ body {
     box-shadow: var(--shadow-lg);
     touch-action: none; /* tillåter pinch-zoom på bilden utan sidzoom */
     flex-shrink: 0; /* bilden krymper inte i flex-kontexter */
-}
-
-/* Teal-tonad overlay så bilderna matchar appens färgschema */
-.banguide-image-wrap::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-        180deg,
-        rgba(15, 118, 110, 0.06) 0%,
-        rgba(13, 148, 136, 0.12) 50%,
-        rgba(15, 118, 110, 0.08) 100%
-    );
-    pointer-events: none; /* pinch-zoom fungerar fortfarande på bilden */
-    border-radius: 1rem;
 }
 
 .banguide-image {
@@ -162,8 +146,6 @@ body {
     vertical-align: top;
     transform-origin: center center;
     will-change: transform;
-    /* Lätt tonning mot appens teal – diskret, bilden förblir tydlig */
-    filter: sepia(0.04) hue-rotate(158deg) saturate(1.02);
 }
 
 .banguide-section {
