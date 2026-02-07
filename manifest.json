@@ -1,7 +1,7 @@
 {
-  "name": "Smart Golf",
-  "short_name": "SmartGolf",
-  "description": "Intelligent golf-assistent med GPS, väder och klubbrekommendationer",
+  "name": "Slottsbanan",
+  "short_name": "Slottsbanan",
+  "description": "Slottsbanan – golf-assistent med GPS, väder och klubbrekommendationer",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",

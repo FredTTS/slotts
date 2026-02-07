@@ -1,6 +1,6 @@
-# Smart Golf - PWA Golf App
+# Slottsbanan – PWA Golf App
 
-En intelligent golf-assistent som hjälper dig välja rätt klubba baserat på:
+En golf-assistent för Slottsbanan som hjälper dig välja rätt klubba baserat på:
 - GPS-avstånd till green
 - Väderförhållanden (vind, temperatur, luftfuktighet, lufttryck)
 - Höjdskillnad
