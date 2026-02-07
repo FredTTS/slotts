@@ -21,14 +21,21 @@
             <div class="header-content">
                 <h1>⛳ Slottsbanan</h1>
                 <div class="header-actions">
-                    <button id="editLayoutBtn" class="settings-btn" title="Redigera layout" aria-label="Redigera layout">↕</button>
-                    <button id="resetLayoutBtn" class="settings-btn" title="Återställ layout" aria-label="Återställ layout">⟲</button>
-                    <button class="settings-btn" id="settingsBtn" aria-label="Öppna inställningar">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="3"></circle>
-                        <path d="M12 1v6m0 6v6m8.66-9l-5.2 3m-6.92 4l-5.2 3M20.66 17l-5.2-3m-6.92-4l-5.2-3"></path>
-                    </svg>
-                </button>
+                    <button type="button" id="editLayoutBtn" class="header-btn" title="Ändra ordning på korten" aria-label="Ändra ordning på korten">
+                        <span class="header-btn-icon" aria-hidden="true">↕</span>
+                        <span class="header-btn-label">Ordning</span>
+                    </button>
+                    <button type="button" id="resetLayoutBtn" class="header-btn" title="Återställ ordning" aria-label="Återställ ordning">
+                        <span class="header-btn-icon" aria-hidden="true">⟲</span>
+                        <span class="header-btn-label">Återställ</span>
+                    </button>
+                    <button type="button" class="header-btn" id="settingsBtn" title="Klubbinställningar" aria-label="Klubbinställningar">
+                        <svg class="header-btn-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                            <circle cx="12" cy="12" r="3"></circle>
+                            <path d="M12 1v6m0 6v6m8.66-9l-5.2 3m-6.92 4l-5.2 3M20.66 17l-5.2-3m-6.92-4l-5.2-3"></path>
+                        </svg>
+                        <span class="header-btn-label">Klubbar</span>
+                    </button>
                 </div>
             </div>
         </header>
