@@ -542,12 +542,18 @@ function selectHole(holeNumber) {
         }, 150);
     }
     
-    // Show relevant sections
+    // Show relevant sections (varje del är eget draggbart kort)
     const pinAdj = document.getElementById('pinAdjustment');
     const clubRec = document.getElementById('clubRecommendation');
+    const windArrowCard = document.getElementById('windArrowCard');
+    const windAdjCard = document.getElementById('windAdjustmentCard');
+    const conditionsCard = document.getElementById('conditionsImpactCard');
     const timerSec = document.getElementById('timerSection');
     if (pinAdj) pinAdj.style.display = 'block';
     if (clubRec) clubRec.style.display = 'block';
+    if (windArrowCard) windArrowCard.style.display = 'block';
+    if (windAdjCard) windAdjCard.style.display = 'block';
+    if (conditionsCard) conditionsCard.style.display = 'block';
     if (timerSec) timerSec.style.display = 'block';
 
     // Update ideal time for this hole (15 min per hole)

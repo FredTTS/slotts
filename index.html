@@ -90,16 +90,19 @@
                 </div>
             </section>
 
-            <!-- Club Recommendation -->
+            <!-- Rekommenderad klubba (eget kort) -->
             <section class="card club-recommendation" id="clubRecommendation" data-layout-id="clubRecommendation" style="display: none;">
                 <h3>Rekommenderad Klubba</h3>
                 <div class="recommended-club" id="recommendedClub">
                     <div class="club-name">-</div>
                     <div class="club-distance">-</div>
                 </div>
-                
+            </section>
+
+            <!-- Vindriktning (eget kort) -->
+            <section class="card wind-arrow-card" id="windArrowCard" data-layout-id="windArrowCard" style="display: none;">
+                <h3>Vindriktning</h3>
                 <div class="wind-arrow-block" id="windArrowBlock" style="display: none;">
-                    <div class="wind-arrow-label">Vindriktning</div>
                     <div class="wind-arrow-compass" aria-hidden="true">
                         <div class="wind-arrow-needle" id="windArrowNeedle" title="Pilen visar varifrån vinden blåser">
                             <svg viewBox="0 0 24 48" width="24" height="48" aria-hidden="true">
@@ -111,15 +114,23 @@
                     </div>
                     <div class="wind-arrow-from" id="windArrowFrom">-</div>
                 </div>
+            </section>
+
+            <!-- Vart man skall sikta (eget kort) -->
+            <section class="card wind-adjustment-card" id="windAdjustmentCard" data-layout-id="windAdjustmentCard" style="display: none;">
+                <h3>Vart ska jag sikta?</h3>
                 <div class="wind-adjustment" id="windAdjustment" style="display: none;">
                     <div class="adjustment-info">
                         <span class="adjustment-icon">🎯</span>
                         <span id="windAdjustmentText">Sikta 0m rakt på flaggan</span>
                     </div>
                 </div>
+            </section>
 
+            <!-- Påverkan på avstånd (eget kort) -->
+            <section class="card conditions-impact-card" id="conditionsImpactCard" data-layout-id="conditionsImpactCard" style="display: none;">
+                <h3>Påverkan på avstånd</h3>
                 <div class="conditions-impact" id="conditionsImpact">
-                    <h4>Påverkan på avstånd:</h4>
                     <div class="impact-list" id="impactList"></div>
                 </div>
             </section>
