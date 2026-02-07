@@ -72,11 +72,14 @@ body {
 
 .page-banguide {
     background: var(--background);
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
+    overflow: hidden; /* scroll sker i .banguide-content */
 }
 
 /* Banguide-sida: header och innehåll */
+.page-banguide > .header {
+    flex-shrink: 0;
+}
+
 .header-banguide .header-content {
     flex-wrap: wrap;
     gap: 0.5rem;
@@ -113,6 +116,9 @@ body {
 
 .banguide-content {
     flex: 1;
+    min-height: 0; /* behövs för att flex-item ska kunna scrolla */
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     padding: 1rem 1.5rem;
     padding-bottom: 2rem;
 }
