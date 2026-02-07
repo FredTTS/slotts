@@ -781,8 +781,9 @@ function setupDeviceOrientation() {
     window.addEventListener('deviceorientation', handler, false);
 }
 
-// Pinch-zoom endast på banguide-bilden (sidzoom är låst i viewport) (inte hela sidan)
+// Pinch-zoom och pan (drag) på banguide-bilden
 let banguideImageScale = 1;
+let banguideImageTranslate = { x: 0, y: 0 };
 
 function getTouchDistance(touches) {
     if (!touches || touches.length < 2) return 0;
@@ -791,36 +792,88 @@ function getTouchDistance(touches) {
     return Math.hypot(b.clientX - a.clientX, b.clientY - a.clientY);
 }
 
+function applyBanguideImageTransform(img) {
+    if (!img) return;
+    img.style.transform = `translate(${banguideImageTranslate.x}px, ${banguideImageTranslate.y}px) scale(${banguideImageScale})`;
+}
+
 function setupBanguideImageZoom() {
     const wrap = document.querySelector('.banguide-image-wrap');
     const img = document.getElementById('banguideImage');
     if (!wrap || !img) return;
-    let startDist = 0;
-    let startScale = 1;
+    let pinchStartDist = 0;
+    let pinchStartScale = 1;
+    let panStartX = 0, panStartY = 0, panStartTx = 0, panStartTy = 0;
     wrap.addEventListener('touchstart', (e) => {
         if (e.touches.length === 2) {
-            startDist = getTouchDistance(e.touches);
-            startScale = banguideImageScale;
+            pinchStartDist = getTouchDistance(e.touches);
+            pinchStartScale = banguideImageScale;
+        } else if (e.touches.length === 1) {
+            panStartX = e.touches[0].clientX;
+            panStartY = e.touches[0].clientY;
+            panStartTx = banguideImageTranslate.x;
+            panStartTy = banguideImageTranslate.y;
         }
     }, { passive: true });
     wrap.addEventListener('touchmove', (e) => {
         if (e.touches.length === 2) {
             e.preventDefault();
             const dist = getTouchDistance(e.touches);
-            if (startDist > 0) {
-                let scale = startScale * (dist / startDist);
+            if (pinchStartDist > 0) {
+                let scale = pinchStartScale * (dist / pinchStartDist);
                 scale = Math.max(1, Math.min(4, scale));
                 banguideImageScale = scale;
-                img.style.transform = `scale(${scale})`;
+                applyBanguideImageTransform(img);
             }
+        } else if (e.touches.length === 1) {
+            e.preventDefault();
+            const dx = e.touches[0].clientX - panStartX;
+            const dy = e.touches[0].clientY - panStartY;
+            banguideImageTranslate.x = panStartTx + dx;
+            banguideImageTranslate.y = panStartTy + dy;
+            applyBanguideImageTransform(img);
         }
     }, { passive: false });
     wrap.addEventListener('touchend', (e) => {
-        if (e.touches.length < 2) startDist = 0;
+        if (e.touches.length === 2) {
+            panStartX = e.touches[0].clientX;
+            panStartY = e.touches[0].clientY;
+            panStartTx = banguideImageTranslate.x;
+            panStartTy = banguideImageTranslate.y;
+        }
+        if (e.touches.length < 2) pinchStartDist = 0;
+        if (e.touches.length < 1) {
+            panStartX = 0;
+            panStartY = 0;
+        }
     }, { passive: true });
+    wrap.addEventListener('touchcancel', () => {
+        pinchStartDist = 0;
+    }, { passive: true });
+
+    // Mus: dra för att förflytta (pan)
+    let mouseDown = false;
+    let mouseStartX = 0, mouseStartY = 0, mouseStartTx = 0, mouseStartTy = 0;
+    wrap.addEventListener('mousedown', (e) => {
+        if (e.button !== 0) return;
+        mouseDown = true;
+        mouseStartX = e.clientX;
+        mouseStartY = e.clientY;
+        mouseStartTx = banguideImageTranslate.x;
+        mouseStartTy = banguideImageTranslate.y;
+    });
+    wrap.addEventListener('mousemove', (e) => {
+        if (!mouseDown) return;
+        e.preventDefault();
+        banguideImageTranslate.x = mouseStartTx + (e.clientX - mouseStartX);
+        banguideImageTranslate.y = mouseStartTy + (e.clientY - mouseStartY);
+        applyBanguideImageTransform(img);
+    });
+    wrap.addEventListener('mouseup', () => { mouseDown = false; });
+    wrap.addEventListener('mouseleave', () => { mouseDown = false; });
 }
 
-// Banguide-sida: uppdatera hålnummer och bild när hål byts (återställ bildzoom)
+// Banguide-sida: uppdatera hålnummer och bild när hål byts (återställ zoom och pan)
 function updateBanguidePage() {
     const hole = state.currentHole || 1;
     const numEl = document.getElementById('banguideHoleNumber');
@@ -830,6 +883,7 @@ function updateBanguidePage() {
         imgEl.src = `img/s${hole}.jpeg`;
         imgEl.alt = `Hål ${hole}`;
         banguideImageScale = 1;
+        banguideImageTranslate = { x: 0, y: 0 };
         imgEl.style.transform = '';
     }
 }
