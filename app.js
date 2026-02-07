@@ -692,24 +692,6 @@ function updateDistances() {
         }
     }
     if (backEl) backEl.textContent = `${Math.round(distanceToBack)} m`;
-
-    // Green form (djup/kort, bred/smal) från GeoJSON-polygon
-    const greenShapeEl = document.getElementById('greenShape');
-    const greenShapeRow = document.getElementById('greenShapeRow');
-    if (greenPolygon && greenShapeEl && greenShapeRow) {
-        const dims = getGreenDimensions(greenPolygon);
-        if (dims) {
-            const desc = getGreenShapeDescription(dims.lengthM, dims.widthM);
-            greenShapeEl.textContent = desc
-                ? `${desc} (${Math.round(dims.lengthM)}×${Math.round(dims.widthM)} m)`
-                : `${Math.round(dims.lengthM)}×${Math.round(dims.widthM)} m`;
-            greenShapeRow.style.display = '';
-        } else {
-            greenShapeRow.style.display = 'none';
-        }
-    } else if (greenShapeRow) {
-        greenShapeRow.style.display = 'none';
-    }
     
     // Calculate elevation
     const elevation = calculateElevation(holeData, state.userPosition);
@@ -748,54 +730,16 @@ function getGreenPolygon(holeData) {
     }));
 }
 
-// Project green polygon to meters (same scale as calculatePolygonArea)
-function greenPolygonToMeters(polygon) {
-    if (!polygon || polygon.length < 2) return [];
-    const avgLat = polygon.reduce((s, p) => s + p.lat, 0) / polygon.length;
-    const metersPerDegLat = 111320;
-    const metersPerDegLon = 111320 * Math.cos(avgLat * Math.PI / 180);
-    return polygon.map(p => ({ x: p.lng * metersPerDegLon, y: p.lat * metersPerDegLat }));
-}
-
-// Green dimensions from GeoJSON polygon: längd (största utsträckning), bredd (minsta)
-function getGreenDimensions(polygon) {
-    if (!polygon || polygon.length < 2) return null;
-    const pts = greenPolygonToMeters(polygon);
-    let minX = pts[0].x, maxX = pts[0].x, minY = pts[0].y, maxY = pts[0].y;
-    pts.forEach(p => {
-        if (p.x < minX) minX = p.x;
-        if (p.x > maxX) maxX = p.x;
-        if (p.y < minY) minY = p.y;
-        if (p.y > maxY) maxY = p.y;
-    });
-    const extent1 = maxX - minX;
-    const extent2 = maxY - minY;
-    return {
-        lengthM: Math.max(extent1, extent2),
-        widthM: Math.min(extent1, extent2)
-    };
-}
-
-// Beskrivning: djup/kort, bred/smal (baserat på typiska green-storlekar)
-function getGreenShapeDescription(lengthM, widthM) {
-    if (lengthM == null || widthM == null) return '';
-    const deep = lengthM > 28;
-    const short = lengthM < 18;
-    const wide = widthM > 22;
-    const narrow = widthM < 14;
-    const parts = [];
-    if (deep) parts.push('djup');
-    else if (short) parts.push('kort');
-    if (wide) parts.push('bred');
-    else if (narrow) parts.push('smal');
-    if (parts.length === 0) return 'normalt djup och bredd';
-    return parts.join(' och ');
-}
-
 // Calculate polygon area in square meters using planar projection (sufficient for small areas like greens)
 function calculatePolygonArea(polygon) {
     if (!polygon || polygon.length < 3) return 0;
-    const pts = greenPolygonToMeters(polygon);
+    // average latitude for longitude scaling
+    const avgLat = polygon.reduce((s, p) => s + p.lat, 0) / polygon.length;
+    const metersPerDegLat = 111320; // approx meters per degree latitude
+    const metersPerDegLon = 111320 * Math.cos(avgLat * Math.PI / 180);
+
+    const pts = polygon.map(p => ({ x: p.lng * metersPerDegLon, y: p.lat * metersPerDegLat }));
+
     let sum = 0;
     for (let i = 0; i < pts.length; i++) {
         const j = (i + 1) % pts.length;
