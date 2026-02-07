@@ -36,11 +36,13 @@ let state = {
     timerStartTime: null,
     timerRunning: false,
     timerIntervalId: null,
-    deviceHeading: null  // kompassriktning (grader), 0 = N, 90 = Ö
+    deviceHeading: null,  // kompassriktning (grader), 0 = N, 90 = Ö
+    notes: loadNotes()    // anteckningar per hål { 1: "...", 2: "...", ... }
 };
 
 // Layout persistence key
 const LAYOUT_KEY = 'layoutOrder';
+const NOTES_KEY = 'holeNotes';
 
 // Initialize App
 document.addEventListener('DOMContentLoaded', () => {
@@ -120,6 +122,23 @@ function loadClubData() {
 
 function saveClubData() {
     localStorage.setItem('clubData', JSON.stringify(state.clubs));
+}
+
+function loadNotes() {
+    try {
+        const saved = localStorage.getItem(NOTES_KEY);
+        return saved ? JSON.parse(saved) : {};
+    } catch (e) {
+        return {};
+    }
+}
+
+function saveNotes() {
+    try {
+        localStorage.setItem(NOTES_KEY, JSON.stringify(state.notes));
+    } catch (e) {
+        console.warn('Kunde inte spara anteckningar', e);
+    }
 }
 
 // UI Creation
@@ -335,6 +354,17 @@ function setupEventListeners() {
     if (updateAimBtn) {
         updateAimBtn.addEventListener('click', refreshAimPosition);
     }
+
+    const holeNotesInput = document.getElementById('holeNotesInput');
+    if (holeNotesInput) {
+        holeNotesInput.addEventListener('input', () => {
+            if (state.currentHole == null) return;
+            const text = holeNotesInput.value.trim();
+            if (text) state.notes[state.currentHole] = holeNotesInput.value;
+            else delete state.notes[state.currentHole];
+            saveNotes();
+        });
+    }
 }
 
 function loadLayoutOrder() {
@@ -529,8 +559,24 @@ function selectHole(holeNumber) {
     // Wrap around: 0 becomes 18, 19 becomes 1
     if (holeNumber < 1) holeNumber = 18;
     if (holeNumber > 18) holeNumber = 1;
+
+    // Spara anteckningar för aktuellt hål innan vi byter
+    const notesInput = document.getElementById('holeNotesInput');
+    if (state.currentHole != null && notesInput) {
+        const text = notesInput.value.trim();
+        if (text) state.notes[state.currentHole] = text;
+        else delete state.notes[state.currentHole];
+        saveNotes();
+    }
     
     state.currentHole = holeNumber;
+    
+    // Uppdatera anteckningsrutan till det nya hålet
+    const notesCard = document.getElementById('holeNotesCard');
+    const holeNotesNumber = document.getElementById('holeNotesHoleNumber');
+    if (notesCard) notesCard.style.display = 'block';
+    if (holeNotesNumber) holeNotesNumber.textContent = holeNumber;
+    if (notesInput) notesInput.value = state.notes[holeNumber] || '';
     
     // Update UI: update hole number display with animation
     const holeNumberEl = document.getElementById('currentHoleNumber');
