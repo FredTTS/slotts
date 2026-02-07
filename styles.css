@@ -471,6 +471,76 @@ input[type="range"]::-moz-range-thumb:hover {
     opacity: 0.9;
 }
 
+/* Vindpil – följer vindriktning och enhetens kompass */
+.wind-arrow-block {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.wind-arrow-label {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
+.wind-arrow-compass {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(180deg, #f0fdf4 0%, #dcfce7 100%);
+    border: 2px solid var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: inset 0 0 8px rgba(0,0,0,0.06);
+}
+
+.wind-arrow-needle {
+    position: absolute;
+    width: 24px;
+    height: 48px;
+    color: var(--primary-dark);
+    transform-origin: 12px 24px;
+    transition: transform 0.15s ease-out;
+    pointer-events: none;
+}
+
+.wind-arrow-n {
+    position: absolute;
+    top: 6px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    pointer-events: none;
+}
+
+.wind-arrow-from {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.wind-arrow-permission-btn {
+    margin-top: 0.5rem;
+    padding: 0.4rem 0.75rem;
+    font-size: 0.8rem;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.wind-arrow-permission-btn:hover {
+    background: var(--primary-dark);
+}
+
 .wind-adjustment {
     background: #fef3c7;
     border: 2px solid #fbbf24;

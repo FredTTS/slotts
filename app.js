@@ -35,7 +35,8 @@ let state = {
     watchId: null,
     timerStartTime: null,
     timerRunning: false,
-    timerIntervalId: null
+    timerIntervalId: null,
+    deviceHeading: null  // kompassriktning (grader), 0 = N, 90 = Ö
 };
 
 // Layout persistence key
@@ -92,6 +93,7 @@ async function initializeApp() {
     }
     selectHole(1);
     startLocationTracking();
+    setupDeviceOrientation();
     hideLoading();
 }
 
@@ -643,6 +645,8 @@ function updateWeatherDisplay() {
     const windDirEl = document.getElementById('windDirection'); if (windDirEl) windDirEl.textContent = windDir;
     const humEl = document.getElementById('humidity'); if (humEl) humEl.textContent = `${humidity}%`;
 
+    updateWindArrow();
+
     // Also refresh the impact list so weather metrics appear under Påverkan på avstånd
     updateImpactDetails(
         calculateTemperatureAdjustment(state.weatherData.main.temp),
@@ -657,6 +661,77 @@ function getWindDirection(degrees) {
     const directions = ['N', 'NNÖ', 'NÖ', 'ÖNÖ', 'Ö', 'ÖSÖ', 'SÖ', 'SSÖ', 'S', 'SSV', 'SV', 'VSV', 'V', 'VNV', 'NV', 'NNV'];
     const index = Math.round(degrees / 22.5) % 16;
     return directions[index];
+}
+
+// Vindpil: roterar efter vindriktning (vind.deg = varifrån vinden blåser) och enhetens kompass
+function updateWindArrow() {
+    const block = document.getElementById('windArrowBlock');
+    const needle = document.getElementById('windArrowNeedle');
+    const fromEl = document.getElementById('windArrowFrom');
+    if (!block || !needle) return;
+    if (!state.weatherData || state.weatherData.wind == null) {
+        block.style.display = 'none';
+        return;
+    }
+    block.style.display = 'flex';
+    addCompassPermissionButton();
+    const windDeg = state.weatherData.wind.deg;
+    const windDirText = getWindDirection(windDeg);
+    if (fromEl) fromEl.textContent = `Vind från ${windDirText}`;
+    // Pilen pekar mot vindriktning. Skärmens "upp" = var användaren tittar (deviceHeading).
+    // Så rotation = windDeg - deviceHeading (så pilen pekar rätt i verkligheten).
+    const heading = state.deviceHeading != null ? state.deviceHeading : 0;
+    const rotation = windDeg - heading;
+    needle.style.transform = `rotate(${rotation}deg)`;
+}
+
+let compassPermissionBtnAdded = false;
+
+function setupDeviceOrientation() {
+    if (typeof DeviceOrientationEvent === 'undefined') return;
+    const handler = (e) => {
+        if (e.alpha == null) return;
+        let alpha = e.alpha;
+        if (e.webkitCompassHeading != null) alpha = e.webkitCompassHeading;
+        else if (alpha < 0) alpha = alpha + 360;
+        state.deviceHeading = alpha;
+        updateWindArrow();
+    };
+    if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+        return;
+    }
+    window.addEventListener('deviceorientation', handler, false);
+}
+
+function addCompassPermissionButton() {
+    if (compassPermissionBtnAdded || typeof DeviceOrientationEvent === 'undefined' || typeof DeviceOrientationEvent.requestPermission !== 'function') return;
+    const block = document.getElementById('windArrowBlock');
+    if (!block || block.querySelector('.wind-arrow-permission-btn')) return;
+    compassPermissionBtnAdded = true;
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'wind-arrow-permission-btn';
+    btn.textContent = 'Aktivera kompass';
+    btn.addEventListener('click', () => {
+        DeviceOrientationEvent.requestPermission()
+            .then((p) => {
+                if (p === 'granted') {
+                    const handler = (e) => {
+                        if (e.alpha == null) return;
+                        let alpha = e.alpha;
+                        if (e.webkitCompassHeading != null) alpha = e.webkitCompassHeading;
+                        else if (alpha < 0) alpha = alpha + 360;
+                        state.deviceHeading = alpha;
+                        updateWindArrow();
+                    };
+                    window.addEventListener('deviceorientation', handler, false);
+                    btn.remove();
+                    updateWindArrow();
+                }
+            })
+            .catch(() => {});
+    });
+    block.appendChild(btn);
 }
 
 // Distance Calculations
