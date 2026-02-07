@@ -541,6 +541,47 @@ input[type="range"]::-moz-range-thumb:hover {
     background: var(--primary-dark);
 }
 
+/* Vart ska jag sikta – listan med siktråd */
+.aim-content {
+    padding: 0.25rem 0;
+}
+
+.aim-waiting {
+    margin: 0;
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+}
+
+.aim-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.aim-item {
+    font-size: 0.95rem;
+    color: var(--text-primary);
+    padding: 0.4rem 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.aim-item:last-child {
+    border-bottom: none;
+}
+
+.aim-item-label {
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-right: 0.35rem;
+}
+
+.aim-item-value {
+    color: var(--text-primary);
+}
+
 .wind-adjustment {
     background: #fef3c7;
     border: 2px solid #fbbf24;

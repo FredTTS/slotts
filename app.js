@@ -574,9 +574,11 @@ function selectHole(holeNumber) {
     // Fetch weather
     fetchWeather();
     
-    // Update distances
+    // Update distances och siktråd
     if (state.userPosition) {
         updateDistances();
+    } else {
+        updateAimCard();
     }
 }
 
@@ -879,7 +881,10 @@ function calculateElevation(holeData, userPos) {
 
 // Club Recommendation
 function recommendClub(distance, elevation) {
-    if (!state.weatherData) return;
+    if (!state.weatherData) {
+        updateAimCard();
+        return;
+    }
     
     // Calculate adjustments
     const tempAdjustment = calculateTemperatureAdjustment(state.weatherData.main.temp);
@@ -915,8 +920,8 @@ function recommendClub(distance, elevation) {
         document.querySelector('.club-distance').textContent = 'Gå till inställningar';
     }
     
-    // Wind adjustment for aim
-    updateWindAdjustment();
+    // Siktråd: vind, höjd, lufttryck, avstånd
+    updateAimCard(distance, elevation, tempAdjustment, windAdjustment, humidityAdjustment, elevationAdjustment, pressureAdjustment);
     
     // Show impact details
     updateImpactDetails(tempAdjustment, windAdjustment, humidityAdjustment, 
@@ -976,31 +981,99 @@ function calculateBearing(pos1, pos2) {
     return (θ * 180 / Math.PI + 360) % 360;
 }
 
-function updateWindAdjustment() {
-    if (!state.weatherData || !state.userPosition) return;
-    
+// Uppdaterar "Vart ska jag sikta?" med siktråd utifrån vind, höjd, lufttryck och avstånd
+function updateAimCard(distanceToPin, elevation, tempAdj, windAdj, humidityAdj, elevationAdj, pressureAdj) {
+    const aimWaiting = document.getElementById('aimWaiting');
+    const aimList = document.getElementById('aimList');
+    if (!aimWaiting || !aimList) return;
+
+    if (!state.userPosition) {
+        aimWaiting.style.display = 'block';
+        aimWaiting.textContent = 'Väntar på GPS-position…';
+        aimList.innerHTML = '';
+        aimList.style.display = 'none';
+        return;
+    }
+    if (!state.weatherData) {
+        aimWaiting.style.display = 'block';
+        aimWaiting.textContent = 'Väntar på väderdata…';
+        aimList.innerHTML = '';
+        aimList.style.display = 'none';
+        return;
+    }
+
     const holeData = getHoleData(state.currentHole);
     const pinPos = getPinPosition(holeData);
-    if (!pinPos) return;
-    
-    const windDeg = state.weatherData.wind.deg;
-    const windSpeed = state.weatherData.wind.speed; // m/s
-    const bearing = calculateBearing(state.userPosition, pinPos);
-    
-    // Calculate cross-wind component
-    const crossWind = Math.sin((windDeg - bearing) * Math.PI / 180) * windSpeed;
-    const aimAdjustment = Math.round(Math.abs(crossWind) * 2); // ~2m per m/s crosswind
-    
-    const windAdjustmentEl = document.getElementById('windAdjustment');
-    const windAdjustmentText = document.getElementById('windAdjustmentText');
-    
-    if (Math.abs(aimAdjustment) > 1) {
-        windAdjustmentEl.style.display = 'block';
-        const direction = crossWind > 0 ? 'höger' : 'vänster';
-        windAdjustmentText.textContent = `Sikta ${aimAdjustment}m till ${direction} om flaggan`;
-    } else {
-        windAdjustmentEl.style.display = 'none';
+    if (!pinPos) {
+        aimWaiting.style.display = 'block';
+        aimWaiting.textContent = 'Välj hål för siktråd.';
+        aimList.innerHTML = '';
+        aimList.style.display = 'none';
+        return;
     }
+
+    aimWaiting.style.display = 'none';
+    aimList.style.display = 'block';
+    aimList.innerHTML = '';
+
+    const bearing = calculateBearing(state.userPosition, pinPos);
+    const windDeg = state.weatherData.wind.deg;
+    const windSpeed = state.weatherData.wind.speed;
+
+    // Sidovind (crosswind) – vart man ska sikta höger/vänster
+    const crossWind = Math.sin((windDeg - bearing) * Math.PI / 180) * windSpeed;
+    const aimMeters = Math.round(Math.abs(crossWind) * 2);
+    if (aimMeters >= 1) {
+        const direction = crossWind > 0 ? 'höger' : 'vänster';
+        addAimItem(aimList, 'Vind (sidovind)', `Sikta ${aimMeters} m till ${direction} om flaggan`);
+    } else {
+        addAimItem(aimList, 'Vind (sidovind)', 'Ingen sidovind – sikta rakt på flaggan');
+    }
+
+    // Höjdskillnad (uppförsbacke = slå längre = sikta kort)
+    const elevM = Math.round(Math.abs(elevationAdj));
+    if (elevM >= 1) {
+        if (elevationAdj > 0) {
+            addAimItem(aimList, 'Höjdskillnad', `Sikta ${elevM} m kort (uppförsbacke)`);
+        } else {
+            addAimItem(aimList, 'Höjdskillnad', `Sikta ${elevM} m längre (nedförsbacke)`);
+        }
+    } else {
+        addAimItem(aimList, 'Höjdskillnad', 'Ingen höjdskillnad');
+    }
+
+    // Lufttryck
+    const pressM = Math.round(Math.abs(pressureAdj));
+    if (pressM >= 1) {
+        if (pressureAdj > 0) {
+            addAimItem(aimList, 'Lufttryck', `Sikta ${pressM} m längre (lägre tryck)`);
+        } else {
+            addAimItem(aimList, 'Lufttryck', `Sikta ${pressM} m kort (högre tryck)`);
+        }
+    } else {
+        addAimItem(aimList, 'Lufttryck', 'Ingen påverkan');
+    }
+
+    // Totalt avstånd (temperatur + vind fram/bak + luftfuktighet + höjd + tryck)
+    const totalAdj = (tempAdj || 0) + (windAdj || 0) + (humidityAdj || 0) + (elevationAdj || 0) + (pressureAdj || 0);
+    const totalM = Math.round(Math.abs(totalAdj));
+    if (totalM >= 1) {
+        if (totalAdj > 0) {
+            addAimItem(aimList, 'Totalt', `Slå ${totalM} m längre pga förhållanden`);
+        } else {
+            addAimItem(aimList, 'Totalt', `Slå ${totalM} m kort pga förhållanden`);
+        }
+    } else {
+        addAimItem(aimList, 'Totalt', 'Rakt på flaggan');
+    }
+}
+
+function addAimItem(listEl, label, text) {
+    if (!listEl) return;
+    const li = document.createElement('li');
+    li.className = 'aim-item';
+    li.innerHTML = `<span class="aim-item-label">${label}:</span> <span class="aim-item-value">${text}</span>`;
+    listEl.appendChild(li);
 }
 
 function updateImpactDetails(temp, wind, humidity, elevation, pressure) {

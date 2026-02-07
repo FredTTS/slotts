@@ -119,11 +119,9 @@
             <!-- Vart man skall sikta (eget kort) -->
             <section class="card wind-adjustment-card" id="windAdjustmentCard" data-layout-id="windAdjustmentCard" style="display: none;">
                 <h3>Vart ska jag sikta?</h3>
-                <div class="wind-adjustment" id="windAdjustment" style="display: none;">
-                    <div class="adjustment-info">
-                        <span class="adjustment-icon">🎯</span>
-                        <span id="windAdjustmentText">Sikta 0m rakt på flaggan</span>
-                    </div>
+                <div class="aim-content" id="aimContent">
+                    <p class="aim-waiting" id="aimWaiting">Väntar på position och väder…</p>
+                    <ul class="aim-list" id="aimList" aria-label="Siktråd utifrån vind, höjd, lufttryck och avstånd"></ul>
                 </div>
             </section>
 
