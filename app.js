@@ -361,11 +361,15 @@ function setupEventListeners() {
     const banguideStrip = document.getElementById('banguideStrip');
     const pages = document.getElementById('pages');
     if (banguideStrip && pages) {
-        banguideStrip.addEventListener('click', () => pages.classList.add('show-banguide'));
+        const openBanguide = () => {
+            pages.classList.add('show-banguide');
+            setViewportZoom(true);
+        };
+        banguideStrip.addEventListener('click', openBanguide);
         banguideStrip.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
-                pages.classList.add('show-banguide');
+                openBanguide();
             }
         });
     }
@@ -779,6 +783,17 @@ function setupDeviceOrientation() {
     window.addEventListener('deviceorientation', handler, false);
 }
 
+// Viewport: tillåt zoom på banguide-sidan, annars låst (undviker oavsiktlig zoom på huvudsidan)
+function setViewportZoom(allowZoom) {
+    const meta = document.querySelector('meta[name="viewport"]');
+    if (!meta) return;
+    if (allowZoom) {
+        meta.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes');
+    } else {
+        meta.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
+    }
+}
+
 // Banguide-sida: uppdatera hålnummer och bild när hål byts
 function updateBanguidePage() {
     const hole = state.currentHole || 1;
@@ -803,8 +818,13 @@ function setupPageSwipe() {
     }
     function handleEnd(clientX) {
         const delta = clientX - startX;
-        if (delta < -threshold) pages.classList.add('show-banguide');
-        else if (delta > threshold) pages.classList.remove('show-banguide');
+        if (delta < -threshold) {
+            pages.classList.add('show-banguide');
+            setViewportZoom(true);
+        } else if (delta > threshold) {
+            pages.classList.remove('show-banguide');
+            setViewportZoom(false);
+        }
     }
     wrapper.addEventListener('touchstart', (e) => { handleStart(e.changedTouches[0].screenX); }, { passive: true });
     wrapper.addEventListener('touchend', (e) => { handleEnd(e.changedTouches[0].screenX); }, { passive: true });
@@ -818,6 +838,7 @@ function setupBackToMainButton() {
     if (!btn || !pages) return;
     btn.addEventListener('click', () => {
         pages.classList.remove('show-banguide');
+        setViewportZoom(false);
     });
 }
 
