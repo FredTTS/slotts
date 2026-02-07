@@ -791,8 +791,29 @@ function getTouchDistance(touches) {
     return Math.hypot(b.clientX - a.clientX, b.clientY - a.clientY);
 }
 
-function applyBanguideImageTransform(img) {
+function getBanguideImageBounds(wrap, img) {
+    const w = wrap.offsetWidth || 1;
+    const h = wrap.offsetHeight || 1;
+    const iw = img.offsetWidth || w;
+    const ih = img.offsetHeight || h;
+    const s = banguideImageScale;
+    return {
+        txMin: w / 2 - (iw * s) / 2,
+        txMax: (iw * s) / 2 - w / 2,
+        tyMin: h / 2 - (ih * s) / 2,
+        tyMax: (ih * s) / 2 - h / 2
+    };
+}
+
+function clampBanguideImageTranslate(wrap, img) {
+    const b = getBanguideImageBounds(wrap, img);
+    banguideImageTranslate.x = Math.max(b.txMin, Math.min(b.txMax, banguideImageTranslate.x));
+    banguideImageTranslate.y = Math.max(b.tyMin, Math.min(b.tyMax, banguideImageTranslate.y));
+}
+
+function applyBanguideImageTransform(img, wrap) {
     if (!img) return;
+    if (wrap) clampBanguideImageTranslate(wrap, img);
     img.style.transform = `translate(${banguideImageTranslate.x}px, ${banguideImageTranslate.y}px) scale(${banguideImageScale})`;
 }
 
@@ -823,7 +844,7 @@ function setupBanguideImageZoom() {
                 scale = Math.max(1, Math.min(4, scale));
                 banguideImageScale = scale;
                 if (scale <= 1) banguideImageTranslate = { x: 0, y: 0 };
-                applyBanguideImageTransform(img);
+                applyBanguideImageTransform(img, wrap);
             }
         } else if (e.touches.length === 1 && banguideImageScale > 1) {
             e.preventDefault();
@@ -831,7 +852,7 @@ function setupBanguideImageZoom() {
             const dy = e.touches[0].clientY - panStartY;
             banguideImageTranslate.x = panStartTx + dx;
             banguideImageTranslate.y = panStartTy + dy;
-            applyBanguideImageTransform(img);
+            applyBanguideImageTransform(img, wrap);
         }
     }, { passive: false });
     wrap.addEventListener('touchend', (e) => {
@@ -867,7 +888,7 @@ function setupBanguideImageZoom() {
         e.preventDefault();
         banguideImageTranslate.x = mouseStartTx + (e.clientX - mouseStartX);
         banguideImageTranslate.y = mouseStartTy + (e.clientY - mouseStartY);
-        applyBanguideImageTransform(img);
+        applyBanguideImageTransform(img, wrap);
     });
     wrap.addEventListener('mouseup', () => { mouseDown = false; });
     wrap.addEventListener('mouseleave', () => { mouseDown = false; });
