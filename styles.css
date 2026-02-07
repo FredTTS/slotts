@@ -557,6 +557,37 @@ body {
     color: var(--text-primary);
 }
 
+.detail-item-green {
+    align-items: center;
+}
+
+.green-shape-wrap {
+    width: 100%;
+    max-width: 120px;
+    height: 72px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.green-shape-wrap:not(.has-shape) {
+    min-height: 72px;
+    background: var(--border);
+    border-radius: 0.5rem;
+    opacity: 0.5;
+}
+
+.green-shape-svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.green-shape-polygon {
+    vector-effect: non-scaling-stroke;
+}
+
 /* Pin Adjustment */
 .adjustment-controls {
     display: flex;

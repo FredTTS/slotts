@@ -590,6 +590,10 @@ function selectHole(holeNumber) {
     }
     
     state.currentHole = holeNumber;
+
+    // Uppdatera green-formen direkt (från GeoJSON) så den syns även utan GPS
+    const holeDataForGreen = getHoleData(holeNumber);
+    drawGreenShape(getGreenPolygon(holeDataForGreen));
     
     // Uppdatera anteckningsrutan till det nya hålet
     const notesCard = document.getElementById('holeNotesCard');
@@ -974,18 +978,12 @@ function updateDistances() {
     // Update UI
     const distEl = document.getElementById('distanceToGreen');
     const frontEl = document.getElementById('frontEdge');
-    const centerEl = document.getElementById('centerPin');
     const backEl = document.getElementById('backEdge');
     if (distEl) distEl.innerHTML = `<span style="font-size: 3rem;">${Math.round(distanceToPin)}</span> <span style="font-size: 1.5rem;">m</span>`;
     if (frontEl) frontEl.textContent = `${Math.round(distanceToFront)} m`;
-    if (centerEl) {
-        if (greenArea > 0.5) {
-            centerEl.textContent = `${Math.round(greenArea)} m²`;
-        } else {
-            centerEl.textContent = `${Math.round(midDistance)} m`;
-        }
-    }
     if (backEl) backEl.textContent = `${Math.round(distanceToBack)} m`;
+
+    drawGreenShape(greenPolygon);
     
     // Calculate elevation
     const elevation = calculateElevation(holeData, state.userPosition);
@@ -1022,6 +1020,41 @@ function getGreenPolygon(holeData) {
         lng: coord[0],
         lat: coord[1]
     }));
+}
+
+// Rita greenens form från GeoJSON-polygon i SVG (ersätter Mitten/Area)
+function drawGreenShape(greenPolygon) {
+    const svg = document.getElementById('greenShapeSvg');
+    const wrap = document.getElementById('greenShapeWrap');
+    if (!svg || !wrap) return;
+
+    if (!greenPolygon || greenPolygon.length < 3) {
+        svg.innerHTML = '';
+        wrap.classList.remove('has-shape');
+        return;
+    }
+
+    const lngs = greenPolygon.map(p => p.lng);
+    const lats = greenPolygon.map(p => p.lat);
+    const minLng = Math.min(...lngs);
+    const maxLng = Math.max(...lngs);
+    const minLat = Math.min(...lats);
+    const maxLat = Math.max(...lats);
+    const rangeLng = maxLng - minLng || 1e-6;
+    const rangeLat = maxLat - minLat || 1e-6;
+
+    const pad = 4;
+    const w = 100 - 2 * pad;
+    const h = 60 - 2 * pad;
+
+    const points = greenPolygon.map(p => {
+        const x = pad + ((p.lng - minLng) / rangeLng) * w;
+        const y = pad + ((maxLat - p.lat) / rangeLat) * h;
+        return `${x.toFixed(2)},${y.toFixed(2)}`;
+    }).join(' ');
+
+    svg.innerHTML = `<polygon class="green-shape-polygon" points="${points}" fill="var(--primary-light)" stroke="var(--primary-dark)" stroke-width="1.5" />`;
+    wrap.classList.add('has-shape');
 }
 
 // Calculate polygon area in square meters using planar projection (sufficient for small areas like greens)
