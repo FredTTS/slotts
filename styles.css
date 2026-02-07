@@ -582,6 +582,30 @@ input[type="range"]::-moz-range-thumb:hover {
     color: var(--text-primary);
 }
 
+.aim-update-btn {
+    display: block;
+    width: 100%;
+    margin-top: 1rem;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: white;
+    background: var(--primary);
+    border: none;
+    border-radius: 0.75rem;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.aim-update-btn:hover:not(:disabled) {
+    background: var(--primary-dark);
+}
+
+.aim-update-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
 .wind-adjustment {
     background: #fef3c7;
     border: 2px solid #fbbf24;

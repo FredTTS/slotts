@@ -330,6 +330,11 @@ function setupEventListeners() {
             location.reload();
         });
     }
+
+    const updateAimBtn = document.getElementById('updateAimBtn');
+    if (updateAimBtn) {
+        updateAimBtn.addEventListener('click', refreshAimPosition);
+    }
 }
 
 function loadLayoutOrder() {
@@ -979,6 +984,58 @@ function calculateBearing(pos1, pos2) {
     const θ = Math.atan2(y, x);
     
     return (θ * 180 / Math.PI + 360) % 360;
+}
+
+// Knappen "Uppdatera position och siktråd" – hämtar ny position och uppdaterar siktråden
+function refreshAimPosition() {
+    const btn = document.getElementById('updateAimBtn');
+    const aimWaiting = document.getElementById('aimWaiting');
+    const aimList = document.getElementById('aimList');
+    if (!navigator.geolocation) {
+        if (aimWaiting) {
+            aimWaiting.style.display = 'block';
+            aimWaiting.textContent = 'GPS stöds inte på denna enhet.';
+            if (aimList) aimList.style.display = 'none';
+        }
+        return;
+    }
+    const originalText = btn ? btn.textContent : '';
+    if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'Uppdaterar…';
+    }
+    if (aimWaiting) {
+        aimWaiting.style.display = 'block';
+        aimWaiting.textContent = 'Hämtar ny position…';
+        if (aimList) aimList.style.display = 'none';
+    }
+    navigator.geolocation.getCurrentPosition(
+        (position) => {
+            state.userPosition = {
+                lat: position.coords.latitude,
+                lng: position.coords.longitude,
+                altitude: position.coords.altitude || 0
+            };
+            if (!state.weatherData) fetchWeather();
+            updateDistances();
+            if (btn) {
+                btn.disabled = false;
+                btn.textContent = originalText;
+            }
+        },
+        (error) => {
+            if (aimWaiting) {
+                aimWaiting.style.display = 'block';
+                aimWaiting.textContent = 'Kunde inte hämta position. Kontrollera att plats är på.';
+                if (aimList) aimList.style.display = 'none';
+            }
+            if (btn) {
+                btn.disabled = false;
+                btn.textContent = originalText;
+            }
+        },
+        { enableHighAccuracy: true, maximumAge: 0, timeout: 15000 }
+    );
 }
 
 // Uppdaterar "Vart ska jag sikta?" med siktråd utifrån vind, höjd, lufttryck och avstånd
