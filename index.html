@@ -12,6 +12,10 @@
 </head>
 <body>
     <div id="app">
+        <div class="pages-wrapper" id="pagesWrapper">
+            <div class="pages" id="pages">
+                <!-- Sida 1: Huvudinnehåll -->
+                <div class="page page-main" id="pageMain">
         <!-- Header -->
         <header class="header">
             <div class="header-content">
@@ -164,6 +168,37 @@
                 <textarea class="hole-notes-input" id="holeNotesInput" placeholder="Skriv anteckningar om hålet här…" rows="4" aria-label="Anteckningar för aktuellt hål"></textarea>
             </section>
         </main>
+                </div><!-- /.page-main -->
+
+                <!-- Sida 2: Banguide – svep vänster för att öppna -->
+                <div class="page page-banguide" id="pageBanguide">
+                    <header class="header header-banguide">
+                        <div class="header-content">
+                            <button type="button" class="back-to-main-btn" id="backToMainBtn" aria-label="Tillbaka till huvudsidan">‹ Tillbaka</button>
+                            <h1 class="banguide-title">Banguide – Hål <span id="banguideHoleNumber">1</span></h1>
+                            <span class="sweep-hint">Svep höger för att gå tillbaka</span>
+                        </div>
+                    </header>
+                    <main class="banguide-content">
+                        <div class="banguide-image-wrap">
+                            <img class="banguide-image" id="banguideImage" src="img/s1.jpeg" alt="Hål 1" />
+                        </div>
+                        <section class="banguide-section">
+                            <h3>Information om hålet</h3>
+                            <div class="banguide-text" id="banguideInfo">
+                                <p>Information om hålet visas här.</p>
+                            </div>
+                        </section>
+                        <section class="banguide-section">
+                            <h3>Banguide / Spelguide</h3>
+                            <div class="banguide-text" id="banguideGuide">
+                                <p>Spelguide och tips för hålet visas här.</p>
+                            </div>
+                        </section>
+                    </main>
+                </div><!-- /.page-banguide -->
+            </div><!-- /.pages -->
+        </div><!-- /.pages-wrapper -->
 
         <!-- Settings Modal -->
         <div class="modal" id="settingsModal">

@@ -96,6 +96,9 @@ async function initializeApp() {
     selectHole(1);
     startLocationTracking();
     setupDeviceOrientation();
+    setupPageSwipe();
+    setupBackToMainButton();
+    updateBanguidePage();
     hideLoading();
 }
 
@@ -631,6 +634,8 @@ function selectHole(holeNumber) {
     } else {
         updateAimCard();
     }
+
+    updateBanguidePage();
 }
 
 function resetPinPosition() {
@@ -760,6 +765,48 @@ function setupDeviceOrientation() {
         return;
     }
     window.addEventListener('deviceorientation', handler, false);
+}
+
+// Banguide-sida: uppdatera hålnummer och bild när hål byts
+function updateBanguidePage() {
+    const hole = state.currentHole || 1;
+    const numEl = document.getElementById('banguideHoleNumber');
+    const imgEl = document.getElementById('banguideImage');
+    if (numEl) numEl.textContent = hole;
+    if (imgEl) {
+        imgEl.src = `img/s${hole}.jpeg`;
+        imgEl.alt = `Hål ${hole}`;
+    }
+}
+
+// Svep vänster = banguide, svep höger = tillbaka (touch + mus)
+function setupPageSwipe() {
+    const wrapper = document.getElementById('pagesWrapper');
+    const pages = document.getElementById('pages');
+    if (!wrapper || !pages) return;
+    let startX = 0;
+    const threshold = 60;
+    function handleStart(clientX) {
+        startX = clientX;
+    }
+    function handleEnd(clientX) {
+        const delta = clientX - startX;
+        if (delta < -threshold) pages.classList.add('show-banguide');
+        else if (delta > threshold) pages.classList.remove('show-banguide');
+    }
+    wrapper.addEventListener('touchstart', (e) => { handleStart(e.changedTouches[0].screenX); }, { passive: true });
+    wrapper.addEventListener('touchend', (e) => { handleEnd(e.changedTouches[0].screenX); }, { passive: true });
+    wrapper.addEventListener('mousedown', (e) => { handleStart(e.clientX); });
+    wrapper.addEventListener('mouseup', (e) => { handleEnd(e.clientX); });
+}
+
+function setupBackToMainButton() {
+    const btn = document.getElementById('backToMainBtn');
+    const pages = document.getElementById('pages');
+    if (!btn || !pages) return;
+    btn.addEventListener('click', () => {
+        pages.classList.remove('show-banguide');
+    });
 }
 
 function addCompassPermissionButton() {
