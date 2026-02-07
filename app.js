@@ -1207,22 +1207,36 @@ function calculateTemperatureAdjustment(temp) {
     return (temp - baseTemp) * 0.2;
 }
 
+// Vind på avstånd: beroende på riktning (med-/motvind), styrka och avstånd (längre slag = mer påverkan)
 function calculateWindAdjustment(distance) {
     if (!state.weatherData || !state.userPosition) return 0;
     
     const windSpeed = state.weatherData.wind.speed; // m/s
     const windDeg = state.weatherData.wind.deg;
     
-    // Get bearing to pin
     const holeData = getHoleData(state.currentHole);
     const pinPos = getPinPosition(holeData);
     if (!pinPos) return 0;
     
     const bearing = calculateBearing(state.userPosition, pinPos);
-    const windEffect = Math.cos((windDeg - bearing) * Math.PI / 180);
+    const windEffect = Math.cos((windDeg - bearing) * Math.PI / 180); // 1 = motvind, -1 = medvind
     
-    // Headwind reduces distance, tailwind increases
-    return -windSpeed * windEffect * 2; // ~2m per m/s wind
+    // Längre slag = mer tid i luften = större vindpåverkan. Bas ~2 m per m/s, ökar med avstånd
+    const distanceFactor = 2 * (1 + Math.min(distance, 250) / 150);
+    return -windSpeed * windEffect * distanceFactor; // motvind negativ, medvind positiv
+}
+
+// Returnerar vindtyp för visning (medvind/motvind/ingen)
+function getWindDistanceType() {
+    if (!state.weatherData || !state.userPosition) return 'ingen';
+    const holeData = getHoleData(state.currentHole);
+    const pinPos = getPinPosition(holeData);
+    if (!pinPos) return 'ingen';
+    const bearing = calculateBearing(state.userPosition, pinPos);
+    const windEffect = Math.cos((state.weatherData.wind.deg - bearing) * Math.PI / 180);
+    if (windEffect > 0.2) return 'motvind';
+    if (windEffect < -0.2) return 'medvind';
+    return 'ingen';
 }
 
 function calculateHumidityAdjustment(humidity) {
@@ -1345,12 +1359,13 @@ function updateAimCard(distanceToPin, elevation, tempAdj, windAdj, humidityAdj, 
     const windDeg = state.weatherData.wind.deg;
     const windSpeed = state.weatherData.wind.speed;
 
-    // Sidovind (crosswind) – vart man ska sikta höger/vänster
-    const crossWind = Math.sin((windDeg - bearing) * Math.PI / 180) * windSpeed;
-    const aimMeters = Math.round(Math.abs(crossWind) * 2);
+    // Sidovind – hur mycket man ska sikta åt sidan beror på vindriktning, styrka och avstånd (längre slag = mer drift)
+    const crossWind = Math.sin((windDeg - bearing) * Math.PI / 180) * windSpeed; // m/s sidovind
+    const distanceFactor = 2 * (1 + Math.min(distanceToPin, 250) / 100); // längre slag = mer meters att sikta
+    const aimMeters = Math.round(Math.abs(crossWind) * distanceFactor);
     if (aimMeters >= 1) {
         const direction = crossWind > 0 ? 'höger' : 'vänster';
-        addAimItem(aimList, 'Vind (sidovind)', `Sikta ${aimMeters} m till ${direction} om flaggan`);
+        addAimItem(aimList, 'Vind (sidovind)', `Sikta ${aimMeters} m till ${direction} om flaggan (vind ${windSpeed.toFixed(1)} m/s)`);
     } else {
         addAimItem(aimList, 'Vind (sidovind)', 'Ingen sidovind – sikta rakt på flaggan');
     }
@@ -1404,16 +1419,17 @@ function addAimItem(listEl, label, text) {
 function updateImpactDetails(temp, wind, humidity, elevation, pressure) {
     const impactList = document.getElementById('impactList');
     impactList.innerHTML = '';
-    // Build weather + impact entries. Show raw metric + adjustment in meters.
     const rawTemp = state.weatherData ? Math.round(state.weatherData.main.temp) : null;
     const rawWind = state.weatherData ? Math.round(state.weatherData.wind.speed * 10) / 10 : null;
     const rawHumidity = state.weatherData ? state.weatherData.main.humidity : null;
     const rawPressure = state.weatherData ? state.weatherData.main.pressure : null;
 
+    const windType = getWindDistanceType();
+    const windLabel = windType === 'medvind' ? 'Vind (medvind)' : windType === 'motvind' ? 'Vind (motvind)' : 'Vind';
+
     const entries = [];
-    // Always show weather metrics with their impact
     entries.push({ label: 'Temperatur', raw: rawTemp !== null ? `${rawTemp}°C` : '-', adj: temp });
-    entries.push({ label: 'Vind', raw: rawWind !== null ? `${rawWind} m/s` : '-', adj: wind });
+    entries.push({ label: windLabel, raw: rawWind !== null ? `${rawWind} m/s` : '-', adj: wind });
     entries.push({ label: 'Luftfuktighet', raw: rawHumidity !== null ? `${rawHumidity}%` : '-', adj: humidity });
     entries.push({ label: 'Lufttryck', raw: rawPressure !== null ? `${rawPressure} hPa` : '-', adj: pressure });
 
