@@ -825,7 +825,7 @@ function setupBanguideImageZoom() {
                 if (scale <= 1) banguideImageTranslate = { x: 0, y: 0 };
                 applyBanguideImageTransform(img);
             }
-        } else if (e.touches.length === 1) {
+        } else if (e.touches.length === 1 && banguideImageScale > 1) {
             e.preventDefault();
             const dx = e.touches[0].clientX - panStartX;
             const dy = e.touches[0].clientY - panStartY;
@@ -863,7 +863,7 @@ function setupBanguideImageZoom() {
         mouseStartTy = banguideImageTranslate.y;
     });
     wrap.addEventListener('mousemove', (e) => {
-        if (!mouseDown) return;
+        if (!mouseDown || banguideImageScale <= 1) return;
         e.preventDefault();
         banguideImageTranslate.x = mouseStartTx + (e.clientX - mouseStartX);
         banguideImageTranslate.y = mouseStartTy + (e.clientY - mouseStartY);
