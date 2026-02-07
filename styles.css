@@ -247,19 +247,23 @@ body {
     font-size: 1.1rem;
 }
 
-/* Hole Selector */
+/* Hole Selector – kompakt höjd */
+.hole-selector h2 {
+    margin-bottom: 0.5rem;
+}
+
 .hole-buttons {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 1rem;
+    gap: 0.5rem;
 }
 
-/* Swipe-friendly hole selector */
+/* Swipe-friendly hole selector – mindre höjd */
 .hole-swipe-area {
     width: 100%;
     max-width: 400px;
-    padding: 1rem 1rem;
+    padding: 0.5rem 1rem;
     background: linear-gradient(90deg, 
         var(--primary) 0%,
         var(--primary-dark) 25%,
@@ -268,7 +272,7 @@ body {
         var(--primary) 100%);
     background-size: 200% 100%;
     background-position: center;
-    border-radius: 1rem;
+    border-radius: 0.75rem;
     cursor: grab;
     user-select: none;
     -webkit-user-select: none;
@@ -290,21 +294,21 @@ body {
 
 /* Clean, minimal arrows */
 .swipe-arrow {
-    font-size: 1.2rem;
+    font-size: 1rem;
     color: rgba(255, 255, 255, 0.7);
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    padding: 0.5rem 0.75rem;
+    padding: 0.35rem 0.5rem;
     transition: color 0.2s ease;
 }
 
 .left-arrow {
-    left: 1rem;
+    left: 0.75rem;
 }
 
 .right-arrow {
-    right: 1rem;
+    right: 0.75rem;
 }
 
 .hole-swipe-area:hover .swipe-arrow {
@@ -314,25 +318,78 @@ body {
 .hole-display {
     text-align: center;
     color: white;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.25rem;
     position: relative;
     z-index: 1;
 }
 
 .hole-label {
-    font-size: 0.9rem;
+    font-size: 0.75rem;
     opacity: 0.9;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.2rem;
     letter-spacing: 0.05em;
 }
 
 .hole-number {
-    font-size: 2rem;
+    font-size: 1.5rem;
     font-weight: 700;
     line-height: 1;
     color: white;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     transition: transform 0.3s ease;
+}
+
+/* Banguide-strip – samma look som hålväljaren, klick öppnar banguide */
+.nav-strip-card {
+    padding: 0.5rem 1.5rem;
+}
+
+.nav-strip,
+.banguide-strip {
+    width: 100%;
+    max-width: 400px;
+    padding: 0.5rem 1rem;
+    background: linear-gradient(90deg, 
+        var(--primary) 0%,
+        var(--primary-dark) 25%,
+        var(--primary) 50%,
+        var(--primary-dark) 75%,
+        var(--primary) 100%);
+    background-size: 200% 100%;
+    background-position: center;
+    border-radius: 0.75rem;
+    box-shadow: var(--shadow-lg);
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+    transition: transform 0.2s;
+    color: white;
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.nav-strip:active,
+.banguide-strip:active {
+    transform: scale(0.98);
+}
+
+.nav-strip:hover,
+.banguide-strip:hover {
+    color: white;
+}
+
+.nav-strip-label {
+    letter-spacing: 0.03em;
+}
+
+.nav-strip-arrow {
+    font-size: 1.25rem;
+    opacity: 0.9;
 }
 
 .hole-number.slide-in {
@@ -352,9 +409,10 @@ body {
 
 .swipe-hint {
     text-align: center;
-    font-size: 0.75rem;
+    font-size: 0.65rem;
     color: rgba(255, 255, 255, 0.8);
     animation: pulse 2s infinite;
+    margin-top: 0.1rem;
 }
 
 @keyframes pulse {

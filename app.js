@@ -358,6 +358,18 @@ function setupEventListeners() {
         updateAimBtn.addEventListener('click', refreshAimPosition);
     }
 
+    const banguideStrip = document.getElementById('banguideStrip');
+    const pages = document.getElementById('pages');
+    if (banguideStrip && pages) {
+        banguideStrip.addEventListener('click', () => pages.classList.add('show-banguide'));
+        banguideStrip.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                pages.classList.add('show-banguide');
+            }
+        });
+    }
+
     const holeNotesInput = document.getElementById('holeNotesInput');
     if (holeNotesInput) {
         holeNotesInput.addEventListener('input', () => {
