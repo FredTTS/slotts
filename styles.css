@@ -120,6 +120,7 @@ body {
     overflow: hidden;
     margin-bottom: 1.5rem;
     box-shadow: var(--shadow-lg);
+    touch-action: none; /* tillåter pinch-zoom på bilden utan sidzoom */
 }
 
 .banguide-image {
@@ -127,6 +128,8 @@ body {
     height: auto;
     display: block;
     vertical-align: top;
+    transform-origin: center center;
+    will-change: transform;
 }
 
 .banguide-section {

@@ -98,6 +98,7 @@ async function initializeApp() {
     setupDeviceOrientation();
     setupPageSwipe();
     setupBackToMainButton();
+    setupBanguideImageZoom();
     updateBanguidePage();
     hideLoading();
 }
@@ -361,10 +362,7 @@ function setupEventListeners() {
     const banguideStrip = document.getElementById('banguideStrip');
     const pages = document.getElementById('pages');
     if (banguideStrip && pages) {
-        const openBanguide = () => {
-            pages.classList.add('show-banguide');
-            setViewportZoom(true);
-        };
+        const openBanguide = () => pages.classList.add('show-banguide');
         banguideStrip.addEventListener('click', openBanguide);
         banguideStrip.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' || e.key === ' ') {
@@ -783,18 +781,46 @@ function setupDeviceOrientation() {
     window.addEventListener('deviceorientation', handler, false);
 }
 
-// Viewport: tillåt zoom på banguide-sidan, annars låst (undviker oavsiktlig zoom på huvudsidan)
-function setViewportZoom(allowZoom) {
-    const meta = document.querySelector('meta[name="viewport"]');
-    if (!meta) return;
-    if (allowZoom) {
-        meta.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes');
-    } else {
-        meta.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
-    }
+// Pinch-zoom endast på banguide-bilden (sidzoom är låst i viewport) (inte hela sidan)
+let banguideImageScale = 1;
+
+function getTouchDistance(touches) {
+    if (!touches || touches.length < 2) return 0;
+    const a = touches[0];
+    const b = touches[1];
+    return Math.hypot(b.clientX - a.clientX, b.clientY - a.clientY);
 }
 
-// Banguide-sida: uppdatera hålnummer och bild när hål byts
+function setupBanguideImageZoom() {
+    const wrap = document.querySelector('.banguide-image-wrap');
+    const img = document.getElementById('banguideImage');
+    if (!wrap || !img) return;
+    let startDist = 0;
+    let startScale = 1;
+    wrap.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 2) {
+            startDist = getTouchDistance(e.touches);
+            startScale = banguideImageScale;
+        }
+    }, { passive: true });
+    wrap.addEventListener('touchmove', (e) => {
+        if (e.touches.length === 2) {
+            e.preventDefault();
+            const dist = getTouchDistance(e.touches);
+            if (startDist > 0) {
+                let scale = startScale * (dist / startDist);
+                scale = Math.max(1, Math.min(4, scale));
+                banguideImageScale = scale;
+                img.style.transform = `scale(${scale})`;
+            }
+        }
+    }, { passive: false });
+    wrap.addEventListener('touchend', (e) => {
+        if (e.touches.length < 2) startDist = 0;
+    }, { passive: true });
+}
+
+// Banguide-sida: uppdatera hålnummer och bild när hål byts (återställ bildzoom)
 function updateBanguidePage() {
     const hole = state.currentHole || 1;
     const numEl = document.getElementById('banguideHoleNumber');
@@ -803,6 +829,8 @@ function updateBanguidePage() {
     if (imgEl) {
         imgEl.src = `img/s${hole}.jpeg`;
         imgEl.alt = `Hål ${hole}`;
+        banguideImageScale = 1;
+        imgEl.style.transform = '';
     }
 }
 
@@ -820,13 +848,8 @@ function setupPageSwipe() {
     function handleEnd(clientX) {
         if (multiTouch) return; // pinch-zoom avslutad – stanna kvar på banguide
         const delta = clientX - startX;
-        if (delta < -threshold) {
-            pages.classList.add('show-banguide');
-            setViewportZoom(true);
-        } else if (delta > threshold) {
-            pages.classList.remove('show-banguide');
-            setViewportZoom(false);
-        }
+        if (delta < -threshold) pages.classList.add('show-banguide');
+        else if (delta > threshold) pages.classList.remove('show-banguide');
     }
     wrapper.addEventListener('touchstart', (e) => {
         if (e.touches.length === 2) multiTouch = true;
@@ -849,10 +872,7 @@ function setupBackToMainButton() {
     const btn = document.getElementById('backToMainBtn');
     const pages = document.getElementById('pages');
     if (!btn || !pages) return;
-    btn.addEventListener('click', () => {
-        pages.classList.remove('show-banguide');
-        setViewportZoom(false);
-    });
+    btn.addEventListener('click', () => pages.classList.remove('show-banguide'));
 }
 
 function addCompassPermissionButton() {
