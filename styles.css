@@ -657,6 +657,13 @@ input[type="range"]::-moz-range-thumb:hover {
     opacity: 0.9;
 }
 
+.recommended-club .club-distance-adjusted {
+    font-size: 1rem;
+    opacity: 0.95;
+    margin-top: 0.35rem;
+    font-weight: 600;
+}
+
 /* Klubbval + avstånd (delat i två fält) */
 .club-distance-card .club-distance-split {
     display: grid;

@@ -1095,6 +1095,8 @@ function recommendClub(distance, elevation) {
     if (!state.weatherData) {
         updateAimCard();
         updateClubDistanceDisplay();
+        const adjEl = document.getElementById('clubRecommendedAdjusted');
+        if (adjEl) adjEl.style.display = 'none';
         return;
     }
     
@@ -1126,10 +1128,18 @@ function recommendClub(distance, elevation) {
     if (bestClub) {
         document.querySelector('.club-name').textContent = bestClub.name;
         document.querySelector('.club-distance').textContent = 
-            `${Math.round(bestClub.totalDistance)} m (${Math.round(bestClub.carryDistance)} m carry)`;
+            `Normalt: ${Math.round(bestClub.totalDistance)} m (${Math.round(bestClub.carryDistance)} m carry)`;
+        const adjEl = document.getElementById('clubRecommendedAdjusted');
+        if (adjEl) {
+            const todayM = Math.round(bestClub.totalDistance + totalAdjustment);
+            adjEl.textContent = `Idag (väder + höjd): ${todayM} m`;
+            adjEl.style.display = '';
+        }
     } else {
         document.querySelector('.club-name').textContent = 'Ställ in klubbor';
         document.querySelector('.club-distance').textContent = 'Gå till inställningar';
+        const adjEl = document.getElementById('clubRecommendedAdjusted');
+        if (adjEl) adjEl.style.display = 'none';
     }
     
     // Siktråd: vind, höjd, lufttryck, avstånd
