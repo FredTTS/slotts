@@ -1090,7 +1090,8 @@ function drawGreenShape(greenPolygon, holeData) {
             x: p.x * cos - p.y * sin,
             y: -(p.x * sin + p.y * cos) // SVG y ner, så negera
         }));
-        // 90° motsols (counterclockwise): (x,y) -> (-y,x)
+        // 90° motsols (counterclockwise): (x,y) -> (-y,x). Två gånger = 180° extra.
+        rotated = rotated.map(p => ({ x: -p.y, y: p.x }));
         rotated = rotated.map(p => ({ x: -p.y, y: p.x }));
         const rx = rotated.map(p => p.x), ry = rotated.map(p => p.y);
         const minX = Math.min(...rx), maxX = Math.max(...rx);
