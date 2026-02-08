@@ -1148,7 +1148,7 @@ function getPinPosition(holeData) {
         return { lat: offsetLat, lng: offsetLng };
     }
 
-    // Offset relativt pos: Fram/Bak = mot pos (y), Höger/Vänster = vänster/höger sett från pos (x)
+    // Offset relativt pos: Fram/Bak = mot pos (y), Vänster/höger = vänster/höger sett från pos (x)
     const mPerDegLat = 111320;
     const mPerDegLon = 111320 * Math.cos(lat * Math.PI / 180);
     // Riktning från pin mot pos (i meter: öst, nord)
