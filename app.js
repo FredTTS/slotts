@@ -471,7 +471,7 @@ function loadLayoutOrder() {
         const container = document.querySelector('.main-content');
         if (!container) return;
         order.forEach(id => {
-            if (id === 'windAdjustmentCard') return; // finns på avståndssidan, inte i huvudlayout
+            if (id === 'windAdjustmentCard' || id === 'holeNotesCard') return; // finns på avståndssidan, inte i huvudlayout
             const el = document.querySelector(`[data-layout-id="${id}"], #${id}`);
             if (el) container.appendChild(el);
         });
@@ -715,10 +715,8 @@ function selectHole(holeNumber) {
     const holeDataForGreen = getHoleData(holeNumber);
     drawGreenShape(getGreenPolygon(holeDataForGreen), holeDataForGreen);
     
-    // Uppdatera anteckningsrutan till det nya hålet
-    const notesCard = document.getElementById('holeNotesCard');
+    // Uppdatera anteckningsrutan till det nya hålet (kortet finns på avståndssidan)
     const holeNotesNumber = document.getElementById('holeNotesHoleNumber');
-    if (notesCard) notesCard.style.display = 'block';
     if (holeNotesNumber) holeNotesNumber.textContent = holeNumber;
     if (notesInput) notesInput.value = state.notes[holeNumber] || '';
     
