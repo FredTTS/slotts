@@ -260,6 +260,25 @@
                 </div>
                 <div class="modal-body">
                     <div class="club-list" id="clubList"></div>
+                    <div class="add-club-section">
+                        <h3 class="add-club-title">Lägg till egen klubba</h3>
+                        <div class="add-club-row">
+                            <div class="input-group">
+                                <label for="newClubName">Klubbnamn</label>
+                                <input type="text" id="newClubName" placeholder="t.ex. Järn 10" maxlength="30" aria-label="Namn på ny klubba">
+                            </div>
+                            <div class="input-group">
+                                <label for="newClubTotal">Totallängd (m)</label>
+                                <input type="number" id="newClubTotal" placeholder="0" min="0" max="400" aria-label="Totallängd i meter">
+                            </div>
+                            <div class="input-group">
+                                <label for="newClubCarry">Längd utan rull (m)</label>
+                                <input type="number" id="newClubCarry" placeholder="0" min="0" max="400" aria-label="Längd utan rull i meter">
+                            </div>
+                            <button type="button" class="btn-add-club" id="addClubBtn">Lägg till</button>
+                        </div>
+                        <p class="add-club-hint" id="addClubMessage"></p>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button class="btn-primary" id="saveSettings">Spara</button>

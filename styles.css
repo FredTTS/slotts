@@ -1152,11 +1152,34 @@ input[type="range"]::-moz-range-thumb:hover {
     padding: 1rem;
 }
 
+.club-item-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
 .club-item-header {
     font-weight: 600;
     font-size: 1.125rem;
-    margin-bottom: 1rem;
     color: var(--text-primary);
+}
+
+.btn-remove-club {
+    flex-shrink: 0;
+    padding: 0.35rem 0.6rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #dc2626;
+    background: transparent;
+    border: 1px solid #dc2626;
+    border-radius: 0.4rem;
+    cursor: pointer;
+}
+
+.btn-remove-club:hover {
+    background: rgba(220, 38, 38, 0.1);
 }
 
 .club-inputs {
@@ -1188,6 +1211,58 @@ input[type="range"]::-moz-range-thumb:hover {
 .input-group input:focus {
     outline: none;
     border-color: var(--primary);
+}
+
+/* Lägg till egen klubba */
+.add-club-section {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 2px solid var(--border);
+}
+
+.add-club-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.75rem;
+}
+
+.add-club-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: flex-end;
+}
+
+.add-club-row .input-group {
+    flex: 1;
+    min-width: 100px;
+}
+
+.btn-add-club {
+    flex-shrink: 0;
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: white;
+    background: var(--primary);
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+}
+
+.btn-add-club:hover {
+    background: var(--primary-dark);
+}
+
+.add-club-hint {
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.add-club-hint.error {
+    color: #dc2626;
 }
 
 /* Buttons */

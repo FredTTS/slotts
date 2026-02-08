@@ -222,35 +222,72 @@ function createHoleButtons() {
 
 function createClubSettings() {
     const container = document.getElementById('clubList');
+    if (!container) return;
     container.innerHTML = '';
-    
-    CLUBS.forEach(clubName => {
+
+    const clubNames = Object.keys(state.clubs).sort((a, b) => {
+        const orderA = CLUBS.indexOf(a);
+        const orderB = CLUBS.indexOf(b);
+        if (orderA >= 0 && orderB >= 0) return orderA - orderB;
+        if (orderA >= 0) return -1;
+        if (orderB >= 0) return 1;
+        return a.localeCompare(b);
+    });
+
+    clubNames.forEach(clubName => {
         const clubData = state.clubs[clubName];
+        if (!clubData) return;
+        const isCustom = CLUBS.indexOf(clubName) === -1;
         const item = document.createElement('div');
-        item.className = 'club-item';
+        item.className = 'club-item' + (isCustom ? ' club-item-custom' : '');
+        const removeBtn = isCustom
+            ? `<button type="button" class="btn-remove-club" data-club="${escapeHtml(clubName)}" aria-label="Ta bort ${escapeHtml(clubName)}">Ta bort</button>`
+            : '';
         item.innerHTML = `
-            <div class="club-item-header">${clubName}</div>
+            <div class="club-item-header-row">
+                <span class="club-item-header">${escapeHtml(clubName)}</span>
+                ${removeBtn}
+            </div>
             <div class="club-inputs">
                 <div class="input-group">
                     <label>Totallängd (m)</label>
                     <input type="number" 
-                           data-club="${clubName}" 
+                           data-club="${escapeHtml(clubName)}" 
                            data-field="totalDistance" 
-                           value="${clubData.totalDistance}" 
+                           value="${Number(clubData.totalDistance) || ''}" 
                            placeholder="0">
                 </div>
                 <div class="input-group">
                     <label>Längd utan rull (m)</label>
                     <input type="number" 
-                           data-club="${clubName}" 
+                           data-club="${escapeHtml(clubName)}" 
                            data-field="carryDistance" 
-                           value="${clubData.carryDistance}" 
+                           value="${Number(clubData.carryDistance) || ''}" 
                            placeholder="0">
                 </div>
             </div>
         `;
         container.appendChild(item);
     });
+
+    const removeBtns = container.querySelectorAll('.btn-remove-club');
+    removeBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const name = btn.getAttribute('data-club');
+            if (name && CLUBS.indexOf(name) === -1) {
+                delete state.clubs[name];
+                saveClubData();
+                createClubSettings();
+                populateClubSelect();
+            }
+        });
+    });
+}
+
+function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
 }
 
 // Swipe Detection for Hole Navigation
@@ -316,6 +353,9 @@ function setupEventListeners() {
     if (settingsBtn) settingsBtn.addEventListener('click', openSettings);
     if (closeSettingsBtn) closeSettingsBtn.addEventListener('click', closeSettings);
     if (saveSettingsBtn) saveSettingsBtn.addEventListener('click', saveSettings);
+
+    const addClubBtn = document.getElementById('addClubBtn');
+    if (addClubBtn) addClubBtn.addEventListener('click', addCustomClub);
 
     const pinOffsetX = document.getElementById('pinOffsetX');
     const pinOffsetY = document.getElementById('pinOffsetY');
@@ -555,12 +595,49 @@ function saveSettings() {
     inputs.forEach(input => {
         const club = input.dataset.club;
         const field = input.dataset.field;
-        state.clubs[club][field] = parseFloat(input.value) || 0;
+        if (club && state.clubs[club] && field) {
+            state.clubs[club][field] = parseFloat(input.value) || 0;
+        }
     });
     saveClubData();
     closeSettings();
     if (state.currentHole) {
         updateDistances();
+    }
+}
+
+function addCustomClub() {
+    const nameEl = document.getElementById('newClubName');
+    const totalEl = document.getElementById('newClubTotal');
+    const carryEl = document.getElementById('newClubCarry');
+    const msgEl = document.getElementById('addClubMessage');
+    if (!nameEl || !totalEl || !carryEl) return;
+
+    const name = nameEl.value.trim();
+    const total = parseFloat(totalEl.value) || 0;
+    const carry = parseFloat(carryEl.value) || 0;
+
+    if (!name) {
+        if (msgEl) { msgEl.textContent = 'Ange ett klubbnamn.'; msgEl.classList.add('error'); }
+        return;
+    }
+    if (state.clubs[name]) {
+        if (msgEl) { msgEl.textContent = 'En klubba med det namnet finns redan.'; msgEl.classList.add('error'); }
+        return;
+    }
+
+    state.clubs[name] = { totalDistance: total, carryDistance: carry };
+    saveClubData();
+    createClubSettings();
+    populateClubSelect();
+
+    nameEl.value = '';
+    totalEl.value = '';
+    carryEl.value = '';
+    if (msgEl) {
+        msgEl.textContent = 'Klubban är tillagd.';
+        msgEl.classList.remove('error');
+        setTimeout(() => { msgEl.textContent = ''; }, 3000);
     }
 }
 
@@ -1257,13 +1334,22 @@ function recommendClub(distance, elevation) {
 function populateClubSelect() {
     const sel = document.getElementById('clubSelect');
     if (!sel) return;
+    const currentVal = sel.value;
     sel.innerHTML = '';
-    CLUBS.forEach(name => {
+    const names = Object.keys(state.clubs).sort((a, b) => {
+        const ia = CLUBS.indexOf(a), ib = CLUBS.indexOf(b);
+        if (ia >= 0 && ib >= 0) return ia - ib;
+        if (ia >= 0) return -1;
+        if (ib >= 0) return 1;
+        return a.localeCompare(b);
+    });
+    names.forEach(name => {
         const opt = document.createElement('option');
         opt.value = name;
         opt.textContent = name;
         sel.appendChild(opt);
     });
+    if (state.clubs[currentVal]) sel.value = currentVal;
     updateClubDistanceDisplay();
 }
 
