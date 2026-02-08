@@ -702,6 +702,45 @@ input[type="range"]::-moz-range-thumb:hover {
     color: var(--primary);
 }
 
+.pin-step-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.pin-step-btn {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 0.5rem;
+    border: 2px solid var(--primary);
+    background: white;
+    color: var(--primary);
+    font-size: 1.25rem;
+    font-weight: 700;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.pin-step-btn:hover {
+    background: var(--primary);
+    color: white;
+}
+
+.pin-step-btn:active {
+    transform: scale(0.96);
+}
+
+.pin-step-value {
+    min-width: 4ch;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--primary);
+    text-align: center;
+}
+
 .reset-btn {
     background: var(--background);
     border: 2px solid var(--border);
