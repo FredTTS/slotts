@@ -374,32 +374,24 @@ function setupEventListeners() {
     const addClubBtn = document.getElementById('addClubBtn');
     if (addClubBtn) addClubBtn.addEventListener('click', addCustomClub);
 
-    const PIN_STEP = 0.5;
-    const PIN_MIN = -10;
-    const PIN_MAX = 10;
-
-    function setPinOffsetX(value) {
-        state.pinOffset.x = Math.max(PIN_MIN, Math.min(PIN_MAX, value));
-        const v = document.getElementById('pinOffsetXValue');
-        if (v) v.textContent = `${state.pinOffset.x} m`;
-        updateDistances();
+    const pinOffsetX = document.getElementById('pinOffsetX');
+    const pinOffsetY = document.getElementById('pinOffsetY');
+    if (pinOffsetX) {
+        pinOffsetX.addEventListener('input', (e) => {
+            state.pinOffset.x = parseFloat(e.target.value);
+            const v = document.getElementById('pinOffsetXValue');
+            if (v) v.textContent = `${e.target.value} m`;
+            updateDistances();
+        });
     }
-    function setPinOffsetY(value) {
-        state.pinOffset.y = Math.max(PIN_MIN, Math.min(PIN_MAX, value));
-        const v = document.getElementById('pinOffsetYValue');
-        if (v) v.textContent = `${state.pinOffset.y} m`;
-        updateDistances();
+    if (pinOffsetY) {
+        pinOffsetY.addEventListener('input', (e) => {
+            state.pinOffset.y = parseFloat(e.target.value);
+            const v = document.getElementById('pinOffsetYValue');
+            if (v) v.textContent = `${e.target.value} m`;
+            updateDistances();
+        });
     }
-
-    const pinXMinus = document.getElementById('pinOffsetXMinus');
-    const pinXPlus = document.getElementById('pinOffsetXPlus');
-    const pinYMinus = document.getElementById('pinOffsetYMinus');
-    const pinYPlus = document.getElementById('pinOffsetYPlus');
-    if (pinXMinus) pinXMinus.addEventListener('click', () => setPinOffsetX(state.pinOffset.x - PIN_STEP));
-    if (pinXPlus) pinXPlus.addEventListener('click', () => setPinOffsetX(state.pinOffset.x + PIN_STEP));
-    if (pinYMinus) pinYMinus.addEventListener('click', () => setPinOffsetY(state.pinOffset.y - PIN_STEP));
-    if (pinYPlus) pinYPlus.addEventListener('click', () => setPinOffsetY(state.pinOffset.y + PIN_STEP));
-
     const resetPinBtn = document.getElementById('resetPin');
     if (resetPinBtn) resetPinBtn.addEventListener('click', resetPinPosition);
 
@@ -788,8 +780,12 @@ function selectHole(holeNumber) {
 
 function resetPinPosition() {
     state.pinOffset = { x: 0, y: 0 };
+    const xEl = document.getElementById('pinOffsetX');
+    const yEl = document.getElementById('pinOffsetY');
     const xVal = document.getElementById('pinOffsetXValue');
     const yVal = document.getElementById('pinOffsetYValue');
+    if (xEl) xEl.value = 0;
+    if (yEl) yEl.value = 0;
     if (xVal) xVal.textContent = '0 m';
     if (yVal) yVal.textContent = '0 m';
     if (state.currentHole && state.userPosition) {
