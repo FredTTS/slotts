@@ -613,9 +613,9 @@ function selectHole(holeNumber) {
     const holeEl = document.getElementById('distancePageHoleNumber');
     if (holeEl) holeEl.textContent = holeNumber;
 
-    // Uppdatera green-formen direkt (från GeoJSON) så den syns även utan GPS
+    // Uppdatera green-formen direkt (från GeoJSON) så den syns från pos
     const holeDataForGreen = getHoleData(holeNumber);
-    drawGreenShape(getGreenPolygon(holeDataForGreen));
+    drawGreenShape(getGreenPolygon(holeDataForGreen), holeDataForGreen);
     
     // Uppdatera anteckningsrutan till det nya hålet
     const notesCard = document.getElementById('holeNotesCard');
@@ -1006,7 +1006,7 @@ function updateDistances() {
     if (frontEl) frontEl.textContent = `${Math.round(distanceToFront)} m`;
     if (backEl) backEl.textContent = `${Math.round(distanceToBack)} m`;
 
-    drawGreenShape(greenPolygon);
+    drawGreenShape(greenPolygon, holeData);
     
     // Calculate elevation
     const elevation = calculateElevation(holeData, state.userPosition);
@@ -1045,8 +1045,15 @@ function getGreenPolygon(holeData) {
     }));
 }
 
-// Rita greenens form från GeoJSON-polygon i SVG (ersätter Mitten/Area)
-function drawGreenShape(greenPolygon) {
+function getPosPosition(holeData) {
+    const pos = holeData.find(f => f.properties && f.properties.type === 'pos');
+    if (!pos || !pos.geometry || pos.geometry.coordinates == null) return null;
+    const [lng, lat] = pos.geometry.coordinates;
+    return { lng, lat };
+}
+
+// Rita greenens form från GeoJSON, som den ser ut från positionen pos (t.ex. tee)
+function drawGreenShape(greenPolygon, holeData) {
     const svg = document.getElementById('greenShapeSvg');
     const wrap = document.getElementById('greenShapeWrap');
     if (!svg || !wrap) return;
@@ -1057,24 +1064,56 @@ function drawGreenShape(greenPolygon) {
         return;
     }
 
-    const lngs = greenPolygon.map(p => p.lng);
-    const lats = greenPolygon.map(p => p.lat);
-    const minLng = Math.min(...lngs);
-    const maxLng = Math.max(...lngs);
-    const minLat = Math.min(...lats);
-    const maxLat = Math.max(...lats);
-    const rangeLng = maxLng - minLng || 1e-6;
-    const rangeLat = maxLat - minLat || 1e-6;
-
+    const pos = holeData ? getPosPosition(holeData) : null;
     const pad = 4;
     const w = 100 - 2 * pad;
     const h = 60 - 2 * pad;
 
-    const points = greenPolygon.map(p => {
-        const x = pad + ((p.lng - minLng) / rangeLng) * w;
-        const y = pad + ((maxLat - p.lat) / rangeLat) * h;
-        return `${x.toFixed(2)},${y.toFixed(2)}`;
-    }).join(' ');
+    let points;
+
+    if (pos) {
+        // Koordinater i meter relativt pos (ungefär)
+        const mPerDegLat = 111320;
+        const mPerDegLon = 111320 * Math.cos(pos.lat * Math.PI / 180);
+        const toMeters = (p) => ({
+            x: (p.lng - pos.lng) * mPerDegLon,
+            y: (p.lat - pos.lat) * mPerDegLat
+        });
+        const meters = greenPolygon.map(toMeters);
+        const cx = meters.reduce((s, p) => s + p.x, 0) / meters.length;
+        const cy = meters.reduce((s, p) => s + p.y, 0) / meters.length;
+        // Vinkel så att riktning pos -> greencentrum blir "upp" i SVG
+        const angle = Math.atan2(cy, cx);
+        const rot = -angle - Math.PI / 2;
+        const cos = Math.cos(rot), sin = Math.sin(rot);
+        const rotated = meters.map(p => ({
+            x: p.x * cos - p.y * sin,
+            y: -(p.x * sin + p.y * cos) // SVG y ner, så negera
+        }));
+        const rx = rotated.map(p => p.x), ry = rotated.map(p => p.y);
+        const minX = Math.min(...rx), maxX = Math.max(...rx);
+        const minY = Math.min(...ry), maxY = Math.max(...ry);
+        const rangeX = maxX - minX || 1e-6;
+        const rangeY = maxY - minY || 1e-6;
+        points = rotated.map(p => {
+            const sx = pad + ((p.x - minX) / rangeX) * w;
+            const sy = pad + ((p.y - minY) / rangeY) * h;
+            return `${sx.toFixed(2)},${sy.toFixed(2)}`;
+        }).join(' ');
+    } else {
+        // Fallback: bounding box som tidigare
+        const lngs = greenPolygon.map(p => p.lng);
+        const lats = greenPolygon.map(p => p.lat);
+        const minLng = Math.min(...lngs), maxLng = Math.max(...lngs);
+        const minLat = Math.min(...lats), maxLat = Math.max(...lats);
+        const rangeLng = maxLng - minLng || 1e-6;
+        const rangeLat = maxLat - minLat || 1e-6;
+        points = greenPolygon.map(p => {
+            const x = pad + ((p.lng - minLng) / rangeLng) * w;
+            const y = pad + ((maxLat - p.lat) / rangeLat) * h;
+            return `${x.toFixed(2)},${y.toFixed(2)}`;
+        }).join(' ');
+    }
 
     svg.innerHTML = `<polygon class="green-shape-polygon" points="${points}" fill="var(--primary-light)" stroke="var(--primary-dark)" stroke-width="1.5" />`;
     wrap.classList.add('has-shape');
