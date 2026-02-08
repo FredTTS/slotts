@@ -299,6 +299,7 @@ body {
 }
 
 .card {
+    position: relative;
     background: var(--card-bg);
     border-radius: 1rem;
     padding: 1.5rem;
@@ -1501,8 +1502,7 @@ input[type="range"]::-moz-range-thumb:hover {
     cursor: grab;
 }
 
-.layout-edit .card .drag-handle { display: flex; }
-.card .drag-handle { display: none; }
+.card .drag-handle { display: flex; }
 
 .layout-controls {
     display: flex;

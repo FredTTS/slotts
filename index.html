@@ -21,10 +21,6 @@
             <div class="header-content">
                 <h1>⛳ Slottsbanan</h1>
                 <div class="header-actions">
-                    <button type="button" id="editLayoutBtn" class="header-btn" title="Ändra ordning på korten" aria-label="Ändra ordning på korten">
-                        <span class="header-btn-icon" aria-hidden="true">↕</span>
-                        <span class="header-btn-label">Ordning</span>
-                    </button>
                     <button type="button" id="resetLayoutBtn" class="header-btn" title="Återställ ordning" aria-label="Återställ ordning">
                         <span class="header-btn-icon" aria-hidden="true">⟲</span>
                         <span class="header-btn-label">Återställ</span>
@@ -127,16 +123,16 @@
                         </div>
                     </header>
                     <main class="banguide-content">
-                        <div class="banguide-image-wrap">
+                        <div class="card banguide-image-wrap" id="banguideImageCard" data-layout-id="banguideImageCard">
                             <img class="banguide-image" id="banguideImage" src="img/s1.jpeg" alt="Hål 1" />
                         </div>
-                        <section class="banguide-section">
+                        <section class="card banguide-section" id="banguideInfoSection" data-layout-id="banguideInfoSection">
                             <h3>Information om hålet</h3>
                             <div class="banguide-text" id="banguideInfo">
                                 <p>Information om hålet visas här.</p>
                             </div>
                         </section>
-                        <section class="banguide-section">
+                        <section class="card banguide-section" id="banguideGuideSection" data-layout-id="banguideGuideSection">
                             <h3>Banguide / Spelguide</h3>
                             <div class="banguide-text" id="banguideGuide">
                                 <p>Spelguide och tips för hålet visas här.</p>
@@ -154,7 +150,7 @@
                         </div>
                     </header>
                     <main class="distance-page-content">
-                        <section class="card distance-display" id="distanceDisplay">
+                        <section class="card distance-display" id="distanceDisplay" data-layout-id="distanceDisplay">
                             <div class="distance-main">
                                 <div class="distance-label">Avstånd till mitten på Green</div>
                                 <div class="distance-value-wrap">
@@ -184,7 +180,7 @@
                                 </div>
                             </div>
                         </section>
-                        <section class="card club-recommendation" id="clubRecommendation">
+                        <section class="card club-recommendation" id="clubRecommendation" data-layout-id="clubRecommendation">
                             <h3>Rekommenderad Klubba</h3>
                             <div class="recommended-club" id="recommendedClub">
                                 <div class="club-name">-</div>
@@ -192,7 +188,7 @@
                                 <div class="club-distance-adjusted" id="clubRecommendedAdjusted"></div>
                             </div>
                         </section>
-                        <section class="card club-distance-card" id="clubDistanceCard">
+                        <section class="card club-distance-card" id="clubDistanceCard" data-layout-id="clubDistanceCard">
                             <h3>Klubba och avstånd</h3>
                             <div class="club-distance-split">
                                 <div class="club-distance-half">
@@ -206,7 +202,7 @@
                                 </div>
                             </div>
                         </section>
-                        <section class="card pin-adjustment" id="pinAdjustment">
+                        <section class="card pin-adjustment" id="pinAdjustment" data-layout-id="pinAdjustment">
                             <h3>Flaggposition</h3>
                             <div class="adjustment-controls">
                                 <div class="adjustment-group">
@@ -228,7 +224,7 @@
                                 <button class="reset-btn" id="resetPin">Återställ Position</button>
                             </div>
                         </section>
-                        <section class="card wind-adjustment-card" id="windAdjustmentCard">
+                        <section class="card wind-adjustment-card" id="windAdjustmentCard" data-layout-id="windAdjustmentCard">
                             <h3>Vart ska jag sikta?</h3>
                             <div class="aim-content" id="aimContent">
                                 <p class="aim-waiting" id="aimWaiting">Väntar på position och väder…</p>
@@ -238,7 +234,7 @@
                                 📍 Uppdatera position och siktråd
                             </button>
                         </section>
-                        <section class="card hole-notes-card" id="holeNotesCard">
+                        <section class="card hole-notes-card" id="holeNotesCard" data-layout-id="holeNotesCard">
                             <h3>Anteckningar – hål <span id="holeNotesHoleNumber">1</span></h3>
                             <textarea class="hole-notes-input" id="holeNotesInput" placeholder="Skriv anteckningar om hålet här…" rows="4" aria-label="Anteckningar för aktuellt hål"></textarea>
                         </section>

@@ -40,8 +40,10 @@ let state = {
     notes: loadNotes()    // anteckningar per hål { 1: "...", 2: "...", ... }
 };
 
-// Layout persistence key
-const LAYOUT_KEY = 'layoutOrder';
+// Layout persistence keys (en per sida)
+const LAYOUT_KEY_MAIN = 'layoutOrderMain';
+const LAYOUT_KEY_BANGUIDE = 'layoutOrderBanguide';
+const LAYOUT_KEY_DISTANCE = 'layoutOrderDistance';
 const NOTES_KEY = 'holeNotes';
 
 // Initialize App
@@ -83,6 +85,8 @@ async function initializeApp() {
     populateClubSelect();
     setupEventListeners();
     loadLayoutOrder();
+    setDraggableState(true);
+    setupAllDragHandlers();
     // Set total (max) time for full round (18 holes x 15 min = 270 min = 04:30)
     try {
         const totalMinutes = 18 * 15;
@@ -411,18 +415,12 @@ function setupEventListeners() {
         });
     }
 
-    const editBtn = document.getElementById('editLayoutBtn');
     const resetLayoutBtn = document.getElementById('resetLayoutBtn');
-    if (editBtn) {
-        editBtn.addEventListener('click', () => {
-            const enabled = document.body.classList.toggle('layout-edit');
-            setDraggableState(enabled);
-            if (enabled) setupDragHandlers();
-        });
-    }
     if (resetLayoutBtn) {
         resetLayoutBtn.addEventListener('click', () => {
-            localStorage.removeItem(LAYOUT_KEY);
+            localStorage.removeItem(LAYOUT_KEY_MAIN);
+            localStorage.removeItem(LAYOUT_KEY_BANGUIDE);
+            localStorage.removeItem(LAYOUT_KEY_DISTANCE);
             location.reload();
         });
     }
@@ -476,29 +474,51 @@ function setupEventListeners() {
     }
 }
 
+const MAIN_PAGE_IDS = ['holeSelector', 'banguideNavCard', 'avstandNavCard', 'windArrowCard', 'conditionsImpactCard', 'timerSection'];
+
 function loadLayoutOrder() {
     try {
-        const saved = localStorage.getItem(LAYOUT_KEY);
-        if (!saved) return;
-        const order = JSON.parse(saved);
-        const container = document.querySelector('.main-content');
-        if (!container) return;
-        order.forEach(id => {
-            if (id === 'windAdjustmentCard' || id === 'holeNotesCard' || id === 'clubRecommendation') return; // finns på avståndssidan, inte i huvudlayout
-            const el = document.querySelector(`[data-layout-id="${id}"], #${id}`);
-            if (el) container.appendChild(el);
-        });
+        // Huvudsidan
+        const savedMain = localStorage.getItem(LAYOUT_KEY_MAIN);
+        const containerMain = document.querySelector('.main-content');
+        if (containerMain && savedMain) {
+            const order = JSON.parse(savedMain);
+            order.forEach(id => {
+                if (!MAIN_PAGE_IDS.includes(id)) return;
+                const el = document.querySelector(`[data-layout-id="${id}"], #${id}`);
+                if (el && el.closest('.main-content')) containerMain.appendChild(el);
+            });
+        }
+        // Banguide-sidan
+        const savedBanguide = localStorage.getItem(LAYOUT_KEY_BANGUIDE);
+        const containerBanguide = document.querySelector('.banguide-content');
+        if (containerBanguide && savedBanguide) {
+            const order = JSON.parse(savedBanguide);
+            order.forEach(id => {
+                const el = document.querySelector(`[data-layout-id="${id}"], #${id}`);
+                if (el && el.closest('.banguide-content')) containerBanguide.appendChild(el);
+            });
+        }
+        // Avståndssidan
+        const savedDistance = localStorage.getItem(LAYOUT_KEY_DISTANCE);
+        const containerDistance = document.querySelector('.distance-page-content');
+        if (containerDistance && savedDistance) {
+            const order = JSON.parse(savedDistance);
+            order.forEach(id => {
+                const el = document.querySelector(`[data-layout-id="${id}"], #${id}`);
+                if (el && el.closest('.distance-page-content')) containerDistance.appendChild(el);
+            });
+        }
     } catch (e) {
         console.warn('Could not load layout order', e);
     }
 }
 
-function saveLayoutOrder() {
-    const container = document.querySelector('.main-content');
-    if (!container) return;
+function saveLayoutOrder(container, storageKey) {
+    if (!container || !storageKey) return;
     const sections = Array.from(container.querySelectorAll('.card'));
     const order = sections.map(s => s.dataset.layoutId || s.id).filter(Boolean);
-    localStorage.setItem(LAYOUT_KEY, JSON.stringify(order));
+    localStorage.setItem(storageKey, JSON.stringify(order));
 }
 
 function setDraggableState(enabled) {
@@ -521,16 +541,18 @@ function setDraggableState(enabled) {
     });
 }
 
-// Drag & drop handlers
+// Drag & drop – en handler per container så att ordning sparas per sida
 let draggedEl = null;
-function setupDragHandlers() {
-    const container = document.querySelector('.main-content');
-    if (!container) return;
+let currentDragContainer = null;
+
+function setupDragHandlersForContainer(container, storageKey) {
+    if (!container || !storageKey) return;
 
     container.addEventListener('dragstart', (e) => {
         const el = e.target.closest('.card');
-        if (!el) return;
+        if (!el || !container.contains(el)) return;
         draggedEl = el;
+        currentDragContainer = container;
         e.dataTransfer.effectAllowed = 'move';
         try { e.dataTransfer.setData('text/plain', el.dataset.layoutId || el.id); } catch (err) {}
         el.classList.add('dragging');
@@ -538,14 +560,15 @@ function setupDragHandlers() {
 
     container.addEventListener('dragend', () => {
         if (draggedEl) draggedEl.classList.remove('dragging');
+        if (currentDragContainer && storageKey) saveLayoutOrder(currentDragContainer, storageKey);
         draggedEl = null;
-        saveLayoutOrder();
+        currentDragContainer = null;
     });
 
     container.addEventListener('dragover', (e) => {
         e.preventDefault();
+        if (!draggedEl || container !== currentDragContainer) return;
         const afterEl = getDragAfterElement(container, e.clientY);
-        if (!draggedEl) return;
         if (afterEl == null) {
             container.appendChild(draggedEl);
         } else {
@@ -555,8 +578,17 @@ function setupDragHandlers() {
 
     container.addEventListener('drop', (e) => {
         e.preventDefault();
-        saveLayoutOrder();
+        saveLayoutOrder(container, storageKey);
     });
+}
+
+function setupAllDragHandlers() {
+    const main = document.querySelector('.main-content');
+    const banguide = document.querySelector('.banguide-content');
+    const distance = document.querySelector('.distance-page-content');
+    if (main) setupDragHandlersForContainer(main, LAYOUT_KEY_MAIN);
+    if (banguide) setupDragHandlersForContainer(banguide, LAYOUT_KEY_BANGUIDE);
+    if (distance) setupDragHandlersForContainer(distance, LAYOUT_KEY_DISTANCE);
 }
 
 function getDragAfterElement(container, y) {
