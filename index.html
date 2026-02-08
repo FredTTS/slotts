@@ -64,32 +64,6 @@
                 </div>
             </section>
 
-            <!-- Pin Position Adjustment -->
-            <section class="card pin-adjustment" id="pinAdjustment" data-layout-id="pinAdjustment" style="display: none;">
-                <h3>Flaggposition</h3>
-                <div class="adjustment-controls">
-                    <div class="adjustment-group">
-                        <label>Höger/Vänster (m)</label>
-                        <div class="slider-container">
-                            <span class="slider-label">-10m</span>
-                            <input type="range" id="pinOffsetX" min="-10" max="10" value="0" step="0.5">
-                            <span class="slider-label">+10m</span>
-                        </div>
-                        <div class="slider-value" id="pinOffsetXValue">0 m</div>
-                    </div>
-                    <div class="adjustment-group">
-                        <label>Fram/Bak (m)</label>
-                        <div class="slider-container">
-                            <span class="slider-label">-10m</span>
-                            <input type="range" id="pinOffsetY" min="-10" max="10" value="0" step="0.5">
-                            <span class="slider-label">+10m</span>
-                        </div>
-                        <div class="slider-value" id="pinOffsetYValue">0 m</div>
-                    </div>
-                    <button class="reset-btn" id="resetPin">Återställ Position</button>
-                </div>
-            </section>
-
             <!-- Rekommenderad klubba (eget kort) -->
             <section class="card club-recommendation" id="clubRecommendation" data-layout-id="clubRecommendation" style="display: none;">
                 <h3>Rekommenderad Klubba</h3>
@@ -248,6 +222,30 @@
                                     <span class="detail-label">Bakkant:</span>
                                     <span class="detail-value" id="backEdge">-</span>
                                 </div>
+                            </div>
+                        </section>
+                        <section class="card pin-adjustment" id="pinAdjustment">
+                            <h3>Flaggposition</h3>
+                            <div class="adjustment-controls">
+                                <div class="adjustment-group">
+                                    <label>Höger/Vänster (m)</label>
+                                    <div class="slider-container">
+                                        <span class="slider-label">-10m</span>
+                                        <input type="range" id="pinOffsetX" min="-10" max="10" value="0" step="0.5">
+                                        <span class="slider-label">+10m</span>
+                                    </div>
+                                    <div class="slider-value" id="pinOffsetXValue">0 m</div>
+                                </div>
+                                <div class="adjustment-group">
+                                    <label>Fram/Bak (m)</label>
+                                    <div class="slider-container">
+                                        <span class="slider-label">-10m</span>
+                                        <input type="range" id="pinOffsetY" min="-10" max="10" value="0" step="0.5">
+                                        <span class="slider-label">+10m</span>
+                                    </div>
+                                    <div class="slider-value" id="pinOffsetYValue">0 m</div>
+                                </div>
+                                <button class="reset-btn" id="resetPin">Återställ Position</button>
                             </div>
                         </section>
                     </main>
