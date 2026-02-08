@@ -396,7 +396,12 @@ function setupEventListeners() {
     if (resetPinBtn) resetPinBtn.addEventListener('click', resetPinPosition);
 
     const clubSelect = document.getElementById('clubSelect');
-    if (clubSelect) clubSelect.addEventListener('change', () => updateClubDistanceDisplay());
+    if (clubSelect) {
+        clubSelect.addEventListener('change', () => {
+            updateClubDistanceDisplay();
+            updateDistances(); // uppdaterar siktråd (sidovind beror på vald klubba)
+        });
+    }
 
     const editBtn = document.getElementById('editLayoutBtn');
     const resetLayoutBtn = document.getElementById('resetLayoutBtn');
@@ -1566,13 +1571,20 @@ function updateAimCard(distanceToPin, elevation, tempAdj, windAdj, humidityAdj, 
     const windDeg = state.weatherData.wind.deg;
     const windSpeed = state.weatherData.wind.speed;
 
-    // Sidovind – hur mycket man ska sikta åt sidan beror på vindriktning, styrka och avstånd (längre slag = mer drift)
+    // Sidovind – antal meter att sikta åt sidan beror på vald klubba: längre klubba = längre bollflykt = mer drift
+    const clubSel = document.getElementById('clubSelect');
+    const clubName = clubSel ? clubSel.value : null;
+    const clubData = clubName && state.clubs[clubName] ? state.clubs[clubName] : null;
+    const clubDistance = clubData && typeof clubData.totalDistance === 'number' && clubData.totalDistance > 0
+        ? clubData.totalDistance
+        : distanceToPin; // fallback till avstånd till pin om ingen klubba vald
+    const distanceFactor = 2 * (1 + Math.min(clubDistance, 250) / 100);
     const crossWind = Math.sin((windDeg - bearing) * Math.PI / 180) * windSpeed; // m/s sidovind
-    const distanceFactor = 2 * (1 + Math.min(distanceToPin, 250) / 100); // längre slag = mer meters att sikta
     const aimMeters = Math.round(Math.abs(crossWind) * distanceFactor);
+    const clubLabel = clubName ? ` för ${clubName}` : '';
     if (aimMeters >= 1) {
         const direction = crossWind > 0 ? 'höger' : 'vänster';
-        addAimItem(aimList, 'Vind (sidovind)', `Sikta ${aimMeters} m till ${direction} om flaggan (vind ${windSpeed.toFixed(1)} m/s)`);
+        addAimItem(aimList, 'Vind (sidovind)', `Sikta ${aimMeters} m till ${direction} om flaggan${clubLabel} (vind ${windSpeed.toFixed(1)} m/s)`);
     } else {
         addAimItem(aimList, 'Vind (sidovind)', 'Ingen sidovind – sikta rakt på flaggan');
     }
