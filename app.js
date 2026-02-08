@@ -1137,14 +1137,40 @@ function getHoleData(holeNumber) {
 function getPinPosition(holeData) {
     const pin = holeData.find(f => f.properties.type === 'pin');
     if (!pin) return null;
-    
+
     const [lng, lat] = pin.geometry.coordinates;
-    
-    // Apply offset
-    const offsetLat = lat + (state.pinOffset.y / 111320); // ~111.32km per degree
-    const offsetLng = lng + (state.pinOffset.x / (111320 * Math.cos(lat * Math.PI / 180)));
-    
-    return { lat: offsetLat, lng: offsetLng };
+    const pos = holeData ? getPosPosition(holeData) : null;
+
+    if (!pos) {
+        // Ingen pos i GeoJSON: använd geografisk offset (nord/syd, öst/väst)
+        const offsetLat = lat + (state.pinOffset.y / 111320);
+        const offsetLng = lng + (state.pinOffset.x / (111320 * Math.cos(lat * Math.PI / 180)));
+        return { lat: offsetLat, lng: offsetLng };
+    }
+
+    // Offset relativt pos: Fram/Bak = mot pos (y), Höger/Vänster = vänster/höger sett från pos (x)
+    const mPerDegLat = 111320;
+    const mPerDegLon = 111320 * Math.cos(lat * Math.PI / 180);
+    // Riktning från pin mot pos (i meter: öst, nord)
+    const towardEast = (pos.lng - lng) * mPerDegLon;
+    const towardNorth = (pos.lat - lat) * mPerDegLat;
+    const distToward = Math.hypot(towardEast, towardNorth) || 1e-10;
+    const towardUnitEast = towardEast / distToward;
+    const towardUnitNorth = towardNorth / distToward;
+    // Vänster = 90° moturs från (pos -> pin). Pos->pin i meter: (pin - pos)
+    const posToPinEast = (lng - pos.lng) * (111320 * Math.cos(pos.lat * Math.PI / 180));
+    const posToPinNorth = (lat - pos.lat) * mPerDegLat;
+    const leftEast = -posToPinNorth;
+    const leftNorth = posToPinEast;
+    const distLeft = Math.hypot(leftEast, leftNorth) || 1e-10;
+    const leftUnitEast = leftEast / distLeft;
+    const leftUnitNorth = leftNorth / distLeft;
+    // Offset: pinOffset.y = meter mot pos (Fram), pinOffset.x = meter vänster (Vänster)
+    const offsetEast = state.pinOffset.y * towardUnitEast + state.pinOffset.x * leftUnitEast;
+    const offsetNorth = state.pinOffset.y * towardUnitNorth + state.pinOffset.x * leftUnitNorth;
+    const offsetLat = offsetNorth / mPerDegLat;
+    const offsetLng = offsetEast / mPerDegLon;
+    return { lat: lat + offsetLat, lng: lng + offsetLng };
 }
 
 function getGreenPolygon(holeData) {
