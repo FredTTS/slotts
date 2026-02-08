@@ -624,6 +624,16 @@ body {
     vector-effect: non-scaling-stroke;
 }
 
+.green-pin-flag {
+    vector-effect: non-scaling-stroke;
+}
+
+.green-pin-label {
+    font-size: 8px;
+    font-weight: 600;
+    fill: var(--text-primary);
+}
+
 /* Pin Adjustment */
 .adjustment-controls {
     display: flex;

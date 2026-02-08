@@ -1182,6 +1182,7 @@ function drawGreenShape(greenPolygon, holeData) {
     const h = 60 - 2 * pad;
 
     let points;
+    let pinSx, pinSy;
 
     if (pos) {
         // Koordinater i meter relativt pos
@@ -1194,13 +1195,12 @@ function drawGreenShape(greenPolygon, holeData) {
         const meters = greenPolygon.map(toMeters);
         const cx = meters.reduce((s, p) => s + p.x, 0) / meters.length;
         const cy = meters.reduce((s, p) => s + p.y, 0) / meters.length;
-        // Rotera så att riktning pos -> greencentrum blir "upp" i SVG, sedan 180° motsols
         const angle = Math.atan2(cy, cx);
         const rot = -angle - Math.PI / 2 + Math.PI;
         const cos = Math.cos(rot), sin = Math.sin(rot);
         const rotated = meters.map(p => ({
             x: p.x * cos - p.y * sin,
-            y: -(p.x * sin + p.y * cos) // SVG y ner, så negera
+            y: -(p.x * sin + p.y * cos)
         }));
         const rx = rotated.map(p => p.x), ry = rotated.map(p => p.y);
         const minX = Math.min(...rx), maxX = Math.max(...rx);
@@ -1212,6 +1212,15 @@ function drawGreenShape(greenPolygon, holeData) {
             const sy = pad + ((p.y - minY) / rangeY) * h;
             return `${sx.toFixed(2)},${sy.toFixed(2)}`;
         }).join(' ');
+        // Pin-position i SVG (samma koordinatsystem som greenen)
+        const pinPos = getPinPosition(holeData);
+        const pinM = pinPos ? toMeters(pinPos) : { x: cx + state.pinOffset.x, y: cy + state.pinOffset.y };
+        const pinRot = {
+            x: pinM.x * cos - pinM.y * sin,
+            y: -(pinM.x * sin + pinM.y * cos)
+        };
+        pinSx = pad + ((pinRot.x - minX) / rangeX) * w;
+        pinSy = pad + ((pinRot.y - minY) / rangeY) * h;
     } else {
         const lngs = greenPolygon.map(p => p.lng);
         const lats = greenPolygon.map(p => p.lat);
@@ -1224,7 +1233,25 @@ function drawGreenShape(greenPolygon, holeData) {
             const y = pad + ((maxLat - p.lat) / rangeLat) * h;
             return `${x.toFixed(2)},${y.toFixed(2)}`;
         }).join(' ');
+        const centerLng = (minLng + maxLng) / 2;
+        const centerLat = (minLat + maxLat) / 2;
+        const pinLng = centerLng + state.pinOffset.x / (111320 * Math.cos(centerLat * Math.PI / 180));
+        const pinLat = centerLat + state.pinOffset.y / 111320;
+        pinSx = pad + ((pinLng - minLng) / rangeLng) * w;
+        pinSy = pad + ((maxLat - pinLat) / rangeLat) * h;
     }
+
+    const poleH = 12;
+    const flagW = 6;
+    const flagPath = `M ${pinSx} ${pinSy - poleH} L ${pinSx + flagW} ${pinSy - poleH + 2} L ${pinSx} ${pinSy - poleH + 4} Z`;
+    const pinMarkup = (pinSx != null && pinSy != null) ? `
+      <g class="green-pin-flag" aria-label="Pin">
+        <line x1="${pinSx}" y1="${pinSy}" x2="${pinSx}" y2="${pinSy - poleH}" stroke="var(--primary-dark)" stroke-width="1.2"/>
+        <path d="${flagPath}" fill="var(--primary)" stroke="var(--primary-dark)" stroke-width="0.8"/>
+        <circle cx="${pinSx}" cy="${pinSy}" r="2" fill="var(--primary-dark)"/>
+        <text x="${pinSx}" y="${pinSy + 6}" text-anchor="middle" class="green-pin-label" fill="var(--text-primary)">Pin</text>
+      </g>
+    ` : '';
 
     const filterId = 'greenSoftEdge';
     svg.innerHTML = `
@@ -1234,6 +1261,7 @@ function drawGreenShape(greenPolygon, holeData) {
         </filter>
       </defs>
       <polygon class="green-shape-polygon" points="${points}" fill="var(--primary-light)" stroke="var(--primary-dark)" stroke-width="1.5" filter="url(#${filterId})" />
+      ${pinMarkup}
     `;
     wrap.classList.add('has-shape');
 }
