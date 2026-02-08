@@ -1082,9 +1082,9 @@ function drawGreenShape(greenPolygon, holeData) {
         const meters = greenPolygon.map(toMeters);
         const cx = meters.reduce((s, p) => s + p.x, 0) / meters.length;
         const cy = meters.reduce((s, p) => s + p.y, 0) / meters.length;
-        // Rotera så att riktning pos -> greencentrum blir "upp" i SVG
+        // Rotera så att riktning pos -> greencentrum blir "upp" i SVG, sedan 180° motsols
         const angle = Math.atan2(cy, cx);
-        const rot = -angle - Math.PI / 2;
+        const rot = -angle - Math.PI / 2 + Math.PI;
         const cos = Math.cos(rot), sin = Math.sin(rot);
         const rotated = meters.map(p => ({
             x: p.x * cos - p.y * sin,
