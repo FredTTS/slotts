@@ -1601,17 +1601,18 @@ function updateAimCard(distanceToPin, elevation, tempAdj, windAdj, humidityAdj, 
         addAimItem(aimList, 'Lufttryck', 'Ingen påverkan');
     }
 
-    // Totalt avstånd (temperatur + vind fram/bak + luftfuktighet + höjd + tryck)
+    // Totalt avstånd: förhållanden gör att bollen går totalAdj m längre (+) eller kortare (-).
+    // Om bollen går kortare ska man ta en klubba som går längre än normalt, och tvärtom.
     const totalAdj = (tempAdj || 0) + (windAdj || 0) + (humidityAdj || 0) + (elevationAdj || 0) + (pressureAdj || 0);
     const totalM = Math.round(Math.abs(totalAdj));
     if (totalM >= 1) {
-        if (totalAdj > 0) {
-            addAimItem(aimList, 'Totalt', `Slå ${totalM} m längre pga förhållanden`);
+        if (totalAdj < 0) {
+            addAimItem(aimList, 'Rekommendation', `Ta en klubba som går ${totalM} m längre än normalt (förhållanden gör att bollen går ${totalM} m kortare)`);
         } else {
-            addAimItem(aimList, 'Totalt', `Slå ${totalM} m kort pga förhållanden`);
+            addAimItem(aimList, 'Rekommendation', `Ta en klubba som går ${totalM} m kortare än normalt (förhållanden gör att bollen går ${totalM} m längre)`);
         }
     } else {
-        addAimItem(aimList, 'Totalt', 'Rakt på flaggan');
+        addAimItem(aimList, 'Rekommendation', 'Normalklubb räcker – sikta rakt på flaggan');
     }
 }
 
