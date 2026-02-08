@@ -568,6 +568,22 @@ body {
     color: var(--text-secondary);
 }
 
+.distance-to-pin-row {
+    margin-top: 0.75rem;
+    font-size: 1rem;
+    color: var(--text-primary);
+}
+
+.distance-to-pin-label {
+    font-weight: 600;
+    margin-right: 0.35rem;
+}
+
+.distance-to-pin-value {
+    font-weight: 700;
+    color: var(--primary);
+}
+
 .distance-details {
     display: grid;
     grid-template-columns: repeat(3, 1fr);

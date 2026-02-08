@@ -1099,32 +1099,52 @@ function updateDistances() {
     const holeData = getHoleData(state.currentHole);
     if (!holeData || holeData.length === 0) return;
 
-    const pinPosition = getPinPosition(holeData);
     const greenPolygon = getGreenPolygon(holeData);
-    if (!pinPosition) return;
+    const greenCenter = getGreenCenterPosition(holeData);
+    const pinPosition = getPinPosition(holeData);
 
-    // Calculate distances
-    const distanceToPin = calculateDistance(state.userPosition, pinPosition);
-    const distanceToFront = calculateDistanceToFrontEdge(state.userPosition, greenPolygon);
-    const distanceToBack = calculateDistanceToBackEdge(state.userPosition, greenPolygon);
-    const midDistance = (distanceToFront + distanceToBack) / 2;
+    // Avstånd till mitten på green (oförändrat av flaggposition)
+    const distanceToGreenCenter = greenCenter
+        ? calculateDistance(state.userPosition, greenCenter)
+        : null;
+    // Avstånd till pin (ändras när man flyttar flaggan)
+    const distanceToPin = pinPosition
+        ? calculateDistance(state.userPosition, pinPosition)
+        : null;
+
+    const distanceToFront = greenPolygon ? calculateDistanceToFrontEdge(state.userPosition, greenPolygon) : 0;
+    const distanceToBack = greenPolygon ? calculateDistanceToBackEdge(state.userPosition, greenPolygon) : 0;
     const greenArea = greenPolygon ? calculatePolygonArea(greenPolygon) : 0;
-    
-    // Update UI
+
+    // Update UI: mitten på green = alltid greenens centrum
     const distEl = document.getElementById('distanceToGreen');
+    const distToPinEl = document.getElementById('distanceToPin');
     const frontEl = document.getElementById('frontEdge');
     const backEl = document.getElementById('backEdge');
-    if (distEl) distEl.innerHTML = `<span style="font-size: 3rem;">${Math.round(distanceToPin)}</span> <span style="font-size: 1.5rem;">m</span>`;
+    if (distEl) {
+        if (distanceToGreenCenter != null) {
+            distEl.innerHTML = `<span style="font-size: 3rem;">${Math.round(distanceToGreenCenter)}</span> <span style="font-size: 1.5rem;">m</span>`;
+        } else {
+            distEl.innerHTML = '<span class="loading">📍 Hämtar position...</span>';
+        }
+    }
+    if (distToPinEl) {
+        distToPinEl.textContent = distanceToPin != null ? `${Math.round(distanceToPin)} m` : '–';
+    }
     if (frontEl) frontEl.textContent = `${Math.round(distanceToFront)} m`;
     if (backEl) backEl.textContent = `${Math.round(distanceToBack)} m`;
 
     drawGreenShape(greenPolygon, holeData);
-    
-    // Calculate elevation
+
     const elevation = calculateElevation(holeData, state.userPosition);
-    
-    // Recommend club
-    recommendClub(distanceToPin, elevation);
+    // Rekommendera klubba från avstånd till pin (eller till mitten om pin saknas)
+    const distanceForClub = distanceToPin != null ? distanceToPin : distanceToGreenCenter;
+    if (distanceForClub != null) {
+        recommendClub(distanceForClub, elevation);
+    } else {
+        updateAimCard();
+        updateClubDistanceDisplay();
+    }
 }
 
 function getHoleData(holeNumber) {
@@ -1181,6 +1201,14 @@ function getGreenPolygon(holeData) {
         lng: coord[0],
         lat: coord[1]
     }));
+}
+
+function getGreenCenterPosition(holeData) {
+    const polygon = getGreenPolygon(holeData);
+    if (!polygon || polygon.length === 0) return null;
+    const sumLng = polygon.reduce((s, p) => s + p.lng, 0);
+    const sumLat = polygon.reduce((s, p) => s + p.lat, 0);
+    return { lng: sumLng / polygon.length, lat: sumLat / polygon.length };
 }
 
 function getPosPosition(holeData) {
