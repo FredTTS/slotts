@@ -48,7 +48,7 @@
                 <div class="hole-buttons" id="holeButtons" aria-live="polite" aria-atomic="true"></div>
             </section>
 
-            <!-- Banguide – samma look som hålväljaren, klick öppnar banguide-sidan -->
+            <!-- Banguide – klick öppnar banguide-sidan -->
             <section class="card nav-strip-card" id="banguideNavCard" data-layout-id="banguideNavCard" aria-label="Öppna banguide">
                 <div class="nav-strip banguide-strip" id="banguideStrip" role="button" tabindex="0">
                     <span class="nav-strip-label">Banguide</span>
@@ -56,32 +56,11 @@
                 </div>
             </section>
 
-            <!-- Distance Display -->
-            <section class="card distance-display" id="distanceDisplay">
-                <div class="distance-main">
-                    <div class="distance-label">Avstånd till mitten på Green</div>
-                    <div class="distance-value-wrap">
-                        <div class="distance-value" id="distanceToGreen">
-                            <span class="loading">📍 Hämtar position...</span>
-                        </div>
-
-                    </div>
-                </div>
-                <div class="distance-details" id="distanceDetails">
-                    <div class="detail-item">
-                        <span class="detail-label">Framkant:</span>
-                        <span class="detail-value" id="frontEdge">-</span>
-                    </div>
-                    <div class="detail-item detail-item-green">
-                        <span class="detail-label">Green</span>
-                        <div class="green-shape-wrap" id="greenShapeWrap" aria-hidden="true">
-                            <svg class="green-shape-svg" id="greenShapeSvg" viewBox="0 0 100 60" preserveAspectRatio="xMidYMid meet"></svg>
-                        </div>
-                    </div>
-                    <div class="detail-item">
-                        <span class="detail-label">Bakkant:</span>
-                        <span class="detail-value" id="backEdge">-</span>
-                    </div>
+            <!-- Avstånd – klick öppnar avståndssidan -->
+            <section class="card nav-strip-card" id="avstandNavCard" data-layout-id="avstandNavCard" aria-label="Öppna avstånd till green">
+                <div class="nav-strip avstand-strip" id="avstandStrip" role="button" tabindex="0">
+                    <span class="nav-strip-label">Avstånd till green</span>
+                    <span class="nav-strip-arrow" aria-hidden="true">›</span>
                 </div>
             </section>
 
@@ -235,6 +214,44 @@
                         </section>
                     </main>
                 </div><!-- /.page-banguide -->
+
+                <!-- Sida 3: Avstånd till green -->
+                <div class="page page-distance" id="pageDistance">
+                    <header class="header header-distance">
+                        <div class="header-content">
+                            <button type="button" class="back-to-main-btn" id="backFromDistanceBtn" aria-label="Tillbaka till huvudsidan">‹ Tillbaka</button>
+                            <h1 class="distance-page-title">Avstånd till green – Hål <span id="distancePageHoleNumber">1</span></h1>
+                        </div>
+                    </header>
+                    <main class="distance-page-content">
+                        <section class="card distance-display" id="distanceDisplay">
+                            <div class="distance-main">
+                                <div class="distance-label">Avstånd till mitten på Green</div>
+                                <div class="distance-value-wrap">
+                                    <div class="distance-value" id="distanceToGreen">
+                                        <span class="loading">📍 Hämtar position...</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="distance-details" id="distanceDetails">
+                                <div class="detail-item">
+                                    <span class="detail-label">Framkant:</span>
+                                    <span class="detail-value" id="frontEdge">-</span>
+                                </div>
+                                <div class="detail-item detail-item-green">
+                                    <span class="detail-label">Green</span>
+                                    <div class="green-shape-wrap" id="greenShapeWrap" aria-hidden="true">
+                                        <svg class="green-shape-svg" id="greenShapeSvg" viewBox="0 0 100 60" preserveAspectRatio="xMidYMid meet"></svg>
+                                    </div>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Bakkant:</span>
+                                    <span class="detail-value" id="backEdge">-</span>
+                                </div>
+                            </div>
+                        </section>
+                    </main>
+                </div><!-- /.page-distance -->
             </div><!-- /.pages -->
         </div><!-- /.pages-wrapper -->
 

@@ -363,14 +363,33 @@ function setupEventListeners() {
     }
 
     const banguideStrip = document.getElementById('banguideStrip');
+    const avstandStrip = document.getElementById('avstandStrip');
     const pages = document.getElementById('pages');
     if (banguideStrip && pages) {
-        const openBanguide = () => pages.classList.add('show-banguide');
+        const openBanguide = () => {
+            pages.classList.remove('show-distance');
+            pages.classList.add('show-banguide');
+        };
         banguideStrip.addEventListener('click', openBanguide);
         banguideStrip.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
                 openBanguide();
+            }
+        });
+    }
+    if (avstandStrip && pages) {
+        const openDistance = () => {
+            pages.classList.remove('show-banguide');
+            pages.classList.add('show-distance');
+            const holeEl = document.getElementById('distancePageHoleNumber');
+            if (holeEl) holeEl.textContent = state.currentHole || 1;
+        };
+        avstandStrip.addEventListener('click', openDistance);
+        avstandStrip.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                openDistance();
             }
         });
     }
@@ -590,6 +609,9 @@ function selectHole(holeNumber) {
     }
     
     state.currentHole = holeNumber;
+
+    const holeEl = document.getElementById('distancePageHoleNumber');
+    if (holeEl) holeEl.textContent = holeNumber;
 
     // Uppdatera green-formen direkt (från GeoJSON) så den syns även utan GPS
     const holeDataForGreen = getHoleData(holeNumber);
@@ -924,6 +946,11 @@ function setupBackToMainButton() {
     const pages = document.getElementById('pages');
     if (!btn || !pages) return;
     btn.addEventListener('click', () => pages.classList.remove('show-banguide'));
+
+    const backFromDistanceBtn = document.getElementById('backFromDistanceBtn');
+    if (backFromDistanceBtn && pages) {
+        backFromDistanceBtn.addEventListener('click', () => pages.classList.remove('show-distance'));
+    }
 }
 
 function addCompassPermissionButton() {

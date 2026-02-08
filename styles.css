@@ -36,7 +36,7 @@ body {
     overflow: hidden;
 }
 
-/* Två sidor: huvudsida + banguide (svep vänster/höger) */
+/* Tre sidor: huvudsida, banguide, avstånd */
 .pages-wrapper {
     flex: 1;
     overflow-x: hidden;
@@ -46,19 +46,23 @@ body {
 
 .pages {
     display: flex;
-    width: 200%;
+    width: 300%;
     min-height: 100%;
     transition: transform 0.3s ease-out;
     will-change: transform;
 }
 
 .pages.show-banguide {
-    transform: translateX(-50%);
+    transform: translateX(-33.333%);
+}
+
+.pages.show-distance {
+    transform: translateX(-66.666%);
 }
 
 .page {
-    flex: 0 0 50%;
-    width: 50%;
+    flex: 0 0 33.333%;
+    width: 33.333%;
     min-height: 100%;
     display: flex;
     flex-direction: column;
@@ -73,6 +77,35 @@ body {
 .page-banguide {
     background: var(--background);
     overflow: hidden; /* scroll sker i .banguide-content */
+}
+
+.page-distance {
+    background: var(--background);
+    overflow: hidden;
+}
+
+.page-distance > .header {
+    flex-shrink: 0;
+}
+
+.distance-page-content {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 1rem 1.5rem;
+    padding-bottom: 2rem;
+}
+
+.header-distance .header-content {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.distance-page-title {
+    font-size: 1.25rem;
+    flex: 1;
+    text-align: center;
 }
 
 /* Banguide-sida: header och innehåll */
@@ -397,7 +430,8 @@ body {
 }
 
 .nav-strip,
-.banguide-strip {
+.banguide-strip,
+.avstand-strip {
     width: 100%;
     max-width: 400px;
     padding: 0.5rem 1rem;
@@ -426,12 +460,14 @@ body {
 }
 
 .nav-strip:active,
-.banguide-strip:active {
+.banguide-strip:active,
+.avstand-strip:active {
     transform: scale(0.98);
 }
 
 .nav-strip:hover,
-.banguide-strip:hover {
+.banguide-strip:hover,
+.avstand-strip:hover {
     color: white;
 }
 
