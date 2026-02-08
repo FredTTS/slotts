@@ -1086,10 +1086,12 @@ function drawGreenShape(greenPolygon, holeData) {
         const angle = Math.atan2(cy, cx);
         const rot = -angle - Math.PI / 2 + Math.PI;
         const cos = Math.cos(rot), sin = Math.sin(rot);
-        const rotated = meters.map(p => ({
+        let rotated = meters.map(p => ({
             x: p.x * cos - p.y * sin,
             y: -(p.x * sin + p.y * cos) // SVG y ner, så negera
         }));
+        // 90° motsols (counterclockwise): (x,y) -> (-y,x)
+        rotated = rotated.map(p => ({ x: -p.y, y: p.x }));
         const rx = rotated.map(p => p.x), ry = rotated.map(p => p.y);
         const minX = Math.min(...rx), maxX = Math.max(...rx);
         const minY = Math.min(...ry), maxY = Math.max(...ry);
