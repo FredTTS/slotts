@@ -818,7 +818,16 @@ function updateTimerDisplay() {
     
     const timeString = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
     const elapsedEl = document.getElementById('elapsedTime');
-    if (elapsedEl) elapsedEl.textContent = timeString;
+    if (elapsedEl) {
+        elapsedEl.textContent = timeString;
+        // Idealtid för aktuellt hål = 15 min per hål
+        const idealSeconds = (state.currentHole || 1) * 15 * 60;
+        if (elapsed > idealSeconds) {
+            elapsedEl.classList.add('timer-value-over-ideal');
+        } else {
+            elapsedEl.classList.remove('timer-value-over-ideal');
+        }
+    }
 }
 
 // Weather API
