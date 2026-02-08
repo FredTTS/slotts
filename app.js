@@ -1082,13 +1082,13 @@ function drawGreenShape(greenPolygon, holeData) {
         const meters = greenPolygon.map(toMeters);
         const cx = meters.reduce((s, p) => s + p.x, 0) / meters.length;
         const cy = meters.reduce((s, p) => s + p.y, 0) / meters.length;
-        // Vinkel så att riktning pos -> greencentrum blir "upp" i SVG
+        // Vinkel: upp i SVG = riktning från pos mot green. Spegling i x så vänster/höger stämmer.
         const angle = Math.atan2(cy, cx);
         const rot = -angle - Math.PI / 2;
         const cos = Math.cos(rot), sin = Math.sin(rot);
         const rotated = meters.map(p => ({
-            x: p.x * cos - p.y * sin,
-            y: -(p.x * sin + p.y * cos) // SVG y ner, så negera
+            x: -(p.x * cos - p.y * sin), // spegla i x så greenen vänder rätt
+            y: -(p.x * sin + p.y * cos)  // SVG y ner, så negera
         }));
         const rx = rotated.map(p => p.x), ry = rotated.map(p => p.y);
         const minX = Math.min(...rx), maxX = Math.max(...rx);
