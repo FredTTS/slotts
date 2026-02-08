@@ -1249,7 +1249,6 @@ function drawGreenShape(greenPolygon, holeData) {
         <line x1="${pinSx}" y1="${pinSy}" x2="${pinSx}" y2="${pinSy - poleH}" stroke="var(--primary-dark)" stroke-width="1.2"/>
         <path d="${flagPath}" fill="var(--primary)" stroke="var(--primary-dark)" stroke-width="0.8"/>
         <circle cx="${pinSx}" cy="${pinSy}" r="2" fill="var(--primary-dark)"/>
-        <text x="${pinSx}" y="${pinSy + 6}" text-anchor="middle" class="green-pin-label" fill="var(--text-primary)">Pin</text>
       </g>
     ` : '';
 
