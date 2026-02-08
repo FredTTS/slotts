@@ -9,21 +9,21 @@ const CLUBS = [
     'Järn 6', 'Järn 7', 'Järn 8', 'Järn 9', 'PW', 'SW', 'LW'
 ];
 
-// Default distances (meters) so users have sensible starting values they can edit
+// Default distances (meters) and spread so users have sensible starting values they can edit
 const DEFAULT_CLUB_DATA = {
-    'Driver': { totalDistance: 230, carryDistance: 220 },
-    'Trä 3': { totalDistance: 210, carryDistance: 200 },
-    'Trä 5': { totalDistance: 195, carryDistance: 185 },
-    'Hybrid 3': { totalDistance: 185, carryDistance: 175 },
-    'Järn 4': { totalDistance: 170, carryDistance: 160 },
-    'Järn 5': { totalDistance: 160, carryDistance: 150 },
-    'Järn 6': { totalDistance: 150, carryDistance: 140 },
-    'Järn 7': { totalDistance: 140, carryDistance: 130 },
-    'Järn 8': { totalDistance: 130, carryDistance: 120 },
-    'Järn 9': { totalDistance: 120, carryDistance: 110 },
-    'PW': { totalDistance: 110, carryDistance: 95 },
-    'SW': { totalDistance: 85, carryDistance: 80 },
-    'LW': { totalDistance: 75, carryDistance: 70 }
+    'Driver': { totalDistance: 230, carryDistance: 220, spread: 10 },
+    'Trä 3': { totalDistance: 210, carryDistance: 200, spread: 8 },
+    'Trä 5': { totalDistance: 195, carryDistance: 185, spread: 8 },
+    'Hybrid 3': { totalDistance: 185, carryDistance: 175, spread: 7 },
+    'Järn 4': { totalDistance: 170, carryDistance: 160, spread: 6 },
+    'Järn 5': { totalDistance: 160, carryDistance: 150, spread: 6 },
+    'Järn 6': { totalDistance: 150, carryDistance: 140, spread: 5 },
+    'Järn 7': { totalDistance: 140, carryDistance: 130, spread: 5 },
+    'Järn 8': { totalDistance: 130, carryDistance: 120, spread: 5 },
+    'Järn 9': { totalDistance: 120, carryDistance: 110, spread: 5 },
+    'PW': { totalDistance: 110, carryDistance: 95, spread: 5 },
+    'SW': { totalDistance: 85, carryDistance: 80, spread: 4 },
+    'LW': { totalDistance: 75, carryDistance: 70, spread: 4 }
 };
 // App State
 let state = {
@@ -107,7 +107,15 @@ async function initializeApp() {
 function loadClubData() {
     const saved = localStorage.getItem('clubData');
     if (saved) {
-        return JSON.parse(saved);
+        const parsed = JSON.parse(saved);
+        // Ensure every club has spread (for old saved data)
+        Object.keys(parsed).forEach(name => {
+            if (parsed[name] && typeof parsed[name].spread !== 'number') {
+                parsed[name].spread = (DEFAULT_CLUB_DATA[name] && typeof DEFAULT_CLUB_DATA[name].spread === 'number')
+                    ? DEFAULT_CLUB_DATA[name].spread : 5;
+            }
+        });
+        return parsed;
     }
     // Use predefined sensible defaults so users have values to edit from start
     const defaultClubs = {};
@@ -115,10 +123,11 @@ function loadClubData() {
         if (DEFAULT_CLUB_DATA[club]) {
             defaultClubs[club] = { 
                 totalDistance: DEFAULT_CLUB_DATA[club].totalDistance,
-                carryDistance: DEFAULT_CLUB_DATA[club].carryDistance
+                carryDistance: DEFAULT_CLUB_DATA[club].carryDistance,
+                spread: DEFAULT_CLUB_DATA[club].spread ?? 5
             };
         } else {
-            defaultClubs[club] = { totalDistance: 0, carryDistance: 0 };
+            defaultClubs[club] = { totalDistance: 0, carryDistance: 0, spread: 5 };
         }
     });
     return defaultClubs;
@@ -264,6 +273,14 @@ function createClubSettings() {
                            data-field="carryDistance" 
                            value="${Number(clubData.carryDistance) || ''}" 
                            placeholder="0">
+                </div>
+                <div class="input-group">
+                    <label>Spridning (m)</label>
+                    <input type="number" 
+                           data-club="${escapeHtml(clubName)}" 
+                           data-field="spread" 
+                           value="${clubData.spread != null ? Number(clubData.spread) : ''}" 
+                           placeholder="0" min="0">
                 </div>
             </div>
         `;
@@ -610,12 +627,14 @@ function addCustomClub() {
     const nameEl = document.getElementById('newClubName');
     const totalEl = document.getElementById('newClubTotal');
     const carryEl = document.getElementById('newClubCarry');
+    const spreadEl = document.getElementById('newClubSpread');
     const msgEl = document.getElementById('addClubMessage');
     if (!nameEl || !totalEl || !carryEl) return;
 
     const name = nameEl.value.trim();
     const total = parseFloat(totalEl.value) || 0;
     const carry = parseFloat(carryEl.value) || 0;
+    const spread = spreadEl ? (parseFloat(spreadEl.value) || 0) : 0;
 
     if (!name) {
         if (msgEl) { msgEl.textContent = 'Ange ett klubbnamn.'; msgEl.classList.add('error'); }
@@ -626,7 +645,7 @@ function addCustomClub() {
         return;
     }
 
-    state.clubs[name] = { totalDistance: total, carryDistance: carry };
+    state.clubs[name] = { totalDistance: total, carryDistance: carry, spread };
     saveClubData();
     createClubSettings();
     populateClubSelect();
@@ -634,6 +653,7 @@ function addCustomClub() {
     nameEl.value = '';
     totalEl.value = '';
     carryEl.value = '';
+    if (spreadEl) spreadEl.value = '';
     if (msgEl) {
         msgEl.textContent = 'Klubban är tillagd.';
         msgEl.classList.remove('error');
@@ -1306,8 +1326,9 @@ function recommendClub(distance, elevation) {
     
     if (bestClub) {
         document.querySelector('.club-name').textContent = bestClub.name;
+        const spreadStr = (bestClub.spread != null && bestClub.spread > 0) ? ` ±${Math.round(bestClub.spread)} m` : '';
         document.querySelector('.club-distance').textContent = 
-            `Normalt: ${Math.round(bestClub.totalDistance)} m (${Math.round(bestClub.carryDistance)} m carry)`;
+            `Normalt: ${Math.round(bestClub.totalDistance)} m (${Math.round(bestClub.carryDistance)} m carry)${spreadStr}`;
         const adjEl = document.getElementById('clubRecommendedAdjusted');
         if (adjEl) {
             const todayM = Math.round(bestClub.totalDistance + totalAdjustment);
@@ -1366,7 +1387,8 @@ function updateClubDistanceDisplay(totalAdjustmentFromRecommend) {
         return;
     }
     const normal = Math.round(clubData.totalDistance);
-    normEl.textContent = `Normalt: ${normal} m`;
+    const spreadStr = (clubData.spread != null && clubData.spread > 0) ? ` ±${Math.round(clubData.spread)} m` : '';
+    normEl.textContent = `Normalt: ${normal} m${spreadStr}`;
     let totalAdj = totalAdjustmentFromRecommend;
     if (totalAdj == null && state.weatherData && state.userPosition && state.currentHole) {
         const holeData = getHoleData(state.currentHole);
