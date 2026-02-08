@@ -471,6 +471,7 @@ function loadLayoutOrder() {
         const container = document.querySelector('.main-content');
         if (!container) return;
         order.forEach(id => {
+            if (id === 'windAdjustmentCard') return; // finns på avståndssidan, inte i huvudlayout
             const el = document.querySelector(`[data-layout-id="${id}"], #${id}`);
             if (el) container.appendChild(el);
         });
@@ -736,15 +737,13 @@ function selectHole(holeNumber) {
         }, 150);
     }
     
-    // Show relevant sections (varje del är eget draggbart kort)
+    // Show relevant sections (varje del är eget draggbart kort; windAdjustmentCard finns på avståndssidan)
     const clubRec = document.getElementById('clubRecommendation');
     const windArrowCard = document.getElementById('windArrowCard');
-    const windAdjCard = document.getElementById('windAdjustmentCard');
     const conditionsCard = document.getElementById('conditionsImpactCard');
     const timerSec = document.getElementById('timerSection');
     if (clubRec) clubRec.style.display = 'block';
     if (windArrowCard) windArrowCard.style.display = 'block';
-    if (windAdjCard) windAdjCard.style.display = 'block';
     if (conditionsCard) conditionsCard.style.display = 'block';
     if (timerSec) timerSec.style.display = 'block';
 

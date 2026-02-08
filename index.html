@@ -96,18 +96,6 @@
                 </div>
             </section>
 
-            <!-- Vart man skall sikta (eget kort) -->
-            <section class="card wind-adjustment-card" id="windAdjustmentCard" data-layout-id="windAdjustmentCard" style="display: none;">
-                <h3>Vart ska jag sikta?</h3>
-                <div class="aim-content" id="aimContent">
-                    <p class="aim-waiting" id="aimWaiting">Väntar på position och väder…</p>
-                    <ul class="aim-list" id="aimList" aria-label="Siktråd utifrån vind, höjd, lufttryck och avstånd"></ul>
-                </div>
-                <button type="button" class="aim-update-btn" id="updateAimBtn" aria-label="Uppdatera din position och siktråden">
-                    📍 Uppdatera position och siktråd
-                </button>
-            </section>
-
             <!-- Påverkan på avstånd (eget kort) -->
             <section class="card conditions-impact-card" id="conditionsImpactCard" data-layout-id="conditionsImpactCard" style="display: none;">
                 <h3>Påverkan på avstånd</h3>
@@ -245,6 +233,16 @@
                                 </div>
                                 <button class="reset-btn" id="resetPin">Återställ Position</button>
                             </div>
+                        </section>
+                        <section class="card wind-adjustment-card" id="windAdjustmentCard">
+                            <h3>Vart ska jag sikta?</h3>
+                            <div class="aim-content" id="aimContent">
+                                <p class="aim-waiting" id="aimWaiting">Väntar på position och väder…</p>
+                                <ul class="aim-list" id="aimList" aria-label="Siktråd utifrån vind, höjd, lufttryck och avstånd"></ul>
+                            </div>
+                            <button type="button" class="aim-update-btn" id="updateAimBtn" aria-label="Uppdatera din position och siktråden">
+                                📍 Uppdatera position och siktråd
+                            </button>
                         </section>
                     </main>
                 </div><!-- /.page-distance -->
