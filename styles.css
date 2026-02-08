@@ -1350,6 +1350,10 @@ input[type="range"]::-moz-range-thumb:hover {
     color: var(--text-primary);
 }
 
+.timer-value.timer-value-over-ideal {
+    color: #dc2626;
+}
+
 /* Responsive */
 @media (max-width: 640px) {
     .header-content {
