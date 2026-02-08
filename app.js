@@ -1072,7 +1072,7 @@ function drawGreenShape(greenPolygon, holeData) {
     let points;
 
     if (pos) {
-        // Koordinater i meter relativt pos (ungefär)
+        // Koordinater i meter relativt pos
         const mPerDegLat = 111320;
         const mPerDegLon = 111320 * Math.cos(pos.lat * Math.PI / 180);
         const toMeters = (p) => ({
@@ -1082,17 +1082,14 @@ function drawGreenShape(greenPolygon, holeData) {
         const meters = greenPolygon.map(toMeters);
         const cx = meters.reduce((s, p) => s + p.x, 0) / meters.length;
         const cy = meters.reduce((s, p) => s + p.y, 0) / meters.length;
-        // Vinkel så att greenen ritas från pos (upp = riktning pos -> green), motsatt håll = +180°
+        // Rotera så att riktning pos -> greencentrum blir "upp" i SVG
         const angle = Math.atan2(cy, cx);
-        const rot = -angle - Math.PI / 2 + Math.PI;
+        const rot = -angle - Math.PI / 2;
         const cos = Math.cos(rot), sin = Math.sin(rot);
-        let rotated = meters.map(p => ({
+        const rotated = meters.map(p => ({
             x: p.x * cos - p.y * sin,
             y: -(p.x * sin + p.y * cos) // SVG y ner, så negera
         }));
-        // 90° motsols (counterclockwise): (x,y) -> (-y,x). Två gånger = 180° extra.
-        rotated = rotated.map(p => ({ x: -p.y, y: p.x }));
-        rotated = rotated.map(p => ({ x: -p.y, y: p.x }));
         const rx = rotated.map(p => p.x), ry = rotated.map(p => p.y);
         const minX = Math.min(...rx), maxX = Math.max(...rx);
         const minY = Math.min(...ry), maxY = Math.max(...ry);
@@ -1104,7 +1101,6 @@ function drawGreenShape(greenPolygon, holeData) {
             return `${sx.toFixed(2)},${sy.toFixed(2)}`;
         }).join(' ');
     } else {
-        // Fallback: bounding box som tidigare
         const lngs = greenPolygon.map(p => p.lng);
         const lats = greenPolygon.map(p => p.lat);
         const minLng = Math.min(...lngs), maxLng = Math.max(...lngs);
