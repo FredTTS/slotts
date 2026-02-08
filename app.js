@@ -1117,7 +1117,15 @@ function drawGreenShape(greenPolygon, holeData) {
         }).join(' ');
     }
 
-    svg.innerHTML = `<polygon class="green-shape-polygon" points="${points}" fill="var(--primary-light)" stroke="var(--primary-dark)" stroke-width="1.5" />`;
+    const filterId = 'greenSoftEdge';
+    svg.innerHTML = `
+      <defs>
+        <filter id="${filterId}" x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="0.6" />
+        </filter>
+      </defs>
+      <polygon class="green-shape-polygon" points="${points}" fill="var(--primary-light)" stroke="var(--primary-dark)" stroke-width="1.5" filter="url(#${filterId})" />
+    `;
     wrap.classList.add('has-shape');
 }
 
