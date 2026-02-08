@@ -641,13 +641,11 @@ function selectHole(holeNumber) {
     
     // Show relevant sections (varje del är eget draggbart kort)
     const clubRec = document.getElementById('clubRecommendation');
-    const clubDistCard = document.getElementById('clubDistanceCard');
     const windArrowCard = document.getElementById('windArrowCard');
     const windAdjCard = document.getElementById('windAdjustmentCard');
     const conditionsCard = document.getElementById('conditionsImpactCard');
     const timerSec = document.getElementById('timerSection');
     if (clubRec) clubRec.style.display = 'block';
-    if (clubDistCard) clubDistCard.style.display = 'block';
     if (windArrowCard) windArrowCard.style.display = 'block';
     if (windAdjCard) windAdjCard.style.display = 'block';
     if (conditionsCard) conditionsCard.style.display = 'block';
