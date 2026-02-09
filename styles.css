@@ -1,17 +1,17 @@
 :root {
-    /* Modern teal/slate palette */
-    --primary: #0d9488;
-    --primary-dark: #0f766e;
-    --primary-light: #2dd4bf;
+    /* Färgschema som matchar banguide-bilderna: skogsgrön, gräsgrön, ljus grön bakgrund */
+    --primary: #15803d;
+    --primary-dark: #166534;
+    --primary-light: #4ade80;
     --secondary: #0ea5e9;
-    --background: #f1f5f9;
-    --bg: #f8fafc;
+    --background: #f0fdf4;
+    --bg: #ecfdf5;
     --card-bg: #ffffff;
-    --text-primary: #0f172a;
-    --text-secondary: #475569;
-    --border: #cbd5e1;
-    --shadow: 0 1px 3px rgba(15, 23, 42, 0.08), 0 4px 12px rgba(15, 23, 42, 0.04);
-    --shadow-lg: 0 4px 6px rgba(15, 23, 42, 0.06), 0 12px 24px rgba(15, 23, 42, 0.06);
+    --text-primary: #052e16;
+    --text-secondary: #166534;
+    --border: #bbd9c8;
+    --shadow: 0 1px 3px rgba(5, 46, 22, 0.08), 0 4px 12px rgba(5, 46, 22, 0.04);
+    --shadow-lg: 0 4px 6px rgba(5, 46, 22, 0.06), 0 12px 24px rgba(5, 46, 22, 0.06);
 }
 
 * {
@@ -947,12 +947,12 @@ input[type="range"]::-moz-range-thumb:hover {
     width: 120px;
     height: 120px;
     border-radius: 50%;
-    background: linear-gradient(180deg, #ccfbf1 0%, #99f6e4 100%);
+    background: linear-gradient(180deg, #dcfce7 0%, #bbf7d0 100%);
     border: 3px solid var(--primary-dark);
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 2px 12px rgba(15, 118, 110, 0.2), inset 0 0 12px rgba(255,255,255,0.5);
+    box-shadow: 0 2px 12px rgba(22, 101, 52, 0.2), inset 0 0 12px rgba(255,255,255,0.5);
 }
 
 .wind-arrow-needle {
@@ -1637,7 +1637,7 @@ input[type="range"]::-moz-range-thumb:hover {
     display: flex;
     justify-content: space-around;
     align-items: center;
-    background: linear-gradient(180deg, var(--primary-dark) 0%, #0d5c56 100%);
+    background: linear-gradient(180deg, var(--primary-dark) 0%, #14532d 100%);
     padding: 0.5rem 0;
     padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
     box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.15);
