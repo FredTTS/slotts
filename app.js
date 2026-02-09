@@ -40,6 +40,9 @@ let state = {
     notes: loadNotes()    // anteckningar per hål { 1: "...", 2: "...", ... }
 };
 
+// Antal hål (banguide-bilder s1.jpeg … s18.jpeg)
+const NUM_HOLES = 18;
+
 // Layout persistence keys (en per sida)
 const LAYOUT_KEY_MAIN = 'layoutOrderMain';
 const LAYOUT_KEY_BANGUIDE = 'layoutOrderBanguide';
@@ -101,6 +104,8 @@ async function initializeApp() {
     selectHole(1);
     startLocationTracking();
     setupDeviceOrientation();
+    buildBanguideTrack();
+    setupBanguideCarouselScroll();
     setupBanguideImageZoom();
     setupGreenPinDrag();
     updateBanguidePage();
@@ -438,7 +443,10 @@ function setupEventListeners() {
         pages.classList.remove('show-distance');
         pages.classList.add('show-banguide');
         setActiveNav('banguide');
-        requestAnimationFrame(() => scrollTargetPageToTop('.banguide-content'));
+        requestAnimationFrame(() => {
+            scrollTargetPageToTop('.banguide-content');
+            updateBanguidePage(); /* scroll carousel till valt hål */
+        });
     }
     function goDistance() {
         pages.classList.remove('show-banguide');
@@ -938,7 +946,50 @@ function setupDeviceOrientation() {
     window.addEventListener('deviceorientation', handler, false);
 }
 
-// Pinch-zoom och pan (drag) på banguide-bilden
+// Bygg horisontell banguide-track med en bild per hål (scroll i sidled byter hål)
+function buildBanguideTrack() {
+    const track = document.getElementById('banguideImageTrack');
+    if (!track || track.children.length > 0) return;
+    for (let h = 1; h <= NUM_HOLES; h++) {
+        const slide = document.createElement('div');
+        slide.className = 'banguide-image-slide';
+        slide.setAttribute('data-hole', String(h));
+        const img = document.createElement('img');
+        img.src = `img/s${h}.jpeg`;
+        img.alt = `Hål ${h}`;
+        slide.appendChild(img);
+        track.appendChild(slide);
+    }
+}
+
+// Vid scroll i banguide: bestäm vilket hål som är i vy och uppdatera state + rubrik
+function setupBanguideCarouselScroll() {
+    const wrap = document.getElementById('banguideImageCard');
+    const track = document.getElementById('banguideImageTrack');
+    if (!wrap || !track || !track.firstElementChild) return;
+    const slides = Array.from(track.querySelectorAll('.banguide-image-slide'));
+    if (slides.length === 0) return;
+
+    function updateHoleFromScroll() {
+        const w = wrap.offsetWidth || 1;
+        const scrollLeft = wrap.scrollLeft;
+        const index = Math.round(scrollLeft / w);
+        const hole = Math.max(1, Math.min(NUM_HOLES, index + 1));
+        if (state.currentHole !== hole) {
+            state.currentHole = hole;
+            const numEl = document.getElementById('banguideHoleNumber');
+            if (numEl) numEl.textContent = hole;
+        }
+    }
+
+    let scrollEndTimer = null;
+    wrap.addEventListener('scroll', () => {
+        if (scrollEndTimer) clearTimeout(scrollEndTimer);
+        scrollEndTimer = setTimeout(updateHoleFromScroll, 80);
+    }, { passive: true });
+}
+
+// Pinch-zoom och pan (drag) på banguide-bilden (används ej i carousel-läge)
 let banguideImageScale = 1;
 let banguideImageTranslate = { x: 0, y: 0 };
 
@@ -976,6 +1027,8 @@ function applyBanguideImageTransform(img, wrap) {
 }
 
 function setupBanguideImageZoom() {
+    const track = document.getElementById('banguideImageTrack');
+    if (track && track.children.length > 0) return; /* carousel: scroll i sidled, ingen zoom */
     const wrap = document.querySelector('.banguide-image-wrap');
     const img = document.getElementById('banguideImage');
     if (!wrap || !img) return;
@@ -1052,29 +1105,27 @@ function setupBanguideImageZoom() {
     wrap.addEventListener('mouseleave', () => { mouseDown = false; });
 }
 
-// Banguide-sida: uppdatera hålnummer och bild när hål byts (återställ zoom och pan)
+// Banguide-sida: uppdatera hålnummer, scroll till valt hål, uppdatera förhandsvisning
 function updateBanguidePage() {
     const hole = state.currentHole || 1;
     const numEl = document.getElementById('banguideHoleNumber');
-    const imgEl = document.getElementById('banguideImage');
     const previewNumEl = document.getElementById('banguidePreviewHoleNumber');
     const previewImgEl = document.getElementById('banguidePreviewImage');
     const expandBtnHoleEl = document.getElementById('banguideExpandBtnHole');
     const expandBtn = document.getElementById('banguideExpandBtn');
+    const wrap = document.getElementById('banguideImageCard');
+    const track = document.getElementById('banguideImageTrack');
     if (numEl) numEl.textContent = hole;
     if (previewNumEl) previewNumEl.textContent = hole;
     if (expandBtnHoleEl) expandBtnHoleEl.textContent = hole;
     if (expandBtn) expandBtn.setAttribute('aria-label', `Öppna banguide för hål ${hole}`);
-    if (imgEl) {
-        imgEl.src = `img/s${hole}.jpeg`;
-        imgEl.alt = `Hål ${hole}`;
-        banguideImageScale = 1;
-        banguideImageTranslate = { x: 0, y: 0 };
-        imgEl.style.transform = '';
-    }
     if (previewImgEl) {
         previewImgEl.src = `img/s${hole}.jpeg`;
         previewImgEl.alt = `Hål ${hole}`;
+    }
+    if (wrap && track && track.children.length > 0) {
+        const slideWidth = wrap.offsetWidth || 1;
+        wrap.scrollLeft = (hole - 1) * slideWidth;
     }
 }
 

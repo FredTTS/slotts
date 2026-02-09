@@ -160,21 +160,47 @@ body {
 
 .banguide-image-wrap {
     width: 100%;
-    min-height: 120px; /* undviker layout-hopp medan bilden laddas */
+    min-height: 120px;
     border-radius: 1rem;
-    overflow: hidden;
+    overflow-x: auto;
+    overflow-y: hidden;
     margin-bottom: 1.5rem;
     box-shadow: var(--shadow-lg);
-    /* pan-y + pinch-zoom: sidan kan scrollas när man sveper på bilden, pinch-zoom fungerar fortfarande */
-    touch-action: pan-y pinch-zoom;
-    flex-shrink: 0; /* bilden krymper inte i flex-kontexter */
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    flex-shrink: 0;
+}
+
+.banguide-image-wrap::-webkit-scrollbar {
+    display: none;
+}
+
+.banguide-image-track {
+    display: flex;
+    flex-direction: row;
+    width: max-content;
+    min-height: 120px;
+}
+
+.banguide-image-slide {
+    flex: 0 0 100%;
+    width: 100%;
+    min-width: 100%;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+}
+
+.banguide-image-slide img {
+    width: 100%;
+    height: auto;
+    display: block;
 }
 
 .banguide-image {
     width: 100%;
     height: auto;
     max-width: 100%;
-    /* Ingen max-height – hela bilden visas och man scrollar sidan för att se allt */
     display: block;
     transform-origin: center center;
     will-change: transform;
