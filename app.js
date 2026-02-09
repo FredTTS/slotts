@@ -1044,8 +1044,12 @@ function updateBanguidePage() {
     const imgEl = document.getElementById('banguideImage');
     const previewNumEl = document.getElementById('banguidePreviewHoleNumber');
     const previewImgEl = document.getElementById('banguidePreviewImage');
+    const expandBtnHoleEl = document.getElementById('banguideExpandBtnHole');
+    const expandBtn = document.getElementById('banguideExpandBtn');
     if (numEl) numEl.textContent = hole;
     if (previewNumEl) previewNumEl.textContent = hole;
+    if (expandBtnHoleEl) expandBtnHoleEl.textContent = hole;
+    if (expandBtn) expandBtn.setAttribute('aria-label', `Öppna banguide för hål ${hole}`);
     if (imgEl) {
         imgEl.src = `img/s${hole}.jpeg`;
         imgEl.alt = `Hål ${hole}`;
