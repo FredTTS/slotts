@@ -142,7 +142,12 @@
                                     <div class="green-shape-wrap" id="greenShapeWrap" aria-hidden="true">
                                         <svg class="green-shape-svg" id="greenShapeSvg" viewBox="0 0 100 60" preserveAspectRatio="xMidYMid meet"></svg>
                                     </div>
-                                    <button class="reset-btn reset-pin-under-green" id="resetPin">Återställ Position</button>
+                                    <div class="green-pin-controls">
+                                        <div id="pinDragRing" class="pin-drag-ring" role="button" aria-label="Flytta flaggan – sätt fingret i ringen och dra" tabindex="0">
+                                            <svg class="pin-drag-ring-svg" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2.5"/></svg>
+                                        </div>
+                                        <button class="reset-btn reset-pin-under-green" id="resetPin">Återställ Position</button>
+                                    </div>
                                 </div>
                                 <div class="detail-item">
                                     <span class="detail-label">Bakkant:</span>

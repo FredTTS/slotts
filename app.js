@@ -1353,13 +1353,11 @@ function drawGreenShape(greenPolygon, holeData) {
 
     const poleH = 12;
     const flagW = 6;
-    const ringR = 8; /* ring som handtag för att flytta flaggan */
     const flagPath = `M ${pinSx} ${pinSy - poleH} L ${pinSx + flagW} ${pinSy - poleH + 2} L ${pinSx} ${pinSy - poleH + 4} Z`;
     const pinMarkup = (pinSx != null && pinSy != null) ? `
       <g class="green-pin-flag" aria-label="Pin">
         <line x1="${pinSx}" y1="${pinSy}" x2="${pinSx}" y2="${pinSy - poleH}" stroke="var(--primary-dark)" stroke-width="1.2"/>
         <path d="${flagPath}" fill="var(--primary)" stroke="var(--primary-dark)" stroke-width="0.8"/>
-        <circle class="pin-drag-ring" cx="${pinSx}" cy="${pinSy}" r="${ringR}" fill="rgba(0,0,0,0.06)" stroke="var(--primary-dark)" stroke-width="1.5"/>
         <circle cx="${pinSx}" cy="${pinSy}" r="2" fill="var(--primary-dark)"/>
       </g>
     ` : '';
@@ -1399,7 +1397,8 @@ function greenSvgToPinOffset(pinSx, pinSy, data) {
 function setupGreenPinDrag() {
     const wrap = document.getElementById('greenShapeWrap');
     const svg = document.getElementById('greenShapeSvg');
-    if (!wrap || !svg) return;
+    const ring = document.getElementById('pinDragRing');
+    if (!wrap || !svg || !ring) return;
 
     let dragging = false;
 
@@ -1427,14 +1426,14 @@ function setupGreenPinDrag() {
         updateDistances();
     }
 
-    wrap.addEventListener('touchstart', (e) => {
+    ring.addEventListener('touchstart', (e) => {
         if (e.touches.length === 1 && wrap._greenDragData) {
             dragging = true;
             e.preventDefault();
         }
     }, { passive: false });
 
-    wrap.addEventListener('touchmove', (e) => {
+    ring.addEventListener('touchmove', (e) => {
         if (dragging && e.touches.length === 1) {
             e.preventDefault();
             const { clientX, clientY } = getClientCoords(e);
@@ -1442,33 +1441,36 @@ function setupGreenPinDrag() {
         }
     }, { passive: false });
 
-    wrap.addEventListener('touchend', (e) => {
+    ring.addEventListener('touchend', (e) => {
         if (e.touches.length === 0) dragging = false;
     }, { passive: true });
 
-    wrap.addEventListener('touchcancel', () => {
+    ring.addEventListener('touchcancel', () => {
         dragging = false;
     }, { passive: true });
 
-    wrap.addEventListener('mousedown', (e) => {
+    ring.addEventListener('mousedown', (e) => {
         if (e.button === 0 && wrap._greenDragData) {
             dragging = true;
+            e.preventDefault();
             applyPinOffsetFromPoint(e.clientX, e.clientY);
         }
     });
 
-    wrap.addEventListener('mousemove', (e) => {
+    document.addEventListener('mousemove', (e) => {
         if (dragging && e.buttons === 1) {
             applyPinOffsetFromPoint(e.clientX, e.clientY);
         }
     });
 
-    wrap.addEventListener('mouseup', (e) => {
+    document.addEventListener('mouseup', (e) => {
         if (e.button === 0) dragging = false;
     });
 
-    wrap.addEventListener('mouseleave', (e) => {
-        if (e.buttons === 0) dragging = false;
+    ring.addEventListener('keydown', (e) => {
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        e.preventDefault();
+        ring.click();
     });
 }
 
