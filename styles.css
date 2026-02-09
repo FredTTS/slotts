@@ -52,12 +52,13 @@ body {
     will-change: transform;
 }
 
+/* Sidordning: Hem (0) → Avstånd (-33.333%) → Banguide (-66.666%) – matchar knapparna */
 .pages.show-banguide {
-    transform: translateX(-33.333%);
+    transform: translateX(-66.666%);
 }
 
 .pages.show-distance {
-    transform: translateX(-66.666%);
+    transform: translateX(-33.333%);
 }
 
 .page {
@@ -175,7 +176,6 @@ body {
     max-width: 100%;
     /* Ingen max-height – hela bilden visas och man scrollar sidan för att se allt */
     display: block;
-    vertical-align: top;
     transform-origin: center center;
     will-change: transform;
 }
