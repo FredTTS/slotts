@@ -613,6 +613,10 @@ body {
     align-items: center;
 }
 
+.reset-pin-under-green {
+    margin-top: 0.75rem;
+}
+
 .green-shape-wrap {
     width: 100%;
     max-width: 220px;
