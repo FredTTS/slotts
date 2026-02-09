@@ -52,10 +52,6 @@ body {
     will-change: transform;
 }
 
-.pages.no-transition {
-    transition: none;
-}
-
 .pages.show-banguide {
     transform: translateX(-33.333%);
 }

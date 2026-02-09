@@ -430,39 +430,22 @@ function setupEventListeners() {
         });
     }
     function goHome() {
-        const wasDistance = pages.classList.contains('show-distance');
-        if (wasDistance) pages.classList.add('no-transition');
         pages.classList.remove('show-banguide', 'show-distance');
         setActiveNav('home');
-        if (wasDistance) {
-            requestAnimationFrame(() => {
-                pages.offsetHeight;
-                pages.classList.remove('no-transition');
-            });
-        }
         requestAnimationFrame(() => scrollTargetPageToTop('.page-main'));
     }
     function goBanguide() {
-        pages.classList.remove('no-transition');
         pages.classList.remove('show-distance');
         pages.classList.add('show-banguide');
         setActiveNav('banguide');
         requestAnimationFrame(() => scrollTargetPageToTop('.banguide-content'));
     }
     function goDistance() {
-        const wasHome = !pages.classList.contains('show-banguide') && !pages.classList.contains('show-distance');
-        if (wasHome) pages.classList.add('no-transition');
         pages.classList.remove('show-banguide');
         pages.classList.add('show-distance');
         const holeEl = document.getElementById('distancePageHoleNumber');
         if (holeEl) holeEl.textContent = state.currentHole || 1;
         setActiveNav('avstand');
-        if (wasHome) {
-            requestAnimationFrame(() => {
-                pages.offsetHeight;
-                pages.classList.remove('no-transition');
-            });
-        }
         requestAnimationFrame(() => scrollTargetPageToTop('.distance-page-content'));
     }
     if (navBtnHome) navBtnHome.addEventListener('click', goHome);
