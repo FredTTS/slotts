@@ -45,8 +45,6 @@ const LAYOUT_KEY_MAIN = 'layoutOrderMain';
 const LAYOUT_KEY_BANGUIDE = 'layoutOrderBanguide';
 const LAYOUT_KEY_DISTANCE = 'layoutOrderDistance';
 const NOTES_KEY = 'holeNotes';
-const PIN_MIN = -10;
-const PIN_MAX = 10;
 
 // Initialize App
 document.addEventListener('DOMContentLoaded', () => {
@@ -383,13 +381,13 @@ function setupEventListeners() {
     const PIN_STEP = 0.5;
 
     function setPinOffsetX(value) {
-        state.pinOffset.x = Math.max(PIN_MIN, Math.min(PIN_MAX, value));
+        state.pinOffset.x = value;
         const v = document.getElementById('pinOffsetXValue');
         if (v) v.textContent = `${state.pinOffset.x} m`;
         updateDistances();
     }
     function setPinOffsetY(value) {
-        state.pinOffset.y = Math.max(PIN_MIN, Math.min(PIN_MAX, value));
+        state.pinOffset.y = value;
         const v = document.getElementById('pinOffsetYValue');
         if (v) v.textContent = `${state.pinOffset.y} m`;
         updateDistances();
@@ -1327,9 +1325,17 @@ function drawGreenShape(greenPolygon, holeData) {
             const towardUnitNorth = towardNorth / dist;
             const leftUnitEast = -towardUnitNorth;
             const leftUnitNorth = towardUnitEast;
+            // Gränser för greenen i SVG-koordinater – flaggan ska bara kunna placeras innanför
+            const sxs = rotated.map(p => pad + ((p.x - minX) / rangeX) * w);
+            const sys = rotated.map(p => pad + ((p.y - minY) / rangeY) * h);
+            const greenMinSx = Math.min(...sxs);
+            const greenMaxSx = Math.max(...sxs);
+            const greenMinSy = Math.min(...sys);
+            const greenMaxSy = Math.max(...sys);
             wrap._greenDragData = {
                 minX, maxX, minY, maxY, rangeX, rangeY, pad, w, h, cos, sin, cx, cy,
-                towardUnitEast, towardUnitNorth, leftUnitEast, leftUnitNorth
+                towardUnitEast, towardUnitNorth, leftUnitEast, leftUnitNorth,
+                greenMinSx, greenMaxSx, greenMinSy, greenMaxSy
             };
         } else {
             wrap._greenDragData = null;
@@ -1382,9 +1388,12 @@ function drawGreenShape(greenPolygon, holeData) {
 // Konvertera (pinSx, pinSy) i SVG-koordinater till pinOffset (meter) med sparad drag-data
 function greenSvgToPinOffset(pinSx, pinSy, data) {
     if (!data) return null;
-    const { minX, minY, rangeX, rangeY, pad, w, h, cos, sin, cx, cy, towardUnitEast, towardUnitNorth, leftUnitEast, leftUnitNorth } = data;
-    const pinRotX = minX + ((pinSx - pad) / w) * rangeX;
-    const pinRotY = minY + ((pinSy - pad) / h) * rangeY;
+    const { minX, minY, rangeX, rangeY, pad, w, h, cos, sin, cx, cy, towardUnitEast, towardUnitNorth, leftUnitEast, leftUnitNorth, greenMinSx, greenMaxSx, greenMinSy, greenMaxSy } = data;
+    // Begränsa till greenens område – flaggan ska bara kunna placeras innanför
+    const clampedSx = Math.max(greenMinSx, Math.min(greenMaxSx, pinSx));
+    const clampedSy = Math.max(greenMinSy, Math.min(greenMaxSy, pinSy));
+    const pinRotX = minX + ((clampedSx - pad) / w) * rangeX;
+    const pinRotY = minY + ((clampedSy - pad) / h) * rangeY;
     const pinMx = cos * pinRotX - sin * pinRotY;
     const pinMy = -sin * pinRotX - cos * pinRotY;
     const offsetEast = pinMx - cx;
@@ -1392,10 +1401,7 @@ function greenSvgToPinOffset(pinSx, pinSy, data) {
     const pinOffsetX = offsetEast * leftUnitEast + offsetNorth * leftUnitNorth;
     const pinOffsetY = offsetEast * towardUnitEast + offsetNorth * towardUnitNorth;
     // Invertera X: SVG x ökar åt höger, men pinOffset.x positiv = vänster; koordinatsystemen är speglade
-    return {
-        x: Math.max(PIN_MIN, Math.min(PIN_MAX, -pinOffsetX)),
-        y: Math.max(PIN_MIN, Math.min(PIN_MAX, pinOffsetY))
-    };
+    return { x: -pinOffsetX, y: pinOffsetY };
 }
 
 function setupGreenPinDrag() {
