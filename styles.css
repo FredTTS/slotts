@@ -170,27 +170,29 @@ body {
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
     flex-shrink: 0;
-    display: flex;
-    flex-direction: row;
     touch-action: pan-x pan-y;
+    padding-left: 0;
+    padding-right: 0;
+    /* Bredd sätts i JS så att horisontell scroll fungerar på alla enheter */
 }
 
 .banguide-image-wrap::-webkit-scrollbar {
     display: none;
 }
 
-/* display: contents så att slidarna blir flex-barn till wrappen och får 100% av dess bredd */
 .banguide-image-track {
-    display: contents;
+    display: flex;
+    flex-direction: row;
+    min-height: 120px;
+    /* width sätts i JS: wrap.clientWidth * 18 */
 }
 
 .banguide-image-slide {
-    flex: 0 0 100%;
-    width: 100%;
-    min-width: 100%;
+    flex: 0 0 auto;
     box-sizing: border-box;
     scroll-snap-align: start;
     scroll-snap-stop: always;
+    /* width sätts i JS: wrap.clientWidth */
 }
 
 .banguide-image-slide img {

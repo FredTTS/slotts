@@ -444,8 +444,11 @@ function setupEventListeners() {
         pages.classList.add('show-banguide');
         setActiveNav('banguide');
         requestAnimationFrame(() => {
-            scrollTargetPageToTop('.banguide-content');
-            updateBanguidePage(); /* scroll carousel till valt hål */
+            requestAnimationFrame(() => {
+                setBanguideCarouselWidths(); /* sätt bredder när sidan är synlig */
+                scrollTargetPageToTop('.banguide-content');
+                updateBanguidePage(); /* scroll carousel till valt hål */
+            });
         });
     }
     function goDistance() {
@@ -960,6 +963,20 @@ function buildBanguideTrack() {
         slide.appendChild(img);
         track.appendChild(slide);
     }
+    setBanguideCarouselWidths();
+}
+
+// Sätt explicita bredder så att horisontell scroll fungerar (krävs på många mobiler)
+function setBanguideCarouselWidths() {
+    const wrap = document.getElementById('banguideImageCard');
+    const track = document.getElementById('banguideImageTrack');
+    if (!wrap || !track || track.children.length === 0) return;
+    const w = wrap.clientWidth || wrap.offsetWidth || window.innerWidth;
+    if (w <= 0) return;
+    track.style.width = (w * NUM_HOLES) + 'px';
+    Array.from(track.querySelectorAll('.banguide-image-slide')).forEach(slide => {
+        slide.style.width = w + 'px';
+    });
 }
 
 // Vid scroll i banguide: bestäm vilket hål som är i vy och uppdatera state + rubrik
@@ -971,7 +988,7 @@ function setupBanguideCarouselScroll() {
     if (slides.length === 0) return;
 
     function updateHoleFromScroll() {
-        const w = wrap.offsetWidth || 1;
+        const w = wrap.clientWidth || wrap.offsetWidth || 1;
         const scrollLeft = wrap.scrollLeft;
         const index = Math.round(scrollLeft / w);
         const hole = Math.max(1, Math.min(NUM_HOLES, index + 1));
@@ -987,6 +1004,10 @@ function setupBanguideCarouselScroll() {
         if (scrollEndTimer) clearTimeout(scrollEndTimer);
         scrollEndTimer = setTimeout(updateHoleFromScroll, 80);
     }, { passive: true });
+
+    window.addEventListener('resize', () => {
+        setBanguideCarouselWidths();
+    });
 }
 
 // Pinch-zoom och pan (drag) på banguide-bilden (används ej i carousel-läge)
@@ -1124,7 +1145,7 @@ function updateBanguidePage() {
         previewImgEl.alt = `Hål ${hole}`;
     }
     if (wrap && track && track.children.length > 0) {
-        const slideWidth = wrap.offsetWidth || 1;
+        const slideWidth = wrap.clientWidth || wrap.offsetWidth || 1;
         wrap.scrollLeft = (hole - 1) * slideWidth;
     }
 }
