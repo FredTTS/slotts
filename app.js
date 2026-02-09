@@ -1150,7 +1150,7 @@ function updateDistances() {
             : '<span class="loading">📍 Hämtar position...</span>';
     }
     if (previewToPin) {
-        previewToPin.textContent = distanceToPin != null ? `Till pin: ${Math.round(distanceToPin)} m` : 'Till pin: –';
+        previewToPin.textContent = distanceToPin != null ? `Till flaggan: ${Math.round(distanceToPin)} m` : 'Till flaggan: –';
     }
     if (frontEl) frontEl.textContent = `${Math.round(distanceToFront)} m`;
     if (backEl) backEl.textContent = `${Math.round(distanceToBack)} m`;
