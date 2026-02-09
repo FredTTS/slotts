@@ -430,37 +430,40 @@ function setupEventListeners() {
         updateAimBtn.addEventListener('click', refreshAimPosition);
     }
 
-    const banguideStrip = document.getElementById('banguideStrip');
-    const avstandStrip = document.getElementById('avstandStrip');
+    // Fast bottenmeny – navigation mellan sidor
     const pages = document.getElementById('pages');
-    if (banguideStrip && pages) {
-        const openBanguide = () => {
-            pages.classList.remove('show-distance');
-            pages.classList.add('show-banguide');
-        };
-        banguideStrip.addEventListener('click', openBanguide);
-        banguideStrip.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                openBanguide();
-            }
+    const navBtnHome = document.getElementById('navBtnHome');
+    const navBtnBanguide = document.getElementById('navBtnBanguide');
+    const navBtnAvstand = document.getElementById('navBtnAvstand');
+    const banguideExpandBtn = document.getElementById('banguideExpandBtn');
+    const distanceExpandBtn = document.getElementById('distanceExpandBtn');
+
+    function setActiveNav(active) {
+        [navBtnHome, navBtnBanguide, navBtnAvstand].forEach(btn => {
+            if (btn) btn.classList.toggle('active', btn.dataset.nav === active);
         });
     }
-    if (avstandStrip && pages) {
-        const openDistance = () => {
-            pages.classList.remove('show-banguide');
-            pages.classList.add('show-distance');
-            const holeEl = document.getElementById('distancePageHoleNumber');
-            if (holeEl) holeEl.textContent = state.currentHole || 1;
-        };
-        avstandStrip.addEventListener('click', openDistance);
-        avstandStrip.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                openDistance();
-            }
-        });
+    function goHome() {
+        pages.classList.remove('show-banguide', 'show-distance');
+        setActiveNav('home');
     }
+    function goBanguide() {
+        pages.classList.remove('show-distance');
+        pages.classList.add('show-banguide');
+        setActiveNav('banguide');
+    }
+    function goDistance() {
+        pages.classList.remove('show-banguide');
+        pages.classList.add('show-distance');
+        const holeEl = document.getElementById('distancePageHoleNumber');
+        if (holeEl) holeEl.textContent = state.currentHole || 1;
+        setActiveNav('avstand');
+    }
+    if (navBtnHome) navBtnHome.addEventListener('click', goHome);
+    if (navBtnBanguide) navBtnBanguide.addEventListener('click', goBanguide);
+    if (navBtnAvstand) navBtnAvstand.addEventListener('click', goDistance);
+    if (banguideExpandBtn) banguideExpandBtn.addEventListener('click', goBanguide);
+    if (distanceExpandBtn) distanceExpandBtn.addEventListener('click', goDistance);
 
     const holeNotesInput = document.getElementById('holeNotesInput');
     if (holeNotesInput) {
@@ -474,7 +477,7 @@ function setupEventListeners() {
     }
 }
 
-const MAIN_PAGE_IDS = ['holeSelector', 'banguideNavCard', 'avstandNavCard', 'windArrowCard', 'conditionsImpactCard', 'timerSection'];
+const MAIN_PAGE_IDS = ['holeSelector', 'banguidePreviewCard', 'distancePreviewCard', 'windArrowCard', 'conditionsImpactCard', 'timerSection'];
 
 function loadLayoutOrder() {
     try {
@@ -1069,7 +1072,10 @@ function updateBanguidePage() {
     const hole = state.currentHole || 1;
     const numEl = document.getElementById('banguideHoleNumber');
     const imgEl = document.getElementById('banguideImage');
+    const previewNumEl = document.getElementById('banguidePreviewHoleNumber');
+    const previewImgEl = document.getElementById('banguidePreviewImage');
     if (numEl) numEl.textContent = hole;
+    if (previewNumEl) previewNumEl.textContent = hole;
     if (imgEl) {
         imgEl.src = `img/s${hole}.jpeg`;
         imgEl.alt = `Hål ${hole}`;
@@ -1077,17 +1083,35 @@ function updateBanguidePage() {
         banguideImageTranslate = { x: 0, y: 0 };
         imgEl.style.transform = '';
     }
+    if (previewImgEl) {
+        previewImgEl.src = `img/s${hole}.jpeg`;
+        previewImgEl.alt = `Hål ${hole}`;
+    }
 }
 
 function setupBackToMainButton() {
     const btn = document.getElementById('backToMainBtn');
     const pages = document.getElementById('pages');
+    const navBtnHome = document.getElementById('navBtnHome');
+    const navBtnBanguide = document.getElementById('navBtnBanguide');
+    const navBtnAvstand = document.getElementById('navBtnAvstand');
+    const setActiveNav = (active) => {
+        [navBtnHome, navBtnBanguide, navBtnAvstand].forEach(b => {
+            if (b) b.classList.toggle('active', b.dataset.nav === active);
+        });
+    };
     if (!btn || !pages) return;
-    btn.addEventListener('click', () => pages.classList.remove('show-banguide'));
+    btn.addEventListener('click', () => {
+        pages.classList.remove('show-banguide');
+        setActiveNav('home');
+    });
 
     const backFromDistanceBtn = document.getElementById('backFromDistanceBtn');
     if (backFromDistanceBtn && pages) {
-        backFromDistanceBtn.addEventListener('click', () => pages.classList.remove('show-distance'));
+        backFromDistanceBtn.addEventListener('click', () => {
+            pages.classList.remove('show-distance');
+            setActiveNav('home');
+        });
     }
 }
 
@@ -1160,6 +1184,18 @@ function updateDistances() {
     }
     if (distToPinEl) {
         distToPinEl.textContent = distanceToPin != null ? `${Math.round(distanceToPin)} m` : '–';
+    }
+    // Uppdatera förhandsvisning på huvudsidan
+    const previewDist = document.getElementById('distancePreviewValue');
+    const previewToPin = document.getElementById('distancePreviewToPin');
+    const previewClub = document.getElementById('distancePreviewClub');
+    if (previewDist) {
+        previewDist.innerHTML = distanceToGreenCenter != null
+            ? `<span class="distance-preview-number">${Math.round(distanceToGreenCenter)}</span> m`
+            : '<span class="loading">📍 Hämtar position...</span>';
+    }
+    if (previewToPin) {
+        previewToPin.textContent = distanceToPin != null ? `Till pin: ${Math.round(distanceToPin)} m` : 'Till pin: –';
     }
     if (frontEl) frontEl.textContent = `${Math.round(distanceToFront)} m`;
     if (backEl) backEl.textContent = `${Math.round(distanceToBack)} m`;
@@ -1422,6 +1458,8 @@ function recommendClub(distance, elevation) {
         updateClubDistanceDisplay();
         const adjEl = document.getElementById('clubRecommendedAdjusted');
         if (adjEl) adjEl.style.display = 'none';
+        const previewClubEl = document.getElementById('distancePreviewClub');
+        if (previewClubEl) previewClubEl.textContent = 'Klubba: Väntar på väder…';
         return;
     }
     
@@ -1451,9 +1489,11 @@ function recommendClub(distance, elevation) {
     });
     
     if (bestClub) {
-        document.querySelector('.club-name').textContent = bestClub.name;
+        const clubNameEl = document.querySelector('.club-name');
+        const clubDistEl = document.querySelector('.club-distance');
+        if (clubNameEl) clubNameEl.textContent = bestClub.name;
         const spreadStr = (bestClub.spread != null && bestClub.spread > 0) ? ` ±${Math.round(bestClub.spread)} m` : '';
-        document.querySelector('.club-distance').textContent = 
+        if (clubDistEl) clubDistEl.textContent =
             `Normalt: ${Math.round(bestClub.totalDistance)} m (${Math.round(bestClub.carryDistance)} m carry)${spreadStr}`;
         const adjEl = document.getElementById('clubRecommendedAdjusted');
         if (adjEl) {
@@ -1461,11 +1501,17 @@ function recommendClub(distance, elevation) {
             adjEl.textContent = `Idag (väder + höjd): ${todayM} m`;
             adjEl.style.display = '';
         }
+        const previewClubEl = document.getElementById('distancePreviewClub');
+        if (previewClubEl) previewClubEl.textContent = `Klubba: ${bestClub.name}`;
     } else {
-        document.querySelector('.club-name').textContent = 'Ställ in klubbor';
-        document.querySelector('.club-distance').textContent = 'Gå till inställningar';
+        const clubNameEl = document.querySelector('.club-name');
+        const clubDistEl = document.querySelector('.club-distance');
+        if (clubNameEl) clubNameEl.textContent = 'Ställ in klubbor';
+        if (clubDistEl) clubDistEl.textContent = 'Gå till inställningar';
         const adjEl = document.getElementById('clubRecommendedAdjusted');
         if (adjEl) adjEl.style.display = 'none';
+        const previewClubEl = document.getElementById('distancePreviewClub');
+        if (previewClubEl) previewClubEl.textContent = 'Klubba: –';
     }
     
     // Siktråd: vind, höjd, lufttryck, avstånd
