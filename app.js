@@ -417,14 +417,20 @@ function setupEventListeners() {
             if (btn) btn.classList.toggle('active', btn.dataset.nav === active);
         });
     }
+    function scrollPageToTop(selector) {
+        const el = document.querySelector(selector);
+        if (el) el.scrollTo({ top: 0, behavior: 'instant' });
+    }
     function goHome() {
         pages.classList.remove('show-banguide', 'show-distance');
         setActiveNav('home');
+        requestAnimationFrame(() => scrollPageToTop('.page-main'));
     }
     function goBanguide() {
         pages.classList.remove('show-distance');
         pages.classList.add('show-banguide');
         setActiveNav('banguide');
+        requestAnimationFrame(() => scrollPageToTop('.banguide-content'));
     }
     function goDistance() {
         pages.classList.remove('show-banguide');
@@ -432,6 +438,7 @@ function setupEventListeners() {
         const holeEl = document.getElementById('distancePageHoleNumber');
         if (holeEl) holeEl.textContent = state.currentHole || 1;
         setActiveNav('avstand');
+        requestAnimationFrame(() => scrollPageToTop('.distance-page-content'));
     }
     if (navBtnHome) navBtnHome.addEventListener('click', goHome);
     if (navBtnBanguide) navBtnBanguide.addEventListener('click', goBanguide);
@@ -451,7 +458,7 @@ function setupEventListeners() {
     }
 }
 
-const MAIN_PAGE_IDS = ['holeSelector', 'banguidePreviewCard', 'distancePreviewCard', 'windArrowCard', 'conditionsImpactCard', 'timerSection'];
+const MAIN_PAGE_IDS = ['holeSelector', 'distancePreviewCard', 'windArrowCard', 'conditionsImpactCard', 'timerSection'];
 
 function loadLayoutOrder() {
     try {
