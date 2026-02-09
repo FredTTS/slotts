@@ -45,6 +45,8 @@ const LAYOUT_KEY_MAIN = 'layoutOrderMain';
 const LAYOUT_KEY_BANGUIDE = 'layoutOrderBanguide';
 const LAYOUT_KEY_DISTANCE = 'layoutOrderDistance';
 const NOTES_KEY = 'holeNotes';
+const PIN_MIN = -10;
+const PIN_MAX = 10;
 
 // Initialize App
 document.addEventListener('DOMContentLoaded', () => {
@@ -102,6 +104,7 @@ async function initializeApp() {
     startLocationTracking();
     setupDeviceOrientation();
     setupBanguideImageZoom();
+    setupGreenPinDrag();
     updateBanguidePage();
     hideLoading();
 }
@@ -378,8 +381,6 @@ function setupEventListeners() {
     if (addClubBtn) addClubBtn.addEventListener('click', addCustomClub);
 
     const PIN_STEP = 0.5;
-    const PIN_MIN = -10;
-    const PIN_MAX = 10;
 
     function setPinOffsetX(value) {
         state.pinOffset.x = Math.max(PIN_MIN, Math.min(PIN_MAX, value));
@@ -1315,6 +1316,24 @@ function drawGreenShape(greenPolygon, holeData) {
         };
         pinSx = pad + ((pinRot.x - minX) / rangeX) * w;
         pinSy = pad + ((pinRot.y - minY) / rangeY) * h;
+        // Spara konverteringsdata för drag av flaggan (SVG-koordinater -> pinOffset i meter)
+        const pinFeature = holeData.find(f => f.properties && f.properties.type === 'pin');
+        if (pinFeature && pinFeature.geometry && pinFeature.geometry.coordinates) {
+            const [pinLng, pinLat] = pinFeature.geometry.coordinates;
+            const towardEast = (pos.lng - pinLng) * mPerDegLon;
+            const towardNorth = (pos.lat - pinLat) * mPerDegLat;
+            const dist = Math.hypot(towardEast, towardNorth) || 1e-10;
+            const towardUnitEast = towardEast / dist;
+            const towardUnitNorth = towardNorth / dist;
+            const leftUnitEast = -towardUnitNorth;
+            const leftUnitNorth = towardUnitEast;
+            wrap._greenDragData = {
+                minX, maxX, minY, maxY, rangeX, rangeY, pad, w, h, cos, sin, cx, cy,
+                towardUnitEast, towardUnitNorth, leftUnitEast, leftUnitNorth
+            };
+        } else {
+            wrap._greenDragData = null;
+        }
     } else {
         const lngs = greenPolygon.map(p => p.lng);
         const lats = greenPolygon.map(p => p.lat);
@@ -1333,6 +1352,7 @@ function drawGreenShape(greenPolygon, holeData) {
         const pinLat = centerLat + state.pinOffset.y / 111320;
         pinSx = pad + ((pinLng - minLng) / rangeLng) * w;
         pinSy = pad + ((maxLat - pinLat) / rangeLat) * h;
+        wrap._greenDragData = null;
     }
 
     const poleH = 12;
@@ -1357,6 +1377,101 @@ function drawGreenShape(greenPolygon, holeData) {
       ${pinMarkup}
     `;
     wrap.classList.add('has-shape');
+}
+
+// Konvertera (pinSx, pinSy) i SVG-koordinater till pinOffset (meter) med sparad drag-data
+function greenSvgToPinOffset(pinSx, pinSy, data) {
+    if (!data) return null;
+    const { minX, minY, rangeX, rangeY, pad, w, h, cos, sin, cx, cy, towardUnitEast, towardUnitNorth, leftUnitEast, leftUnitNorth } = data;
+    const pinRotX = minX + ((pinSx - pad) / w) * rangeX;
+    const pinRotY = minY + ((pinSy - pad) / h) * rangeY;
+    const pinMx = cos * pinRotX - sin * pinRotY;
+    const pinMy = -sin * pinRotX - cos * pinRotY;
+    const offsetEast = pinMx - cx;
+    const offsetNorth = pinMy - cy;
+    const pinOffsetX = offsetEast * leftUnitEast + offsetNorth * leftUnitNorth;
+    const pinOffsetY = offsetEast * towardUnitEast + offsetNorth * towardUnitNorth;
+    return {
+        x: Math.max(PIN_MIN, Math.min(PIN_MAX, pinOffsetX)),
+        y: Math.max(PIN_MIN, Math.min(PIN_MAX, pinOffsetY))
+    };
+}
+
+function setupGreenPinDrag() {
+    const wrap = document.getElementById('greenShapeWrap');
+    const svg = document.getElementById('greenShapeSvg');
+    if (!wrap || !svg) return;
+
+    let dragging = false;
+
+    function getClientCoords(e) {
+        if (e.touches && e.touches.length > 0) {
+            return { clientX: e.touches[0].clientX, clientY: e.touches[0].clientY };
+        }
+        return { clientX: e.clientX, clientY: e.clientY };
+    }
+
+    function applyPinOffsetFromPoint(clientX, clientY) {
+        const data = wrap._greenDragData;
+        if (!data) return;
+        const pt = svg.createSVGPoint();
+        pt.x = clientX;
+        pt.y = clientY;
+        const svgPt = pt.matrixTransform(svg.getScreenCTM().inverse());
+        const offset = greenSvgToPinOffset(svgPt.x, svgPt.y, data);
+        if (!offset) return;
+        state.pinOffset.x = offset.x;
+        state.pinOffset.y = offset.y;
+        const xVal = document.getElementById('pinOffsetXValue');
+        const yVal = document.getElementById('pinOffsetYValue');
+        if (xVal) xVal.textContent = `${state.pinOffset.x} m`;
+        if (yVal) yVal.textContent = `${state.pinOffset.y} m`;
+        updateDistances();
+    }
+
+    wrap.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 1 && wrap._greenDragData) {
+            dragging = true;
+            e.preventDefault();
+        }
+    }, { passive: false });
+
+    wrap.addEventListener('touchmove', (e) => {
+        if (dragging && e.touches.length === 1) {
+            e.preventDefault();
+            const { clientX, clientY } = getClientCoords(e);
+            applyPinOffsetFromPoint(clientX, clientY);
+        }
+    }, { passive: false });
+
+    wrap.addEventListener('touchend', (e) => {
+        if (e.touches.length === 0) dragging = false;
+    }, { passive: true });
+
+    wrap.addEventListener('touchcancel', () => {
+        dragging = false;
+    }, { passive: true });
+
+    wrap.addEventListener('mousedown', (e) => {
+        if (e.button === 0 && wrap._greenDragData) {
+            dragging = true;
+            applyPinOffsetFromPoint(e.clientX, e.clientY);
+        }
+    });
+
+    wrap.addEventListener('mousemove', (e) => {
+        if (dragging && e.buttons === 1) {
+            applyPinOffsetFromPoint(e.clientX, e.clientY);
+        }
+    });
+
+    wrap.addEventListener('mouseup', (e) => {
+        if (e.button === 0) dragging = false;
+    });
+
+    wrap.addEventListener('mouseleave', (e) => {
+        if (e.buttons === 0) dragging = false;
+    });
 }
 
 // Calculate polygon area in square meters using planar projection (sufficient for small areas like greens)

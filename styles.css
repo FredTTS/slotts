@@ -615,16 +615,18 @@ body {
 
 .green-shape-wrap {
     width: 100%;
-    max-width: 120px;
-    height: 72px;
+    max-width: 220px;
+    height: 132px;
     margin: 0 auto;
     display: flex;
     align-items: center;
     justify-content: center;
+    touch-action: none; /* tillåter drag av flaggan utan att sidan scrollar */
+    cursor: pointer;
 }
 
 .green-shape-wrap:not(.has-shape) {
-    min-height: 72px;
+    min-height: 132px;
     background: var(--border);
     border-radius: 0.5rem;
     opacity: 0.5;
