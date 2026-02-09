@@ -378,31 +378,6 @@ function setupEventListeners() {
     const addClubBtn = document.getElementById('addClubBtn');
     if (addClubBtn) addClubBtn.addEventListener('click', addCustomClub);
 
-    const PIN_STEP = 0.5;
-
-    function setPinOffsetX(value) {
-        state.pinOffset.x = value;
-        const v = document.getElementById('pinOffsetXValue');
-        if (v) v.textContent = `${state.pinOffset.x} m`;
-        updateDistances();
-    }
-    function setPinOffsetY(value) {
-        state.pinOffset.y = value;
-        const v = document.getElementById('pinOffsetYValue');
-        if (v) v.textContent = `${state.pinOffset.y} m`;
-        updateDistances();
-    }
-
-    const pinXMinus = document.getElementById('pinOffsetXMinus');
-    const pinXPlus = document.getElementById('pinOffsetXPlus');
-    const pinYMinus = document.getElementById('pinOffsetYMinus');
-    const pinYPlus = document.getElementById('pinOffsetYPlus');
-    // + flyttar flaggan åt höger på skärmen, − åt vänster (x ökar = vänster i verkligheten)
-    if (pinXMinus) pinXMinus.addEventListener('click', () => setPinOffsetX(state.pinOffset.x + PIN_STEP));
-    if (pinXPlus) pinXPlus.addEventListener('click', () => setPinOffsetX(state.pinOffset.x - PIN_STEP));
-    if (pinYMinus) pinYMinus.addEventListener('click', () => setPinOffsetY(state.pinOffset.y - PIN_STEP));
-    if (pinYPlus) pinYPlus.addEventListener('click', () => setPinOffsetY(state.pinOffset.y + PIN_STEP));
-
     const resetPinBtn = document.getElementById('resetPin');
     if (resetPinBtn) resetPinBtn.addEventListener('click', resetPinPosition);
 
@@ -820,10 +795,6 @@ function selectHole(holeNumber) {
 
 function resetPinPosition() {
     state.pinOffset = { x: 0, y: 0 };
-    const xVal = document.getElementById('pinOffsetXValue');
-    const yVal = document.getElementById('pinOffsetYValue');
-    if (xVal) xVal.textContent = '0 m';
-    if (yVal) yVal.textContent = '0 m';
     if (state.currentHole && state.userPosition) {
         updateDistances();
     }
@@ -1432,10 +1403,6 @@ function setupGreenPinDrag() {
         if (!offset) return;
         state.pinOffset.x = offset.x;
         state.pinOffset.y = offset.y;
-        const xVal = document.getElementById('pinOffsetXValue');
-        const yVal = document.getElementById('pinOffsetYValue');
-        if (xVal) xVal.textContent = `${state.pinOffset.x} m`;
-        if (yVal) yVal.textContent = `${state.pinOffset.y} m`;
         updateDistances();
     }
 
