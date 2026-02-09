@@ -621,8 +621,8 @@ body {
 
 .green-shape-wrap {
     width: 100%;
-    max-width: 242px;
-    height: 145px;
+    max-width: 340px;
+    height: 204px;
     margin: 0 auto;
     display: flex;
     align-items: center;
@@ -632,7 +632,7 @@ body {
 }
 
 .green-shape-wrap:not(.has-shape) {
-    min-height: 145px;
+    min-height: 204px;
     background: var(--border);
     border-radius: 0.5rem;
     opacity: 0.5;
