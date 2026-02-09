@@ -44,20 +44,29 @@
                 <div class="hole-buttons" id="holeButtons" aria-live="polite" aria-atomic="true"></div>
             </section>
 
-            <!-- Banguide – klick öppnar banguide-sidan -->
-            <section class="card nav-strip-card" id="banguideNavCard" data-layout-id="banguideNavCard" aria-label="Öppna banguide">
-                <div class="nav-strip banguide-strip" id="banguideStrip" role="button" tabindex="0">
-                    <span class="nav-strip-label">Banguide</span>
-                    <span class="nav-strip-arrow" aria-hidden="true">›</span>
+            <!-- Banguide-innehåll – publicerat på huvudsidan -->
+            <section class="card banguide-preview-card" id="banguidePreviewCard" data-layout-id="banguidePreviewCard" aria-label="Banguide">
+                <h3>Banguide – Hål <span id="banguidePreviewHoleNumber">1</span></h3>
+                <div class="banguide-preview-image-wrap" id="banguidePreviewImageWrap">
+                    <img class="banguide-preview-image" id="banguidePreviewImage" src="img/s1.jpeg" alt="Hål 1" />
                 </div>
+                <div class="banguide-preview-info">
+                    <p class="banguide-preview-text" id="banguidePreviewInfo">Information om hålet visas här.</p>
+                </div>
+                <button type="button" class="banguide-expand-btn" id="banguideExpandBtn" aria-label="Öppna full banguide">Öppna full banguide ›</button>
             </section>
 
-            <!-- Avstånd – klick öppnar avståndssidan -->
-            <section class="card nav-strip-card" id="avstandNavCard" data-layout-id="avstandNavCard" aria-label="Öppna avstånd till green">
-                <div class="nav-strip avstand-strip" id="avstandStrip" role="button" tabindex="0">
-                    <span class="nav-strip-label">Avstånd till green</span>
-                    <span class="nav-strip-arrow" aria-hidden="true">›</span>
+            <!-- Avstånd till green – publicerat på huvudsidan -->
+            <section class="card distance-preview-card" id="distancePreviewCard" data-layout-id="distancePreviewCard" aria-label="Avstånd till green">
+                <h3>Avstånd till green</h3>
+                <div class="distance-preview-main">
+                    <div class="distance-preview-value" id="distancePreviewValue">
+                        <span class="loading">📍 Hämtar position...</span>
+                    </div>
+                    <div class="distance-preview-to-pin" id="distancePreviewToPin">Till pin: –</div>
+                    <div class="distance-preview-club" id="distancePreviewClub">Klubba: –</div>
                 </div>
+                <button type="button" class="distance-expand-btn" id="distanceExpandBtn" aria-label="Öppna full avståndssida">Öppna avståndsdetaljer ›</button>
             </section>
 
             <!-- Vindriktning (eget kort) -->
@@ -118,7 +127,6 @@
                 <div class="page page-banguide" id="pageBanguide">
                     <header class="header header-banguide">
                         <div class="header-content">
-                            <button type="button" class="back-to-main-btn" id="backToMainBtn" aria-label="Tillbaka till huvudsidan">‹ Tillbaka</button>
                             <h1 class="banguide-title">Banguide – Hål <span id="banguideHoleNumber">1</span></h1>
                         </div>
                     </header>
@@ -145,7 +153,6 @@
                 <div class="page page-distance" id="pageDistance">
                     <header class="header header-distance">
                         <div class="header-content">
-                            <button type="button" class="back-to-main-btn" id="backFromDistanceBtn" aria-label="Tillbaka till huvudsidan">‹ Tillbaka</button>
                             <h1 class="distance-page-title">Avstånd till green – Hål <span id="distancePageHoleNumber">1</span></h1>
                         </div>
                     </header>
@@ -173,6 +180,7 @@
                                     <div class="green-shape-wrap" id="greenShapeWrap" aria-hidden="true">
                                         <svg class="green-shape-svg" id="greenShapeSvg" viewBox="0 0 100 60" preserveAspectRatio="xMidYMid meet"></svg>
                                     </div>
+                                    <button class="reset-btn reset-pin-under-green" id="resetPin">Återställ Position</button>
                                 </div>
                                 <div class="detail-item">
                                     <span class="detail-label">Bakkant:</span>
@@ -202,28 +210,6 @@
                                 </div>
                             </div>
                         </section>
-                        <section class="card pin-adjustment" id="pinAdjustment" data-layout-id="pinAdjustment">
-                            <h3>Flaggposition</h3>
-                            <div class="adjustment-controls">
-                                <div class="adjustment-group">
-                                    <label>Fram/Bak (m)</label>
-                                    <div class="pin-step-controls">
-                                        <button type="button" class="pin-step-btn" id="pinOffsetYMinus" aria-label="Minska fram/bak med 0,5 m">−</button>
-                                        <span class="pin-step-value" id="pinOffsetYValue">0 m</span>
-                                        <button type="button" class="pin-step-btn" id="pinOffsetYPlus" aria-label="Öka fram/bak med 0,5 m">+</button>
-                                    </div>
-                                </div>
-                                <div class="adjustment-group">
-                                    <label>Vänster/höger (m)</label>
-                                    <div class="pin-step-controls">
-                                        <button type="button" class="pin-step-btn" id="pinOffsetXMinus" aria-label="Minska vänster/höger med 0,5 m">−</button>
-                                        <span class="pin-step-value" id="pinOffsetXValue">0 m</span>
-                                        <button type="button" class="pin-step-btn" id="pinOffsetXPlus" aria-label="Öka vänster/höger med 0,5 m">+</button>
-                                    </div>
-                                </div>
-                                <button class="reset-btn" id="resetPin">Återställ Position</button>
-                            </div>
-                        </section>
                         <section class="card wind-adjustment-card" id="windAdjustmentCard" data-layout-id="windAdjustmentCard">
                             <h3>Vart ska jag sikta?</h3>
                             <div class="aim-content" id="aimContent">
@@ -242,6 +228,22 @@
                 </div><!-- /.page-distance -->
             </div><!-- /.pages -->
         </div><!-- /.pages-wrapper -->
+
+        <!-- Fast bottenmeny – följer med alla sidor -->
+        <nav class="fixed-bottom-nav" id="fixedBottomNav" aria-label="Huvudnavigation">
+            <button type="button" class="fixed-nav-btn active" id="navBtnHome" aria-label="Hem" data-nav="home">
+                <span class="fixed-nav-icon">⌂</span>
+                <span class="fixed-nav-label">Hem</span>
+            </button>
+            <button type="button" class="fixed-nav-btn" id="navBtnBanguide" aria-label="Banguide" data-nav="banguide">
+                <span class="fixed-nav-icon">📋</span>
+                <span class="fixed-nav-label">Banguide</span>
+            </button>
+            <button type="button" class="fixed-nav-btn" id="navBtnAvstand" aria-label="Avstånd till green" data-nav="avstand">
+                <span class="fixed-nav-icon">📍</span>
+                <span class="fixed-nav-label">Avstånd</span>
+            </button>
+        </nav>
 
         <!-- Settings Modal -->
         <div class="modal" id="settingsModal">

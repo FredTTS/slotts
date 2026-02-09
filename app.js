@@ -101,8 +101,8 @@ async function initializeApp() {
     selectHole(1);
     startLocationTracking();
     setupDeviceOrientation();
-    setupBackToMainButton();
     setupBanguideImageZoom();
+    setupGreenPinDrag();
     updateBanguidePage();
     hideLoading();
 }
@@ -378,32 +378,6 @@ function setupEventListeners() {
     const addClubBtn = document.getElementById('addClubBtn');
     if (addClubBtn) addClubBtn.addEventListener('click', addCustomClub);
 
-    const PIN_STEP = 0.5;
-    const PIN_MIN = -10;
-    const PIN_MAX = 10;
-
-    function setPinOffsetX(value) {
-        state.pinOffset.x = Math.max(PIN_MIN, Math.min(PIN_MAX, value));
-        const v = document.getElementById('pinOffsetXValue');
-        if (v) v.textContent = `${state.pinOffset.x} m`;
-        updateDistances();
-    }
-    function setPinOffsetY(value) {
-        state.pinOffset.y = Math.max(PIN_MIN, Math.min(PIN_MAX, value));
-        const v = document.getElementById('pinOffsetYValue');
-        if (v) v.textContent = `${state.pinOffset.y} m`;
-        updateDistances();
-    }
-
-    const pinXMinus = document.getElementById('pinOffsetXMinus');
-    const pinXPlus = document.getElementById('pinOffsetXPlus');
-    const pinYMinus = document.getElementById('pinOffsetYMinus');
-    const pinYPlus = document.getElementById('pinOffsetYPlus');
-    if (pinXMinus) pinXMinus.addEventListener('click', () => setPinOffsetX(state.pinOffset.x - PIN_STEP));
-    if (pinXPlus) pinXPlus.addEventListener('click', () => setPinOffsetX(state.pinOffset.x + PIN_STEP));
-    if (pinYMinus) pinYMinus.addEventListener('click', () => setPinOffsetY(state.pinOffset.y - PIN_STEP));
-    if (pinYPlus) pinYPlus.addEventListener('click', () => setPinOffsetY(state.pinOffset.y + PIN_STEP));
-
     const resetPinBtn = document.getElementById('resetPin');
     if (resetPinBtn) resetPinBtn.addEventListener('click', resetPinPosition);
 
@@ -430,37 +404,40 @@ function setupEventListeners() {
         updateAimBtn.addEventListener('click', refreshAimPosition);
     }
 
-    const banguideStrip = document.getElementById('banguideStrip');
-    const avstandStrip = document.getElementById('avstandStrip');
+    // Fast bottenmeny – navigation mellan sidor
     const pages = document.getElementById('pages');
-    if (banguideStrip && pages) {
-        const openBanguide = () => {
-            pages.classList.remove('show-distance');
-            pages.classList.add('show-banguide');
-        };
-        banguideStrip.addEventListener('click', openBanguide);
-        banguideStrip.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                openBanguide();
-            }
+    const navBtnHome = document.getElementById('navBtnHome');
+    const navBtnBanguide = document.getElementById('navBtnBanguide');
+    const navBtnAvstand = document.getElementById('navBtnAvstand');
+    const banguideExpandBtn = document.getElementById('banguideExpandBtn');
+    const distanceExpandBtn = document.getElementById('distanceExpandBtn');
+
+    function setActiveNav(active) {
+        [navBtnHome, navBtnBanguide, navBtnAvstand].forEach(btn => {
+            if (btn) btn.classList.toggle('active', btn.dataset.nav === active);
         });
     }
-    if (avstandStrip && pages) {
-        const openDistance = () => {
-            pages.classList.remove('show-banguide');
-            pages.classList.add('show-distance');
-            const holeEl = document.getElementById('distancePageHoleNumber');
-            if (holeEl) holeEl.textContent = state.currentHole || 1;
-        };
-        avstandStrip.addEventListener('click', openDistance);
-        avstandStrip.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                openDistance();
-            }
-        });
+    function goHome() {
+        pages.classList.remove('show-banguide', 'show-distance');
+        setActiveNav('home');
     }
+    function goBanguide() {
+        pages.classList.remove('show-distance');
+        pages.classList.add('show-banguide');
+        setActiveNav('banguide');
+    }
+    function goDistance() {
+        pages.classList.remove('show-banguide');
+        pages.classList.add('show-distance');
+        const holeEl = document.getElementById('distancePageHoleNumber');
+        if (holeEl) holeEl.textContent = state.currentHole || 1;
+        setActiveNav('avstand');
+    }
+    if (navBtnHome) navBtnHome.addEventListener('click', goHome);
+    if (navBtnBanguide) navBtnBanguide.addEventListener('click', goBanguide);
+    if (navBtnAvstand) navBtnAvstand.addEventListener('click', goDistance);
+    if (banguideExpandBtn) banguideExpandBtn.addEventListener('click', goBanguide);
+    if (distanceExpandBtn) distanceExpandBtn.addEventListener('click', goDistance);
 
     const holeNotesInput = document.getElementById('holeNotesInput');
     if (holeNotesInput) {
@@ -474,7 +451,7 @@ function setupEventListeners() {
     }
 }
 
-const MAIN_PAGE_IDS = ['holeSelector', 'banguideNavCard', 'avstandNavCard', 'windArrowCard', 'conditionsImpactCard', 'timerSection'];
+const MAIN_PAGE_IDS = ['holeSelector', 'banguidePreviewCard', 'distancePreviewCard', 'windArrowCard', 'conditionsImpactCard', 'timerSection'];
 
 function loadLayoutOrder() {
     try {
@@ -818,10 +795,6 @@ function selectHole(holeNumber) {
 
 function resetPinPosition() {
     state.pinOffset = { x: 0, y: 0 };
-    const xVal = document.getElementById('pinOffsetXValue');
-    const yVal = document.getElementById('pinOffsetYValue');
-    if (xVal) xVal.textContent = '0 m';
-    if (yVal) yVal.textContent = '0 m';
     if (state.currentHole && state.userPosition) {
         updateDistances();
     }
@@ -1069,7 +1042,10 @@ function updateBanguidePage() {
     const hole = state.currentHole || 1;
     const numEl = document.getElementById('banguideHoleNumber');
     const imgEl = document.getElementById('banguideImage');
+    const previewNumEl = document.getElementById('banguidePreviewHoleNumber');
+    const previewImgEl = document.getElementById('banguidePreviewImage');
     if (numEl) numEl.textContent = hole;
+    if (previewNumEl) previewNumEl.textContent = hole;
     if (imgEl) {
         imgEl.src = `img/s${hole}.jpeg`;
         imgEl.alt = `Hål ${hole}`;
@@ -1077,17 +1053,9 @@ function updateBanguidePage() {
         banguideImageTranslate = { x: 0, y: 0 };
         imgEl.style.transform = '';
     }
-}
-
-function setupBackToMainButton() {
-    const btn = document.getElementById('backToMainBtn');
-    const pages = document.getElementById('pages');
-    if (!btn || !pages) return;
-    btn.addEventListener('click', () => pages.classList.remove('show-banguide'));
-
-    const backFromDistanceBtn = document.getElementById('backFromDistanceBtn');
-    if (backFromDistanceBtn && pages) {
-        backFromDistanceBtn.addEventListener('click', () => pages.classList.remove('show-distance'));
+    if (previewImgEl) {
+        previewImgEl.src = `img/s${hole}.jpeg`;
+        previewImgEl.alt = `Hål ${hole}`;
     }
 }
 
@@ -1160,6 +1128,18 @@ function updateDistances() {
     }
     if (distToPinEl) {
         distToPinEl.textContent = distanceToPin != null ? `${Math.round(distanceToPin)} m` : '–';
+    }
+    // Uppdatera förhandsvisning på huvudsidan
+    const previewDist = document.getElementById('distancePreviewValue');
+    const previewToPin = document.getElementById('distancePreviewToPin');
+    const previewClub = document.getElementById('distancePreviewClub');
+    if (previewDist) {
+        previewDist.innerHTML = distanceToGreenCenter != null
+            ? `<span class="distance-preview-number">${Math.round(distanceToGreenCenter)}</span> m`
+            : '<span class="loading">📍 Hämtar position...</span>';
+    }
+    if (previewToPin) {
+        previewToPin.textContent = distanceToPin != null ? `Till pin: ${Math.round(distanceToPin)} m` : 'Till pin: –';
     }
     if (frontEl) frontEl.textContent = `${Math.round(distanceToFront)} m`;
     if (backEl) backEl.textContent = `${Math.round(distanceToBack)} m`;
@@ -1305,6 +1285,32 @@ function drawGreenShape(greenPolygon, holeData) {
         };
         pinSx = pad + ((pinRot.x - minX) / rangeX) * w;
         pinSy = pad + ((pinRot.y - minY) / rangeY) * h;
+        // Spara konverteringsdata för drag av flaggan (SVG-koordinater -> pinOffset i meter)
+        const pinFeature = holeData.find(f => f.properties && f.properties.type === 'pin');
+        if (pinFeature && pinFeature.geometry && pinFeature.geometry.coordinates) {
+            const [pinLng, pinLat] = pinFeature.geometry.coordinates;
+            const towardEast = (pos.lng - pinLng) * mPerDegLon;
+            const towardNorth = (pos.lat - pinLat) * mPerDegLat;
+            const dist = Math.hypot(towardEast, towardNorth) || 1e-10;
+            const towardUnitEast = towardEast / dist;
+            const towardUnitNorth = towardNorth / dist;
+            const leftUnitEast = -towardUnitNorth;
+            const leftUnitNorth = towardUnitEast;
+            // Gränser för greenen i SVG-koordinater – flaggan ska bara kunna placeras innanför
+            const sxs = rotated.map(p => pad + ((p.x - minX) / rangeX) * w);
+            const sys = rotated.map(p => pad + ((p.y - minY) / rangeY) * h);
+            const greenMinSx = Math.min(...sxs);
+            const greenMaxSx = Math.max(...sxs);
+            const greenMinSy = Math.min(...sys);
+            const greenMaxSy = Math.max(...sys);
+            wrap._greenDragData = {
+                minX, maxX, minY, maxY, rangeX, rangeY, pad, w, h, cos, sin, cx, cy,
+                towardUnitEast, towardUnitNorth, leftUnitEast, leftUnitNorth,
+                greenMinSx, greenMaxSx, greenMinSy, greenMaxSy
+            };
+        } else {
+            wrap._greenDragData = null;
+        }
     } else {
         const lngs = greenPolygon.map(p => p.lng);
         const lats = greenPolygon.map(p => p.lat);
@@ -1323,6 +1329,7 @@ function drawGreenShape(greenPolygon, holeData) {
         const pinLat = centerLat + state.pinOffset.y / 111320;
         pinSx = pad + ((pinLng - minLng) / rangeLng) * w;
         pinSy = pad + ((maxLat - pinLat) / rangeLat) * h;
+        wrap._greenDragData = null;
     }
 
     const poleH = 12;
@@ -1347,6 +1354,101 @@ function drawGreenShape(greenPolygon, holeData) {
       ${pinMarkup}
     `;
     wrap.classList.add('has-shape');
+}
+
+// Konvertera (pinSx, pinSy) i SVG-koordinater till pinOffset (meter) med sparad drag-data
+function greenSvgToPinOffset(pinSx, pinSy, data) {
+    if (!data) return null;
+    const { minX, minY, rangeX, rangeY, pad, w, h, cos, sin, cx, cy, towardUnitEast, towardUnitNorth, leftUnitEast, leftUnitNorth, greenMinSx, greenMaxSx, greenMinSy, greenMaxSy } = data;
+    // Begränsa till greenens område – flaggan ska bara kunna placeras innanför
+    const clampedSx = Math.max(greenMinSx, Math.min(greenMaxSx, pinSx));
+    const clampedSy = Math.max(greenMinSy, Math.min(greenMaxSy, pinSy));
+    const pinRotX = minX + ((clampedSx - pad) / w) * rangeX;
+    const pinRotY = minY + ((clampedSy - pad) / h) * rangeY;
+    const pinMx = cos * pinRotX - sin * pinRotY;
+    const pinMy = -sin * pinRotX - cos * pinRotY;
+    const offsetEast = pinMx - cx;
+    const offsetNorth = pinMy - cy;
+    const pinOffsetX = offsetEast * leftUnitEast + offsetNorth * leftUnitNorth;
+    const pinOffsetY = offsetEast * towardUnitEast + offsetNorth * towardUnitNorth;
+    // Invertera X: SVG x ökar åt höger, men pinOffset.x positiv = vänster; koordinatsystemen är speglade
+    return { x: -pinOffsetX, y: pinOffsetY };
+}
+
+function setupGreenPinDrag() {
+    const wrap = document.getElementById('greenShapeWrap');
+    const svg = document.getElementById('greenShapeSvg');
+    if (!wrap || !svg) return;
+
+    let dragging = false;
+
+    function getClientCoords(e) {
+        if (e.touches && e.touches.length > 0) {
+            return { clientX: e.touches[0].clientX, clientY: e.touches[0].clientY };
+        }
+        return { clientX: e.clientX, clientY: e.clientY };
+    }
+
+    // Placera flaggan ovanför fingret/cursorn så den syns under drag (annars döljs den)
+    const PLACEMENT_OFFSET_ABOVE_PX = 90;
+
+    function applyPinOffsetFromPoint(clientX, clientY) {
+        const data = wrap._greenDragData;
+        if (!data) return;
+        const pt = svg.createSVGPoint();
+        pt.x = clientX;
+        pt.y = clientY - PLACEMENT_OFFSET_ABOVE_PX;
+        const svgPt = pt.matrixTransform(svg.getScreenCTM().inverse());
+        const offset = greenSvgToPinOffset(svgPt.x, svgPt.y, data);
+        if (!offset) return;
+        state.pinOffset.x = offset.x;
+        state.pinOffset.y = offset.y;
+        updateDistances();
+    }
+
+    wrap.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 1 && wrap._greenDragData) {
+            dragging = true;
+            e.preventDefault();
+        }
+    }, { passive: false });
+
+    wrap.addEventListener('touchmove', (e) => {
+        if (dragging && e.touches.length === 1) {
+            e.preventDefault();
+            const { clientX, clientY } = getClientCoords(e);
+            applyPinOffsetFromPoint(clientX, clientY);
+        }
+    }, { passive: false });
+
+    wrap.addEventListener('touchend', (e) => {
+        if (e.touches.length === 0) dragging = false;
+    }, { passive: true });
+
+    wrap.addEventListener('touchcancel', () => {
+        dragging = false;
+    }, { passive: true });
+
+    wrap.addEventListener('mousedown', (e) => {
+        if (e.button === 0 && wrap._greenDragData) {
+            dragging = true;
+            applyPinOffsetFromPoint(e.clientX, e.clientY);
+        }
+    });
+
+    wrap.addEventListener('mousemove', (e) => {
+        if (dragging && e.buttons === 1) {
+            applyPinOffsetFromPoint(e.clientX, e.clientY);
+        }
+    });
+
+    wrap.addEventListener('mouseup', (e) => {
+        if (e.button === 0) dragging = false;
+    });
+
+    wrap.addEventListener('mouseleave', (e) => {
+        if (e.buttons === 0) dragging = false;
+    });
 }
 
 // Calculate polygon area in square meters using planar projection (sufficient for small areas like greens)
@@ -1422,6 +1524,8 @@ function recommendClub(distance, elevation) {
         updateClubDistanceDisplay();
         const adjEl = document.getElementById('clubRecommendedAdjusted');
         if (adjEl) adjEl.style.display = 'none';
+        const previewClubEl = document.getElementById('distancePreviewClub');
+        if (previewClubEl) previewClubEl.textContent = 'Klubba: Väntar på väder…';
         return;
     }
     
@@ -1451,9 +1555,11 @@ function recommendClub(distance, elevation) {
     });
     
     if (bestClub) {
-        document.querySelector('.club-name').textContent = bestClub.name;
+        const clubNameEl = document.querySelector('.club-name');
+        const clubDistEl = document.querySelector('.club-distance');
+        if (clubNameEl) clubNameEl.textContent = bestClub.name;
         const spreadStr = (bestClub.spread != null && bestClub.spread > 0) ? ` ±${Math.round(bestClub.spread)} m` : '';
-        document.querySelector('.club-distance').textContent = 
+        if (clubDistEl) clubDistEl.textContent =
             `Normalt: ${Math.round(bestClub.totalDistance)} m (${Math.round(bestClub.carryDistance)} m carry)${spreadStr}`;
         const adjEl = document.getElementById('clubRecommendedAdjusted');
         if (adjEl) {
@@ -1461,11 +1567,17 @@ function recommendClub(distance, elevation) {
             adjEl.textContent = `Idag (väder + höjd): ${todayM} m`;
             adjEl.style.display = '';
         }
+        const previewClubEl = document.getElementById('distancePreviewClub');
+        if (previewClubEl) previewClubEl.textContent = `Klubba: ${bestClub.name}`;
     } else {
-        document.querySelector('.club-name').textContent = 'Ställ in klubbor';
-        document.querySelector('.club-distance').textContent = 'Gå till inställningar';
+        const clubNameEl = document.querySelector('.club-name');
+        const clubDistEl = document.querySelector('.club-distance');
+        if (clubNameEl) clubNameEl.textContent = 'Ställ in klubbor';
+        if (clubDistEl) clubDistEl.textContent = 'Gå till inställningar';
         const adjEl = document.getElementById('clubRecommendedAdjusted');
         if (adjEl) adjEl.style.display = 'none';
+        const previewClubEl = document.getElementById('distancePreviewClub');
+        if (previewClubEl) previewClubEl.textContent = 'Klubba: –';
     }
     
     // Siktråd: vind, höjd, lufttryck, avstånd
