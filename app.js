@@ -101,7 +101,6 @@ async function initializeApp() {
     selectHole(1);
     startLocationTracking();
     setupDeviceOrientation();
-    setupBackToMainButton();
     setupBanguideImageZoom();
     updateBanguidePage();
     hideLoading();
@@ -399,8 +398,9 @@ function setupEventListeners() {
     const pinXPlus = document.getElementById('pinOffsetXPlus');
     const pinYMinus = document.getElementById('pinOffsetYMinus');
     const pinYPlus = document.getElementById('pinOffsetYPlus');
-    if (pinXMinus) pinXMinus.addEventListener('click', () => setPinOffsetX(state.pinOffset.x - PIN_STEP));
-    if (pinXPlus) pinXPlus.addEventListener('click', () => setPinOffsetX(state.pinOffset.x + PIN_STEP));
+    // + flyttar flaggan åt höger på skärmen, − åt vänster (x ökar = vänster i verkligheten)
+    if (pinXMinus) pinXMinus.addEventListener('click', () => setPinOffsetX(state.pinOffset.x + PIN_STEP));
+    if (pinXPlus) pinXPlus.addEventListener('click', () => setPinOffsetX(state.pinOffset.x - PIN_STEP));
     if (pinYMinus) pinYMinus.addEventListener('click', () => setPinOffsetY(state.pinOffset.y - PIN_STEP));
     if (pinYPlus) pinYPlus.addEventListener('click', () => setPinOffsetY(state.pinOffset.y + PIN_STEP));
 
@@ -1086,32 +1086,6 @@ function updateBanguidePage() {
     if (previewImgEl) {
         previewImgEl.src = `img/s${hole}.jpeg`;
         previewImgEl.alt = `Hål ${hole}`;
-    }
-}
-
-function setupBackToMainButton() {
-    const btn = document.getElementById('backToMainBtn');
-    const pages = document.getElementById('pages');
-    const navBtnHome = document.getElementById('navBtnHome');
-    const navBtnBanguide = document.getElementById('navBtnBanguide');
-    const navBtnAvstand = document.getElementById('navBtnAvstand');
-    const setActiveNav = (active) => {
-        [navBtnHome, navBtnBanguide, navBtnAvstand].forEach(b => {
-            if (b) b.classList.toggle('active', b.dataset.nav === active);
-        });
-    };
-    if (!btn || !pages) return;
-    btn.addEventListener('click', () => {
-        pages.classList.remove('show-banguide');
-        setActiveNav('home');
-    });
-
-    const backFromDistanceBtn = document.getElementById('backFromDistanceBtn');
-    if (backFromDistanceBtn && pages) {
-        backFromDistanceBtn.addEventListener('click', () => {
-            pages.classList.remove('show-distance');
-            setActiveNav('home');
-        });
     }
 }
 
