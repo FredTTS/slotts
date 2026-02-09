@@ -1391,8 +1391,9 @@ function greenSvgToPinOffset(pinSx, pinSy, data) {
     const offsetNorth = pinMy - cy;
     const pinOffsetX = offsetEast * leftUnitEast + offsetNorth * leftUnitNorth;
     const pinOffsetY = offsetEast * towardUnitEast + offsetNorth * towardUnitNorth;
+    // Invertera X: SVG x ökar åt höger, men pinOffset.x positiv = vänster; koordinatsystemen är speglade
     return {
-        x: Math.max(PIN_MIN, Math.min(PIN_MAX, pinOffsetX)),
+        x: Math.max(PIN_MIN, Math.min(PIN_MAX, -pinOffsetX)),
         y: Math.max(PIN_MIN, Math.min(PIN_MAX, pinOffsetY))
     };
 }
