@@ -162,43 +162,11 @@ body {
     width: 100%;
     min-height: 120px;
     border-radius: 1rem;
-    overflow-x: auto;
-    overflow-y: hidden;
+    overflow: hidden;
     margin-bottom: 1.5rem;
     box-shadow: var(--shadow-lg);
-    scroll-snap-type: x mandatory;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
+    touch-action: pan-y pinch-zoom;
     flex-shrink: 0;
-    touch-action: pan-x pan-y;
-    padding-left: 0;
-    padding-right: 0;
-    /* Bredd sätts i JS så att horisontell scroll fungerar på alla enheter */
-}
-
-.banguide-image-wrap::-webkit-scrollbar {
-    display: none;
-}
-
-.banguide-image-track {
-    display: flex;
-    flex-direction: row;
-    min-height: 120px;
-    /* width sätts i JS: wrap.clientWidth * 18 */
-}
-
-.banguide-image-slide {
-    flex: 0 0 auto;
-    box-sizing: border-box;
-    scroll-snap-align: start;
-    scroll-snap-stop: always;
-    /* width sätts i JS: wrap.clientWidth */
-}
-
-.banguide-image-slide img {
-    width: 100%;
-    height: auto;
-    display: block;
 }
 
 .banguide-image {
