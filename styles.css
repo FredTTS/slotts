@@ -170,23 +170,25 @@ body {
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
     flex-shrink: 0;
+    display: flex;
+    flex-direction: row;
+    touch-action: pan-x pan-y;
 }
 
 .banguide-image-wrap::-webkit-scrollbar {
     display: none;
 }
 
+/* display: contents så att slidarna blir flex-barn till wrappen och får 100% av dess bredd */
 .banguide-image-track {
-    display: flex;
-    flex-direction: row;
-    width: max-content;
-    min-height: 120px;
+    display: contents;
 }
 
 .banguide-image-slide {
     flex: 0 0 100%;
     width: 100%;
     min-width: 100%;
+    box-sizing: border-box;
     scroll-snap-align: start;
     scroll-snap-stop: always;
 }
