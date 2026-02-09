@@ -164,7 +164,8 @@ body {
     overflow: hidden;
     margin-bottom: 1.5rem;
     box-shadow: var(--shadow-lg);
-    touch-action: none; /* tillåter pinch-zoom på bilden utan sidzoom */
+    /* pan-y + pinch-zoom: sidan kan scrollas när man sveper på bilden, pinch-zoom fungerar fortfarande */
+    touch-action: pan-y pinch-zoom;
     flex-shrink: 0; /* bilden krymper inte i flex-kontexter */
 }
 
@@ -172,10 +173,7 @@ body {
     width: 100%;
     height: auto;
     max-width: 100%;
-    /* Hela bilden syns i viewport – skalar ned vid höga bilder, pinch-zoom för detaljer */
-    max-height: 80vh;
-    object-fit: contain;
-    object-position: top center;
+    /* Ingen max-height – hela bilden visas och man scrollar sidan för att se allt */
     display: block;
     vertical-align: top;
     transform-origin: center center;
