@@ -1418,12 +1418,15 @@ function setupGreenPinDrag() {
         return { clientX: e.clientX, clientY: e.clientY };
     }
 
+    // Placera flaggan ovanför fingret/cursorn så den syns under drag (annars döljs den)
+    const PLACEMENT_OFFSET_ABOVE_PX = 90;
+
     function applyPinOffsetFromPoint(clientX, clientY) {
         const data = wrap._greenDragData;
         if (!data) return;
         const pt = svg.createSVGPoint();
         pt.x = clientX;
-        pt.y = clientY;
+        pt.y = clientY - PLACEMENT_OFFSET_ABOVE_PX;
         const svgPt = pt.matrixTransform(svg.getScreenCTM().inverse());
         const offset = greenSvgToPinOffset(svgPt.x, svgPt.y, data);
         if (!offset) return;
