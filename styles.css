@@ -652,6 +652,15 @@ body {
     vector-effect: non-scaling-stroke;
 }
 
+/* Ring som handtag för att flytta flaggan */
+.pin-drag-ring {
+    cursor: grab;
+}
+
+.green-shape-wrap:active .pin-drag-ring {
+    cursor: grabbing;
+}
+
 /* Pin Adjustment */
 .adjustment-controls {
     display: flex;

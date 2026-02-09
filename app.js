@@ -1353,11 +1353,13 @@ function drawGreenShape(greenPolygon, holeData) {
 
     const poleH = 12;
     const flagW = 6;
+    const ringR = 8; /* ring som handtag för att flytta flaggan */
     const flagPath = `M ${pinSx} ${pinSy - poleH} L ${pinSx + flagW} ${pinSy - poleH + 2} L ${pinSx} ${pinSy - poleH + 4} Z`;
     const pinMarkup = (pinSx != null && pinSy != null) ? `
       <g class="green-pin-flag" aria-label="Pin">
         <line x1="${pinSx}" y1="${pinSy}" x2="${pinSx}" y2="${pinSy - poleH}" stroke="var(--primary-dark)" stroke-width="1.2"/>
         <path d="${flagPath}" fill="var(--primary)" stroke="var(--primary-dark)" stroke-width="0.8"/>
+        <circle class="pin-drag-ring" cx="${pinSx}" cy="${pinSy}" r="${ringR}" fill="rgba(0,0,0,0.06)" stroke="var(--primary-dark)" stroke-width="1.5"/>
         <circle cx="${pinSx}" cy="${pinSy}" r="2" fill="var(--primary-dark)"/>
       </g>
     ` : '';
