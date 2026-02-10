@@ -1405,6 +1405,10 @@ function setupGreenPinDrag() {
     let dragStarted = false;
     let dragStartX = 0;
     let dragStartY = 0;
+    let startPinOffsetX = 0;
+    let startPinOffsetY = 0;
+    let startFingerPinOffsetX = 0;
+    let startFingerPinOffsetY = 0;
     const DRAG_START_THRESHOLD_PX = 8;
 
     function getClientCoords(e) {
@@ -1414,20 +1418,24 @@ function setupGreenPinDrag() {
         return { clientX: e.clientX, clientY: e.clientY };
     }
 
-    // Placera flaggan ovanför fingret/cursorn så den syns under drag (annars döljs den)
-    const PLACEMENT_OFFSET_ABOVE_PX = 90;
-
-    function applyPinOffsetFromPoint(clientX, clientY) {
+    // Returnerar pinOffset (meter) för en skärmposition (samma projektion som greenen)
+    function getPinOffsetFromPoint(clientX, clientY) {
         const data = wrap._greenDragData;
-        if (!data) return;
+        if (!data) return null;
         const pt = svg.createSVGPoint();
         pt.x = clientX;
-        pt.y = clientY - PLACEMENT_OFFSET_ABOVE_PX;
+        pt.y = clientY;
         const svgPt = pt.matrixTransform(svg.getScreenCTM().inverse());
-        const offset = greenSvgToPinOffset(svgPt.x, svgPt.y, data);
-        if (!offset) return;
-        state.pinOffset.x = offset.x;
-        state.pinOffset.y = offset.y;
+        return greenSvgToPinOffset(svgPt.x, svgPt.y, data);
+    }
+
+    function applyPinOffsetFromDelta(clientX, clientY) {
+        const current = getPinOffsetFromPoint(clientX, clientY);
+        if (current == null) return;
+        const deltaX = current.x - startFingerPinOffsetX;
+        const deltaY = current.y - startFingerPinOffsetY;
+        state.pinOffset.x = startPinOffsetX + deltaX;
+        state.pinOffset.y = startPinOffsetY + deltaY;
         updateDistances();
     }
 
@@ -1450,11 +1458,21 @@ function setupGreenPinDrag() {
             const dy = clientY - dragStartY;
             if (!dragStarted) {
                 if (Math.hypot(dx, dy) < DRAG_START_THRESHOLD_PX) {
-                    return; // ignorera små rörelser – flytta inte flaggan ännu
+                    return;
                 }
                 dragStarted = true;
+                startPinOffsetX = state.pinOffset.x;
+                startPinOffsetY = state.pinOffset.y;
+                const startOffset = getPinOffsetFromPoint(dragStartX, dragStartY);
+                if (startOffset) {
+                    startFingerPinOffsetX = startOffset.x;
+                    startFingerPinOffsetY = startOffset.y;
+                } else {
+                    startFingerPinOffsetX = startPinOffsetX;
+                    startFingerPinOffsetY = startPinOffsetY;
+                }
             }
-            applyPinOffsetFromPoint(clientX, clientY);
+            applyPinOffsetFromDelta(clientX, clientY);
         }
     }, { passive: false });
 
@@ -1472,7 +1490,6 @@ function setupGreenPinDrag() {
 
     ring.addEventListener('mousedown', (e) => {
         if (e.button === 0 && wrap._greenDragData) {
-            // Börja drag, men flytta inte flaggan förrän användaren faktiskt drar
             dragging = true;
             dragStarted = false;
             dragStartX = e.clientX;
@@ -1490,8 +1507,18 @@ function setupGreenPinDrag() {
                     return;
                 }
                 dragStarted = true;
+                startPinOffsetX = state.pinOffset.x;
+                startPinOffsetY = state.pinOffset.y;
+                const startOffset = getPinOffsetFromPoint(dragStartX, dragStartY);
+                if (startOffset) {
+                    startFingerPinOffsetX = startOffset.x;
+                    startFingerPinOffsetY = startOffset.y;
+                } else {
+                    startFingerPinOffsetX = startPinOffsetX;
+                    startFingerPinOffsetY = startPinOffsetY;
+                }
             }
-            applyPinOffsetFromPoint(e.clientX, e.clientY);
+            applyPinOffsetFromDelta(e.clientX, e.clientY);
         }
     });
 
