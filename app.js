@@ -466,7 +466,7 @@ function setupEventListeners() {
     }
 }
 
-const MAIN_PAGE_IDS = ['holeSelector', 'distancePreviewCard', 'windArrowCard', 'conditionsImpactCard', 'timerSection'];
+const MAIN_PAGE_IDS = ['holeSelector', 'windArrowCard', 'conditionsImpactCard', 'timerSection'];
 
 function loadLayoutOrder() {
     try {
