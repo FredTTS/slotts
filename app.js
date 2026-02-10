@@ -1279,9 +1279,8 @@ function drawGreenShape(greenPolygon, holeData) {
         const cx = meters.reduce((s, p) => s + p.x, 0) / meters.length;
         const cy = meters.reduce((s, p) => s + p.y, 0) / meters.length;
         const angle = Math.atan2(cy, cx);
-        // Rotera så att linjen pos→green pekar uppåt på skärmen
-        // (pos nere, green ovanför i fågelperspektiv)
-        const rot = -angle - Math.PI / 2;
+        // Vänd greenen 180° jämfört med fågelperspektivet ovan
+        const rot = -angle - Math.PI / 2 + Math.PI;
         const cos = Math.cos(rot), sin = Math.sin(rot);
         const rotated = meters.map(p => ({
             x: p.x * cos - p.y * sin,
