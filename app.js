@@ -1402,6 +1402,10 @@ function setupGreenPinDrag() {
     if (!wrap || !svg || !ring) return;
 
     let dragging = false;
+    let dragStarted = false;
+    let dragStartX = 0;
+    let dragStartY = 0;
+    const DRAG_START_THRESHOLD_PX = 8;
 
     function getClientCoords(e) {
         if (e.touches && e.touches.length > 0) {
@@ -1429,7 +1433,11 @@ function setupGreenPinDrag() {
 
     ring.addEventListener('touchstart', (e) => {
         if (e.touches.length === 1 && wrap._greenDragData) {
+            const { clientX, clientY } = getClientCoords(e);
             dragging = true;
+            dragStarted = false;
+            dragStartX = clientX;
+            dragStartY = clientY;
             e.preventDefault();
         }
     }, { passive: false });
@@ -1438,34 +1446,60 @@ function setupGreenPinDrag() {
         if (dragging && e.touches.length === 1) {
             e.preventDefault();
             const { clientX, clientY } = getClientCoords(e);
+            const dx = clientX - dragStartX;
+            const dy = clientY - dragStartY;
+            if (!dragStarted) {
+                if (Math.hypot(dx, dy) < DRAG_START_THRESHOLD_PX) {
+                    return; // ignorera små rörelser – flytta inte flaggan ännu
+                }
+                dragStarted = true;
+            }
             applyPinOffsetFromPoint(clientX, clientY);
         }
     }, { passive: false });
 
     ring.addEventListener('touchend', (e) => {
-        if (e.touches.length === 0) dragging = false;
+        if (e.touches.length === 0) {
+            dragging = false;
+            dragStarted = false;
+        }
     }, { passive: true });
 
     ring.addEventListener('touchcancel', () => {
         dragging = false;
+        dragStarted = false;
     }, { passive: true });
 
     ring.addEventListener('mousedown', (e) => {
         if (e.button === 0 && wrap._greenDragData) {
+            // Börja drag, men flytta inte flaggan förrän användaren faktiskt drar
             dragging = true;
+            dragStarted = false;
+            dragStartX = e.clientX;
+            dragStartY = e.clientY;
             e.preventDefault();
-            applyPinOffsetFromPoint(e.clientX, e.clientY);
         }
     });
 
     document.addEventListener('mousemove', (e) => {
         if (dragging && e.buttons === 1) {
+            const dx = e.clientX - dragStartX;
+            const dy = e.clientY - dragStartY;
+            if (!dragStarted) {
+                if (Math.hypot(dx, dy) < DRAG_START_THRESHOLD_PX) {
+                    return;
+                }
+                dragStarted = true;
+            }
             applyPinOffsetFromPoint(e.clientX, e.clientY);
         }
     });
 
     document.addEventListener('mouseup', (e) => {
-        if (e.button === 0) dragging = false;
+        if (e.button === 0) {
+            dragging = false;
+            dragStarted = false;
+        }
     });
 
     ring.addEventListener('keydown', (e) => {
