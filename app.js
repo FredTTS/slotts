@@ -1323,10 +1323,13 @@ function drawGreenShape(greenPolygon, holeData) {
             const greenMaxSx = Math.max(...sxs);
             const greenMinSy = Math.min(...sys);
             const greenMaxSy = Math.max(...sys);
+            const centerSx = pad + ((minX + maxX) / 2 - minX) / rangeX * w;
+            const centerSy = pad + ((minY + maxY) / 2 - minY) / rangeY * h;
             wrap._greenDragData = {
                 minX, maxX, minY, maxY, rangeX, rangeY, pad, w, h, cos, sin, cx, cy,
                 towardUnitEast, towardUnitNorth, leftUnitEast, leftUnitNorth,
-                greenMinSx, greenMaxSx, greenMinSy, greenMaxSy
+                greenMinSx, greenMaxSx, greenMinSy, greenMaxSy,
+                centerSx, centerSy
             };
         } else {
             wrap._greenDragData = null;
@@ -1407,8 +1410,8 @@ function setupGreenPinDrag() {
     let dragStartY = 0;
     let startPinOffsetX = 0;
     let startPinOffsetY = 0;
-    let startFingerPinOffsetX = 0;
-    let startFingerPinOffsetY = 0;
+    let startVirtualPinOffsetX = 0;
+    let startVirtualPinOffsetY = 0;
     const DRAG_START_THRESHOLD_PX = 8;
 
     function getClientCoords(e) {
@@ -1418,24 +1421,28 @@ function setupGreenPinDrag() {
         return { clientX: e.clientX, clientY: e.clientY };
     }
 
-    // Returnerar pinOffset (meter) för en skärmposition (samma projektion som greenen)
-    function getPinOffsetFromPoint(clientX, clientY) {
+    // Virtuell pekpunkt på greenen: greenens centrum + finger-delta (så att ringen kan ligga under greenen)
+    function getPinOffsetFromFingerDelta(clientX, clientY) {
         const data = wrap._greenDragData;
-        if (!data) return null;
-        const pt = svg.createSVGPoint();
-        pt.x = clientX;
-        pt.y = clientY;
-        const svgPt = pt.matrixTransform(svg.getScreenCTM().inverse());
+        if (!data || data.centerSx == null || data.centerSy == null) return null;
+        const anchorPt = svg.createSVGPoint();
+        anchorPt.x = data.centerSx;
+        anchorPt.y = data.centerSy;
+        const anchorScreen = anchorPt.matrixTransform(svg.getScreenCTM());
+        const dxScreen = clientX - dragStartX;
+        const dyScreen = clientY - dragStartY;
+        const virtualPt = svg.createSVGPoint();
+        virtualPt.x = anchorScreen.x + dxScreen;
+        virtualPt.y = anchorScreen.y + dyScreen;
+        const svgPt = virtualPt.matrixTransform(svg.getScreenCTM().inverse());
         return greenSvgToPinOffset(svgPt.x, svgPt.y, data);
     }
 
     function applyPinOffsetFromDelta(clientX, clientY) {
-        const current = getPinOffsetFromPoint(clientX, clientY);
+        const current = getPinOffsetFromFingerDelta(clientX, clientY);
         if (current == null) return;
-        const deltaX = current.x - startFingerPinOffsetX;
-        const deltaY = current.y - startFingerPinOffsetY;
-        state.pinOffset.x = startPinOffsetX + deltaX;
-        state.pinOffset.y = startPinOffsetY + deltaY;
+        state.pinOffset.x = startPinOffsetX + (current.x - startVirtualPinOffsetX);
+        state.pinOffset.y = startPinOffsetY + (current.y - startVirtualPinOffsetY);
         updateDistances();
     }
 
@@ -1463,13 +1470,13 @@ function setupGreenPinDrag() {
                 dragStarted = true;
                 startPinOffsetX = state.pinOffset.x;
                 startPinOffsetY = state.pinOffset.y;
-                const startOffset = getPinOffsetFromPoint(dragStartX, dragStartY);
-                if (startOffset) {
-                    startFingerPinOffsetX = startOffset.x;
-                    startFingerPinOffsetY = startOffset.y;
+                const startVirtual = getPinOffsetFromFingerDelta(dragStartX, dragStartY);
+                if (startVirtual) {
+                    startVirtualPinOffsetX = startVirtual.x;
+                    startVirtualPinOffsetY = startVirtual.y;
                 } else {
-                    startFingerPinOffsetX = startPinOffsetX;
-                    startFingerPinOffsetY = startPinOffsetY;
+                    startVirtualPinOffsetX = startPinOffsetX;
+                    startVirtualPinOffsetY = startPinOffsetY;
                 }
             }
             applyPinOffsetFromDelta(clientX, clientY);
@@ -1509,13 +1516,13 @@ function setupGreenPinDrag() {
                 dragStarted = true;
                 startPinOffsetX = state.pinOffset.x;
                 startPinOffsetY = state.pinOffset.y;
-                const startOffset = getPinOffsetFromPoint(dragStartX, dragStartY);
-                if (startOffset) {
-                    startFingerPinOffsetX = startOffset.x;
-                    startFingerPinOffsetY = startOffset.y;
+                const startVirtual = getPinOffsetFromFingerDelta(dragStartX, dragStartY);
+                if (startVirtual) {
+                    startVirtualPinOffsetX = startVirtual.x;
+                    startVirtualPinOffsetY = startVirtual.y;
                 } else {
-                    startFingerPinOffsetX = startPinOffsetX;
-                    startFingerPinOffsetY = startPinOffsetY;
+                    startVirtualPinOffsetX = startPinOffsetX;
+                    startVirtualPinOffsetY = startPinOffsetY;
                 }
             }
             applyPinOffsetFromDelta(e.clientX, e.clientY);
