@@ -588,23 +588,31 @@ body {
     gap: 1rem;
     padding-top: 1.5rem;
     border-top: 2px solid var(--border);
+    min-width: 0;
 }
 
 .detail-item {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+    min-width: 0;
 }
 
 .detail-label {
     font-size: 0.875rem;
     color: var(--text-secondary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .detail-value {
     font-size: 1.5rem;
     font-weight: 600;
     color: var(--text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .detail-item-green {
@@ -1502,6 +1510,17 @@ input[type="range"]::-moz-range-thumb:hover {
         min-width: 40px;
         padding: 0.45rem;
         justify-content: center;
+    }
+}
+
+/* Avstånd Framkant/Green/Bakkant – undvik overflow på smala skärmar (t.ex. iPhone) */
+@media (max-width: 400px) {
+    .distance-details {
+        gap: 0.5rem;
+    }
+
+    .detail-value {
+        font-size: 1.2rem;
     }
 }
 
