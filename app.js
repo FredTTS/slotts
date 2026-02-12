@@ -31,6 +31,7 @@ let state = {
     userPosition: null,
     weatherData: null,
     pinOffset: { x: 0, y: 0 },
+    selectedTee: 50,
     clubs: loadClubData(),
     watchId: null,
     timerStartTime: null,
@@ -40,26 +41,29 @@ let state = {
     notes: loadNotes()    // anteckningar per hål { 1: "...", 2: "...", ... }
 };
 
-// Hålinfo per hål: par, längd (m), handicap = index 1–18 (svårighetsgrad, 1 svårast). Uppdatera med riktiga Slottsbanan-värden om tillgängliga.
+// Tees: 47, 50, 54, 58 (bana längre = högre siffra). Varje hål har längd per tee i meter.
+const TEE_IDS = [47, 50, 54, 58];
+
+// Hålinfo per hål: par, handicap (index 1–18), lengths = { 47, 50, 54, 58 } i meter. Slottsbanan.
 const HOLE_INFO = {
-    1: { par: 4, length: 320, handicap: 5 },
-    2: { par: 3, length: 145, handicap: 17 },
-    3: { par: 4, length: 285, handicap: 9 },
-    4: { par: 4, length: 310, handicap: 3 },
-    5: { par: 5, length: 480, handicap: 1 },
-    6: { par: 4, length: 295, handicap: 11 },
-    7: { par: 4, length: 265, handicap: 15 },
-    8: { par: 4, length: 340, handicap: 7 },
-    9: { par: 3, length: 165, handicap: 13 },
-    10: { par: 4, length: 305, handicap: 4 },
-    11: { par: 4, length: 275, handicap: 12 },
-    12: { par: 3, length: 155, handicap: 18 },
-    13: { par: 5, length: 455, handicap: 2 },
-    14: { par: 4, length: 300, handicap: 8 },
-    15: { par: 4, length: 290, handicap: 10 },
-    16: { par: 4, length: 315, handicap: 6 },
-    17: { par: 3, length: 175, handicap: 14 },
-    18: { par: 4, length: 330, handicap: 16 }
+    1: { par: 4, handicap: 12, lengths: { 47: 301, 50: 338, 54: 354, 58: 404 } },
+    2: { par: 5, handicap: 8, lengths: { 47: 368, 50: 422, 54: 422, 58: 431 } },
+    3: { par: 5, handicap: 6, lengths: { 47: 417, 50: 417, 54: 469, 58: 480 } },
+    4: { par: 3, handicap: 16, lengths: { 47: 84, 50: 93, 54: 116, 58: 128 } },
+    5: { par: 5, handicap: 4, lengths: { 47: 386, 50: 386, 54: 446, 58: 456 } },
+    6: { par: 4, handicap: 14, lengths: { 47: 275, 50: 275, 54: 332, 58: 345 } },
+    7: { par: 4, handicap: 18, lengths: { 47: 196, 50: 230, 54: 238, 58: 257 } },
+    8: { par: 4, handicap: 2, lengths: { 47: 264, 50: 279, 54: 327, 58: 360 } },
+    9: { par: 3, handicap: 10, lengths: { 47: 98, 50: 131, 54: 150, 58: 158 } },
+    10: { par: 4, handicap: 5, lengths: { 47: 265, 50: 270, 54: 280, 58: 309 } },
+    11: { par: 4, handicap: 1, lengths: { 47: 311, 50: 317, 54: 346, 58: 367 } },
+    12: { par: 5, handicap: 9, lengths: { 47: 404, 50: 420, 54: 431, 58: 452 } },
+    13: { par: 3, handicap: 15, lengths: { 47: 114, 50: 144, 54: 152, 58: 170 } },
+    14: { par: 5, handicap: 11, lengths: { 47: 400, 50: 420, 54: 468, 58: 480 } },
+    15: { par: 3, handicap: 17, lengths: { 47: 97, 50: 116, 54: 116, 58: 134 } },
+    16: { par: 4, handicap: 3, lengths: { 47: 290, 50: 316, 54: 334, 58: 365 } },
+    17: { par: 3, handicap: 13, lengths: { 47: 106, 50: 127, 54: 133, 58: 142 } },
+    18: { par: 4, handicap: 7, lengths: { 47: 286, 50: 292, 54: 333, 58: 398 } }
 };
 
 // Layout persistence keys (en per sida)
@@ -1106,12 +1110,24 @@ function updateBanguidePage() {
     }
     if (infoEl) {
         const info = HOLE_INFO[hole];
-        if (info) {
+        const tee = state.selectedTee;
+        if (info && info.lengths) {
+            const lengthM = info.lengths[tee] != null ? info.lengths[tee] : info.lengths[50];
             infoEl.innerHTML = `
                 <p><strong>Index:</strong> ${info.handicap} (svårighetsgrad 1–18)</p>
-                <p><strong>Längd:</strong> ${info.length} m</p>
+                <p><strong>Längd (tee ${tee}):</strong> ${lengthM} m</p>
                 <p><strong>Par:</strong> ${info.par}</p>
+                <p class="banguide-tee-select">
+                    <span class="banguide-tee-label">Tee:</span>
+                    ${TEE_IDS.map(t => `<button type="button" class="banguide-tee-btn ${t === tee ? 'active' : ''}" data-tee="${t}" aria-pressed="${t === tee}">${t}</button>`).join('')}
+                </p>
             `;
+            infoEl.querySelectorAll('.banguide-tee-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    state.selectedTee = Number(btn.dataset.tee);
+                    updateBanguidePage();
+                });
+            });
         } else {
             infoEl.innerHTML = '<p>Information om hålet visas här.</p>';
         }

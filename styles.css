@@ -244,6 +244,44 @@ body {
     margin-bottom: 0;
 }
 
+.banguide-tee-select {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+}
+
+.banguide-tee-label {
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-right: 0.25rem;
+}
+
+.banguide-tee-btn {
+    min-width: 44px;
+    padding: 0.35rem 0.6rem;
+    border: 2px solid var(--border);
+    border-radius: 0.5rem;
+    background: var(--card-bg);
+    color: var(--text-primary);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.banguide-tee-btn:hover {
+    border-color: var(--primary);
+    color: var(--primary-dark);
+}
+
+.banguide-tee-btn.active {
+    background: var(--primary-dark);
+    border-color: var(--primary-dark);
+    color: white;
+}
+
 /* Header */
 .header {
     background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
