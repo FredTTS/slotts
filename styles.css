@@ -178,6 +178,44 @@ body {
     will-change: transform;
 }
 
+.banguide-hole-nav {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 2rem;
+    padding: 0.75rem;
+    border-top: 1px solid var(--border);
+}
+
+.banguide-hole-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
+    min-height: 48px;
+    padding: 0;
+    border: 2px solid var(--primary-dark);
+    border-radius: 50%;
+    background: var(--card-bg);
+    color: var(--primary-dark);
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.banguide-hole-btn:hover {
+    background: var(--primary-light);
+    color: var(--primary-dark);
+}
+
+.banguide-hole-btn:active {
+    background: var(--primary-dark);
+    color: white;
+}
+
 .banguide-section {
     background: var(--card-bg);
     border-radius: 1rem;

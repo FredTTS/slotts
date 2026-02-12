@@ -40,6 +40,28 @@ let state = {
     notes: loadNotes()    // anteckningar per hål { 1: "...", 2: "...", ... }
 };
 
+// Hålinfo per hål: par, längd (m), handicap = index 1–18 (svårighetsgrad, 1 svårast). Uppdatera med riktiga Slottsbanan-värden om tillgängliga.
+const HOLE_INFO = {
+    1: { par: 4, length: 320, handicap: 5 },
+    2: { par: 3, length: 145, handicap: 17 },
+    3: { par: 4, length: 285, handicap: 9 },
+    4: { par: 4, length: 310, handicap: 3 },
+    5: { par: 5, length: 480, handicap: 1 },
+    6: { par: 4, length: 295, handicap: 11 },
+    7: { par: 4, length: 265, handicap: 15 },
+    8: { par: 4, length: 340, handicap: 7 },
+    9: { par: 3, length: 165, handicap: 13 },
+    10: { par: 4, length: 305, handicap: 4 },
+    11: { par: 4, length: 275, handicap: 12 },
+    12: { par: 3, length: 155, handicap: 18 },
+    13: { par: 5, length: 455, handicap: 2 },
+    14: { par: 4, length: 300, handicap: 8 },
+    15: { par: 4, length: 290, handicap: 10 },
+    16: { par: 4, length: 315, handicap: 6 },
+    17: { par: 3, length: 175, handicap: 14 },
+    18: { par: 4, length: 330, handicap: 16 }
+};
+
 // Layout persistence keys (en per sida)
 const LAYOUT_KEY_MAIN = 'layoutOrderMain';
 const LAYOUT_KEY_BANGUIDE = 'layoutOrderBanguide';
@@ -453,6 +475,11 @@ function setupEventListeners() {
     if (navBtnAvstand) navBtnAvstand.addEventListener('click', goDistance);
     if (banguideExpandBtn) banguideExpandBtn.addEventListener('click', goBanguide);
     if (distanceExpandBtn) distanceExpandBtn.addEventListener('click', goDistance);
+
+    const banguideHolePrev = document.getElementById('banguideHolePrev');
+    const banguideHoleNext = document.getElementById('banguideHoleNext');
+    if (banguideHolePrev) banguideHolePrev.addEventListener('click', () => selectHole((state.currentHole || 1) - 1));
+    if (banguideHoleNext) banguideHoleNext.addEventListener('click', () => selectHole((state.currentHole || 1) + 1));
 
     const holeNotesInput = document.getElementById('holeNotesInput');
     if (holeNotesInput) {
@@ -1052,7 +1079,7 @@ function setupBanguideImageZoom() {
     wrap.addEventListener('mouseleave', () => { mouseDown = false; });
 }
 
-// Banguide-sida: uppdatera hålnummer och bild när hål byts (återställ zoom och pan)
+// Banguide-sida: uppdatera hålnummer, bild och information om hålet
 function updateBanguidePage() {
     const hole = state.currentHole || 1;
     const numEl = document.getElementById('banguideHoleNumber');
@@ -1061,6 +1088,7 @@ function updateBanguidePage() {
     const previewImgEl = document.getElementById('banguidePreviewImage');
     const expandBtnHoleEl = document.getElementById('banguideExpandBtnHole');
     const expandBtn = document.getElementById('banguideExpandBtn');
+    const infoEl = document.getElementById('banguideInfo');
     if (numEl) numEl.textContent = hole;
     if (previewNumEl) previewNumEl.textContent = hole;
     if (expandBtnHoleEl) expandBtnHoleEl.textContent = hole;
@@ -1075,6 +1103,18 @@ function updateBanguidePage() {
     if (previewImgEl) {
         previewImgEl.src = `img/s${hole}.jpeg`;
         previewImgEl.alt = `Hål ${hole}`;
+    }
+    if (infoEl) {
+        const info = HOLE_INFO[hole];
+        if (info) {
+            infoEl.innerHTML = `
+                <p><strong>Index:</strong> ${info.handicap} (svårighetsgrad 1–18)</p>
+                <p><strong>Längd:</strong> ${info.length} m</p>
+                <p><strong>Par:</strong> ${info.par}</p>
+            `;
+        } else {
+            infoEl.innerHTML = '<p>Information om hålet visas här.</p>';
+        }
     }
 }
 
