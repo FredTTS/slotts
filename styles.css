@@ -185,6 +185,9 @@ body {
     gap: 2rem;
     padding: 0.75rem;
     border-top: 1px solid var(--border);
+    position: relative;
+    z-index: 1;
+    background: var(--card-bg);
 }
 
 .banguide-hole-btn {
