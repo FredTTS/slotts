@@ -837,6 +837,13 @@ function selectHole(holeNumber) {
     }
 
     updateBanguidePage();
+
+    // Scroll banguide till toppen vid byte av hål (knapparna) så man slipper scrolla upp
+    const pages = document.getElementById('pages');
+    if (pages && pages.classList.contains('show-banguide')) {
+        const banguideContent = document.querySelector('.banguide-content');
+        if (banguideContent) banguideContent.scrollTo({ top: 0, behavior: 'instant' });
+    }
 }
 
 function resetPinPosition() {
