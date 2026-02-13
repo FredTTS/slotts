@@ -522,6 +522,55 @@ body {
     color: var(--text-primary);
 }
 
+/* Tee-val på startsidan */
+.main-tee-select {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+    font-size: 0.9rem;
+}
+
+.main-tee-label {
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.main-tee-btns {
+    display: flex;
+    gap: 0.35rem;
+}
+
+.main-tee-btn {
+    min-width: 40px;
+    padding: 0.35rem 0.6rem;
+    border: 2px solid var(--border);
+    border-radius: 0.5rem;
+    background: var(--card-bg);
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.main-tee-btn:hover {
+    border-color: var(--primary);
+    color: var(--primary-dark);
+}
+
+.main-tee-btn.active {
+    background: var(--primary-dark);
+    border-color: var(--primary-dark);
+    color: white;
+}
+
+.main-tee-select .tee-hint {
+    width: 100%;
+    margin: 0;
+}
+
 /* Swipe-friendly hole selector – mindre höjd */
 .hole-swipe-area {
     width: 100%;
