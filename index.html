@@ -18,8 +18,8 @@
                 <div class="page page-main" id="pageMain">
         <!-- Header -->
         <header class="header">
-            <div class="header-content">
-                <h1>⛳ Slottsbanan</h1>
+                        <div class="header-content">
+                            <h1 id="mainPageHeading" tabindex="-1">⛳ Slottsbanan</h1>
                 <div class="header-actions">
                     <button type="button" id="resetLayoutBtn" class="header-btn" title="Återställ ordning" aria-label="Återställ ordning">
                         <span class="header-btn-icon" aria-hidden="true">⟲</span>
@@ -102,7 +102,7 @@
                 <div class="page page-distance" id="pageDistance">
                     <header class="header header-distance">
                         <div class="header-content">
-                            <h1 class="distance-page-title">Avstånd till green – Hål <span id="distancePageHoleNumber">1</span></h1>
+                            <h1 id="distancePageHeading" class="distance-page-title" tabindex="-1">Avstånd till green – Hål <span id="distancePageHoleNumber">1</span></h1>
                         </div>
                     </header>
                     <main class="distance-page-content">
@@ -185,12 +185,12 @@
                 <div class="page page-banguide" id="pageBanguide">
                     <header class="header header-banguide">
                         <div class="header-content">
-                            <h1 class="banguide-title">Banguide – Hål <span id="banguideHoleNumber">1</span></h1>
+                            <h1 id="banguidePageHeading" class="banguide-title" tabindex="-1">Banguide – Hål <span id="banguideHoleNumber">1</span></h1>
                         </div>
                     </header>
                     <main class="banguide-content">
                         <div class="card banguide-image-wrap" id="banguideImageCard" data-layout-id="banguideImageCard">
-                            <img class="banguide-image" id="banguideImage" src="img/s1.jpeg" alt="Hål 1" />
+                            <img class="banguide-image" id="banguideImage" src="img/s1.jpeg" alt="Hål 1" loading="lazy" />
                             <div class="banguide-hole-nav" aria-label="Byta hål">
                                 <button type="button" class="banguide-hole-btn banguide-hole-prev" id="banguideHolePrev" aria-label="Föregående hål">
                                     <span aria-hidden="true">←</span>
@@ -279,6 +279,8 @@
         </div>
     </div>
 
+    <!-- Optional: Sätt window.SLOTTS_WEATHER_PROXY = 'https://din-proxy.com/weather' för att dölja API-nyckel -->
+    <!-- Optional: Sätt window.SLOTTS_DEBUG = false för att stänga av konsolloggar -->
     <script src="app.js"></script>
 </body>
 </html>

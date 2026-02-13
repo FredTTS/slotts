@@ -2,7 +2,8 @@
 let GOLF_COURSE_DATA = null;
 
 // Constants
-// I produktion: använd backend-proxy eller miljövariabel för API-nyckel
+// Väder-API: Sätt window.SLOTTS_WEATHER_PROXY till din proxy-URL (t.ex. Netlify/Vercel-funktion)
+// för att dölja API-nyckeln. Annars används nyckeln direkt (synlig i klienten).
 const WEATHER_API_KEY = '99d688898682ba4fc727529cd0fbd7ac';
 const CLUBS = [
     'Driver', 'Trä 3', 'Trä 5', 'Hybrid 3', 'Järn 4', 'Järn 5', 
@@ -25,11 +26,17 @@ const DEFAULT_CLUB_DATA = {
     'SW': { totalDistance: 85, carryDistance: 80, spread: 4 },
     'LW': { totalDistance: 75, carryDistance: 70, spread: 4 }
 };
+// Logger – stäng av i produktion genom att sätta window.SLOTTS_DEBUG = false
+const log = (typeof window !== 'undefined' && window.SLOTTS_DEBUG === false)
+    ? () => {}
+    : (...args) => console.warn(...args);
+
 // App State
 let state = {
     currentHole: null,
     userPosition: null,
     weatherData: null,
+    weatherLoading: false,
     pinOffset: { x: 0, y: 0 },
     selectedTee: 50,
     clubs: loadClubData(),
@@ -446,25 +453,31 @@ function setupEventListeners() {
     const pagesWrapper = document.getElementById('pagesWrapper');
     function scrollPageToTop(selector) {
         const el = document.querySelector(selector);
-        if (el) el.scrollTo({ top: 0, behavior: 'instant' });
+        if (el) el.scrollTop = 0;
     }
     function scrollTargetPageToTop(selector) {
         scrollPageToTop(selector);
-        if (pagesWrapper) pagesWrapper.scrollTo({ top: 0, behavior: 'instant' });
+        if (pagesWrapper) pagesWrapper.scrollTop = 0;
+        requestAnimationFrame(() => scrollPageToTop(selector));
+    }
+    function focusPageHeading(id) {
         requestAnimationFrame(() => {
-            scrollPageToTop(selector);
+            const el = document.getElementById(id);
+            if (el) el.focus({ preventScroll: true });
         });
     }
     function goHome() {
         pages.classList.remove('show-banguide', 'show-distance');
         setActiveNav('home');
         requestAnimationFrame(() => scrollTargetPageToTop('.page-main'));
+        focusPageHeading('mainPageHeading');
     }
     function goBanguide() {
         pages.classList.remove('show-distance');
         pages.classList.add('show-banguide');
         setActiveNav('banguide');
         requestAnimationFrame(() => scrollTargetPageToTop('.banguide-content'));
+        focusPageHeading('banguidePageHeading');
     }
     function goDistance() {
         pages.classList.remove('show-banguide');
@@ -473,6 +486,7 @@ function setupEventListeners() {
         if (holeEl) holeEl.textContent = state.currentHole || 1;
         setActiveNav('avstand');
         requestAnimationFrame(() => scrollTargetPageToTop('.distance-page-content'));
+        focusPageHeading('distancePageHeading');
     }
     if (navBtnHome) navBtnHome.addEventListener('click', goHome);
     if (navBtnBanguide) navBtnBanguide.addEventListener('click', goBanguide);
@@ -842,7 +856,7 @@ function selectHole(holeNumber) {
     const pages = document.getElementById('pages');
     if (pages && pages.classList.contains('show-banguide')) {
         const banguideContent = document.querySelector('.banguide-content');
-        if (banguideContent) banguideContent.scrollTo({ top: 0, behavior: 'instant' });
+        if (banguideContent) banguideContent.scrollTop = 0;
     }
 }
 
@@ -890,43 +904,75 @@ function updateTimerDisplay() {
     }
 }
 
-// Weather API
+// Weather API – använd window.SLOTTS_WEATHER_PROXY för att dölja API-nyckel
 async function fetchWeather() {
     if (!state.userPosition) return;
-    
+
+    setWeatherLoading(true);
+    const url = typeof window !== 'undefined' && window.SLOTTS_WEATHER_PROXY
+        ? `${window.SLOTTS_WEATHER_PROXY}?lat=${state.userPosition.lat}&lon=${state.userPosition.lng}`
+        : `https://api.openweathermap.org/data/2.5/weather?lat=${state.userPosition.lat}&lon=${state.userPosition.lng}&appid=${WEATHER_API_KEY}&units=metric`;
+
     try {
-        const response = await fetch(
-            `https://api.openweathermap.org/data/2.5/weather?lat=${state.userPosition.lat}&lon=${state.userPosition.lng}&appid=${WEATHER_API_KEY}&units=metric`
-        );
-        state.weatherData = await response.json();
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`Väder API: ${response.status} ${response.statusText}`);
+        const data = await response.json();
+        if (data.cod && data.cod >= 400) throw new Error(data.message || 'Väderfel');
+        state.weatherData = data;
         updateWeatherDisplay();
     } catch (error) {
-        console.error('Weather fetch error:', error);
+        log('Weather fetch error:', error);
+        state.weatherData = null;
+        showWeatherError();
+    } finally {
+        setWeatherLoading(false);
     }
 }
 
+function setWeatherLoading(loading) {
+    state.weatherLoading = loading;
+    const impactList = document.getElementById('impactList');
+    const conditionsCard = document.getElementById('conditionsImpactCard');
+    if (!conditionsCard) return;
+    conditionsCard.style.display = 'block';
+    if (!impactList) return;
+    if (loading) {
+        impactList.innerHTML = '<p class="impact-loading">Hämtar väder...</p>';
+    }
+}
+
+function showWeatherError() {
+    const conditionsCard = document.getElementById('conditionsImpactCard');
+    const impactList = document.getElementById('impactList');
+    if (conditionsCard) conditionsCard.style.display = 'block';
+    if (impactList) impactList.innerHTML = '<p class="impact-loading">Kunde inte hämta väder</p>';
+}
+
 function updateWeatherDisplay() {
-    if (!state.weatherData) return;
-    
-    const temp = Math.round(state.weatherData.main.temp);
-    const windSpeed = Math.round(state.weatherData.wind.speed * 10) / 10; // m/s
-    const windDir = getWindDirection(state.weatherData.wind.deg);
-    const humidity = state.weatherData.main.humidity;
-    // Update any weather elements if they exist (we removed the dedicated weather card)
-    const tempEl = document.getElementById('temperature'); if (tempEl) tempEl.textContent = `${temp}°C`;
-    const windEl = document.getElementById('windSpeed'); if (windEl) windEl.textContent = `${windSpeed} m/s`;
-    const windDirEl = document.getElementById('windDirection'); if (windDirEl) windDirEl.textContent = windDir;
-    const humEl = document.getElementById('humidity'); if (humEl) humEl.textContent = `${humidity}%`;
+    const w = state.weatherData;
+    if (!w || !w.main || !w.wind) return;
+
+    const temp = Math.round(w.main.temp);
+    const windSpeed = Math.round((w.wind.speed ?? 0) * 10) / 10;
+    const windDir = getWindDirection(w.wind.deg ?? 0);
+    const humidity = w.main.humidity ?? 0;
+    const tempEl = document.getElementById('temperature');
+    if (tempEl) tempEl.textContent = `${temp}°C`;
+    const windEl = document.getElementById('windSpeed');
+    if (windEl) windEl.textContent = `${windSpeed} m/s`;
+    const windDirEl = document.getElementById('windDirection');
+    if (windDirEl) windDirEl.textContent = windDir;
+    const humEl = document.getElementById('humidity');
+    if (humEl) humEl.textContent = `${humidity}%`;
 
     updateWindArrow();
 
-    // Also refresh the impact list so weather metrics appear under Påverkan på avstånd
     updateImpactDetails(
-        calculateTemperatureAdjustment(state.weatherData.main.temp),
+        calculateTemperatureAdjustment(w.main.temp),
         calculateWindAdjustment(0),
-        calculateHumidityAdjustment(state.weatherData.main.humidity),
+        calculateHumidityAdjustment(w.main.humidity),
         calculateElevationAdjustment(0),
-        calculatePressureAdjustment(state.weatherData.main.pressure)
+        calculatePressureAdjustment(w.main.pressure ?? 1013)
     );
 }
 
@@ -2067,8 +2113,6 @@ function updateImpactDetails(temp, wind, humidity, elevation, pressure) {
 // Service Worker Registration
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('sw.js')
-            .then(reg => console.log('Service Worker registered'))
-            .catch(err => console.log('Service Worker registration failed:', err));
+        navigator.serviceWorker.register('sw.js').catch(() => {});
     });
 }

@@ -82,8 +82,8 @@ Högre luftfuktighet ökar avståndet något
 ### API-nycklar
 
 Väder-API: OpenWeatherMap
-- Aktuell nyckel: `99d688898682ba4fc727529cd0fbd7ac`
-- För produktion: Skaffa egen nyckel på https://openweathermap.org/api
+- För produktion: Använd en backend-proxy för att dölja API-nyckeln. Sätt `window.SLOTTS_WEATHER_PROXY` till din proxy-URL (t.ex. en Netlify/Vercel-funktion) innan `app.js` laddas. Proxyn ska ta `lat` och `lon` som query-params och returnera OpenWeatherMap-svaret.
+- Utan proxy används nyckeln direkt (synlig i klienten) – skaffa egen nyckel på https://openweathermap.org/api
 
 ## Användning
 

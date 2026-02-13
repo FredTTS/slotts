@@ -1183,6 +1183,12 @@ input[type="range"]::-moz-range-thumb:hover {
     gap: 0.75rem;
 }
 
+.impact-loading {
+    padding: 0.75rem;
+    color: var(--text-secondary);
+    font-style: italic;
+}
+
 .impact-item {
     display: flex;
     justify-content: space-between;

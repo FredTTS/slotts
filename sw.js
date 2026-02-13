@@ -1,20 +1,27 @@
-const CACHE_NAME = 'smart-golf-v1';
+const CACHE_NAME = 'smart-golf-v2';
+const base = (self.location.pathname.replace(/\/sw\.js$/, '') || '') + '/';
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/styles.css',
-  '/app.js',
-  '/manifest.json'
-];
+  base,
+  base + 'index.html',
+  base + 'styles.css',
+  base + 'app.js',
+  base + 'manifest.json',
+  base + 'map.geojson',
+  ...Array.from({ length: 18 }, (_, i) => base + `img/s${i + 1}.jpeg`)
+].map((u) => new URL(u, self.location.origin).href);
 
-// Install event - cache files
+// Install event - cache files (en fil som misslyckas hindrar inte övriga)
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then((cache) => {
-        console.log('Opened cache');
-        return cache.addAll(urlsToCache);
-      })
+    caches.open(CACHE_NAME).then((cache) =>
+      Promise.allSettled(
+        urlsToCache.map((url) =>
+          cache.add(url).catch((err) => {
+            console.warn('Cache misslyckades för:', url, err);
+          })
+        )
+      )
+    )
   );
   self.skipWaiting();
 });
