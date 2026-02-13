@@ -42,16 +42,6 @@
             <section class="card hole-selector" id="holeSelector" data-layout-id="holeSelector" aria-label="Hålval">
                 <h2>Välj hål</h2>
                 <div class="hole-buttons" id="holeButtons" aria-live="polite" aria-atomic="true"></div>
-                <div class="main-tee-select" aria-label="Välj tee">
-                    <span class="main-tee-label">Tee:</span>
-                    <div class="main-tee-btns">
-                        <button type="button" class="main-tee-btn" data-tee="47" aria-pressed="false">47</button>
-                        <button type="button" class="main-tee-btn active" data-tee="50" aria-pressed="true">50</button>
-                        <button type="button" class="main-tee-btn" data-tee="54" aria-pressed="false">54</button>
-                        <button type="button" class="main-tee-btn" data-tee="58" aria-pressed="false">58</button>
-                    </div>
-                    <span class="tee-hint">Högre siffra = längre bana</span>
-                </div>
                 <div class="onboarding-banner" id="onboardingBanner" style="display: none;">
                     <p>Konfigurera dina klubbor i inställningar (kugghjulet) för bästa rekommendation.</p>
                     <button type="button" class="onboarding-dismiss" id="onboardingDismiss" aria-label="Stäng">×</button>
@@ -115,18 +105,8 @@
                 <!-- Sida 2: Avstånd till green (matchar knappordning Hem → Avstånd → Banguide) -->
                 <div class="page page-distance" id="pageDistance">
                     <header class="header header-distance">
-                        <div class="header-content header-distance-content">
+                        <div class="header-content">
                             <h1 id="distancePageHeading" class="distance-page-title" tabindex="-1">Avstånd till green – Hål <span id="distancePageHoleNumber">1</span></h1>
-                            <div class="distance-tee-select" aria-label="Välj tee">
-                                <span class="distance-tee-label">Tee:</span>
-                                <div class="distance-tee-btns">
-                                    <button type="button" class="distance-tee-btn" data-tee="47" aria-pressed="false">47</button>
-                                    <button type="button" class="distance-tee-btn active" data-tee="50" aria-pressed="true">50</button>
-                                    <button type="button" class="distance-tee-btn" data-tee="54" aria-pressed="false">54</button>
-                                    <button type="button" class="distance-tee-btn" data-tee="58" aria-pressed="false">58</button>
-                                </div>
-                                <span class="tee-hint">Högre siffra = längre bana</span>
-                            </div>
                         </div>
                     </header>
                     <main class="distance-page-content">

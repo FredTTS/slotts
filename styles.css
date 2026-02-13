@@ -99,15 +99,9 @@ body {
     padding-bottom: 5rem; /* Utrymme för fast bottenmeny */
 }
 
-.header-distance .header-content,
-.header-distance-content {
+.header-distance .header-content {
     flex-wrap: wrap;
     gap: 0.5rem;
-}
-
-.header-distance-content {
-    flex-direction: column;
-    align-items: stretch;
 }
 
 .distance-page-title {
@@ -116,56 +110,10 @@ body {
     text-align: center;
 }
 
-.distance-tee-select {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    font-size: 0.9rem;
-}
-
-.distance-tee-label {
-    font-weight: 600;
-    opacity: 0.95;
-}
-
-.distance-tee-btns {
-    display: flex;
-    gap: 0.35rem;
-}
-
-.distance-tee-btn {
-    min-width: 40px;
-    padding: 0.3rem 0.5rem;
-    border: 2px solid rgba(255, 255, 255, 0.5);
-    border-radius: 0.4rem;
-    background: rgba(255, 255, 255, 0.2);
-    color: white;
-    font-size: 0.9rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.distance-tee-btn:hover {
-    background: rgba(255, 255, 255, 0.3);
-}
-
-.distance-tee-btn.active {
-    background: white;
-    border-color: white;
-    color: var(--primary-dark);
-}
-
 .tee-hint {
     font-size: 0.75rem;
     opacity: 0.85;
     font-style: italic;
-}
-
-.header-distance .tee-hint {
-    width: 100%;
-    margin: 0;
 }
 
 .banguide-tee-select + .tee-hint {
@@ -520,55 +468,6 @@ body {
 .onboarding-dismiss:hover {
     background: var(--border);
     color: var(--text-primary);
-}
-
-/* Tee-val på startsidan */
-.main-tee-select {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    margin-top: 0.75rem;
-    font-size: 0.9rem;
-}
-
-.main-tee-label {
-    font-weight: 600;
-    color: var(--text-secondary);
-}
-
-.main-tee-btns {
-    display: flex;
-    gap: 0.35rem;
-}
-
-.main-tee-btn {
-    min-width: 40px;
-    padding: 0.35rem 0.6rem;
-    border: 2px solid var(--border);
-    border-radius: 0.5rem;
-    background: var(--card-bg);
-    color: var(--text-primary);
-    font-size: 0.9rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.main-tee-btn:hover {
-    border-color: var(--primary);
-    color: var(--primary-dark);
-}
-
-.main-tee-btn.active {
-    background: var(--primary-dark);
-    border-color: var(--primary-dark);
-    color: white;
-}
-
-.main-tee-select .tee-hint {
-    width: 100%;
-    margin: 0;
 }
 
 /* Swipe-friendly hole selector – mindre höjd */

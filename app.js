@@ -455,14 +455,6 @@ function setupEventListeners() {
         });
     }
 
-    document.querySelectorAll('.distance-tee-btn').forEach((btn) => {
-        btn.addEventListener('click', () => onTeeChange(Number(btn.dataset.tee)));
-    });
-
-    document.querySelectorAll('.main-tee-btn').forEach((btn) => {
-        btn.addEventListener('click', () => onTeeChange(Number(btn.dataset.tee)));
-    });
-
     // Fast bottenmeny – navigation mellan sidor
     const pages = document.getElementById('pages');
     const navBtnHome = document.getElementById('navBtnHome');
@@ -495,7 +487,6 @@ function setupEventListeners() {
     function goHome() {
         pages.classList.remove('show-banguide', 'show-distance');
         setActiveNav('home');
-        syncTeeButtons();
         requestAnimationFrame(() => scrollTargetPageToTop('.page-main'));
         focusPageHeading('mainPageHeading');
     }
@@ -511,7 +502,6 @@ function setupEventListeners() {
         pages.classList.add('show-distance');
         const holeEl = document.getElementById('distancePageHoleNumber');
         if (holeEl) holeEl.textContent = state.currentHole || 1;
-        syncTeeButtons();
         setActiveNav('avstand');
         requestAnimationFrame(() => scrollTargetPageToTop('.distance-page-content'));
         focusPageHeading('distancePageHeading');
@@ -1184,18 +1174,8 @@ function setupBanguideImageZoom() {
     wrap.addEventListener('mouseleave', () => { mouseDown = false; });
 }
 
-function syncTeeButtons() {
-    const tee = state.selectedTee || 50;
-    document.querySelectorAll('.distance-tee-btn, .main-tee-btn').forEach((btn) => {
-        const isActive = Number(btn.dataset.tee) === tee;
-        btn.classList.toggle('active', isActive);
-        btn.setAttribute('aria-pressed', isActive);
-    });
-}
-
 function onTeeChange(tee) {
     state.selectedTee = tee;
-    syncTeeButtons();
     updateBanguidePage();
     if (state.currentHole && state.userPosition) updateDistances();
 }
@@ -1249,7 +1229,6 @@ function updateBanguidePage() {
             infoEl.innerHTML = '<p>Information om hålet visas här.</p>';
         }
     }
-    syncTeeButtons();
 }
 
 function addCompassPermissionButton() {
