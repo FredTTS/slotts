@@ -99,15 +99,78 @@ body {
     padding-bottom: 5rem; /* Utrymme för fast bottenmeny */
 }
 
-.header-distance .header-content {
+.header-distance .header-content,
+.header-distance-content {
     flex-wrap: wrap;
     gap: 0.5rem;
+}
+
+.header-distance-content {
+    flex-direction: column;
+    align-items: stretch;
 }
 
 .distance-page-title {
     font-size: 1.25rem;
     flex: 1;
     text-align: center;
+}
+
+.distance-tee-select {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.distance-tee-label {
+    font-weight: 600;
+    opacity: 0.95;
+}
+
+.distance-tee-btns {
+    display: flex;
+    gap: 0.35rem;
+}
+
+.distance-tee-btn {
+    min-width: 40px;
+    padding: 0.3rem 0.5rem;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    border-radius: 0.4rem;
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.distance-tee-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.distance-tee-btn.active {
+    background: white;
+    border-color: white;
+    color: var(--primary-dark);
+}
+
+.tee-hint {
+    font-size: 0.75rem;
+    opacity: 0.85;
+    font-style: italic;
+}
+
+.header-distance .tee-hint {
+    width: 100%;
+    margin: 0;
+}
+
+.banguide-tee-select + .tee-hint {
+    margin: 0.25rem 0 0;
+    font-size: 0.85rem;
 }
 
 /* Banguide-sida: header och innehåll */
@@ -421,6 +484,44 @@ body {
     gap: 0.5rem;
 }
 
+/* Onboarding – första gången */
+.onboarding-banner {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+    padding: 0.75rem 1rem;
+    background: var(--background);
+    border-radius: 0.5rem;
+    border-left: 4px solid var(--primary);
+}
+
+.onboarding-banner p {
+    flex: 1;
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.onboarding-dismiss {
+    flex-shrink: 0;
+    width: 1.75rem;
+    height: 1.75rem;
+    padding: 0;
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 1.25rem;
+    line-height: 1;
+    cursor: pointer;
+    border-radius: 0.25rem;
+}
+
+.onboarding-dismiss:hover {
+    background: var(--border);
+    color: var(--text-primary);
+}
+
 /* Swipe-friendly hole selector – mindre höjd */
 .hole-swipe-area {
     width: 100%;
@@ -493,10 +594,17 @@ body {
 }
 
 .hole-number {
-    font-size: 1.5rem;
+    font-size: 1.75rem;
     font-weight: 700;
     line-height: 1;
     color: white;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 0.2rem 0.6rem;
+    border-radius: 0.5rem;
+    min-width: 2.5rem;
+    display: inline-block;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     transition: transform 0.3s ease;
 }
@@ -620,9 +728,35 @@ body {
 
 .distance-value-wrap {
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 1rem;
+    gap: 0.5rem;
+}
+
+.gps-retry-btn {
+    padding: 0.4rem 0.75rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.gps-retry-btn:hover:not(:disabled) {
+    background: var(--primary-dark);
+}
+
+.gps-retry-btn:disabled {
+    opacity: 0.7;
+    cursor: wait;
+}
+
+.distance-value.gps-error .loading {
+    color: #dc2626;
 }
 
 .distance-label {
@@ -1101,6 +1235,20 @@ input[type="range"]::-moz-range-thumb:hover {
     margin: 0;
     font-size: 0.95rem;
     color: var(--text-secondary);
+}
+
+.aim-waiting-hint {
+    display: block;
+    font-size: 0.85rem;
+    margin-top: 0.25rem;
+    opacity: 0.9;
+}
+
+.aim-hint {
+    margin: 0.5rem 0 0;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    font-style: italic;
 }
 
 .aim-list {

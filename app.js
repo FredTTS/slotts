@@ -425,6 +425,7 @@ function setupEventListeners() {
     const resetLayoutBtn = document.getElementById('resetLayoutBtn');
     if (resetLayoutBtn) {
         resetLayoutBtn.addEventListener('click', () => {
+            if (!confirm('Återställ ordning på kort?')) return;
             localStorage.removeItem(LAYOUT_KEY_MAIN);
             localStorage.removeItem(LAYOUT_KEY_BANGUIDE);
             localStorage.removeItem(LAYOUT_KEY_DISTANCE);
@@ -436,6 +437,32 @@ function setupEventListeners() {
     if (updateAimBtn) {
         updateAimBtn.addEventListener('click', refreshAimPosition);
     }
+
+    const gpsRetryBtn = document.getElementById('gpsRetryBtn');
+    if (gpsRetryBtn) {
+        gpsRetryBtn.addEventListener('click', retryGps);
+    }
+
+    const onboardingBanner = document.getElementById('onboardingBanner');
+    const onboardingDismiss = document.getElementById('onboardingDismiss');
+    if (onboardingBanner && !localStorage.getItem('slotts_onboarding_done')) {
+        onboardingBanner.style.display = 'flex';
+    }
+    if (onboardingDismiss) {
+        onboardingDismiss.addEventListener('click', () => {
+            localStorage.setItem('slotts_onboarding_done', '1');
+            if (onboardingBanner) onboardingBanner.style.display = 'none';
+        });
+    }
+
+    document.querySelectorAll('.distance-tee-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+            state.selectedTee = Number(btn.dataset.tee);
+            syncDistanceTeeButtons();
+            updateBanguidePage();
+            if (state.currentHole && state.userPosition) updateDistances();
+        });
+    });
 
     // Fast bottenmeny – navigation mellan sidor
     const pages = document.getElementById('pages');
@@ -484,10 +511,12 @@ function setupEventListeners() {
         pages.classList.add('show-distance');
         const holeEl = document.getElementById('distancePageHoleNumber');
         if (holeEl) holeEl.textContent = state.currentHole || 1;
+        syncDistanceTeeButtons();
         setActiveNav('avstand');
         requestAnimationFrame(() => scrollTargetPageToTop('.distance-page-content'));
         focusPageHeading('distancePageHeading');
     }
+
     if (navBtnHome) navBtnHome.addEventListener('click', goHome);
     if (navBtnBanguide) navBtnBanguide.addEventListener('click', goBanguide);
     if (navBtnAvstand) navBtnAvstand.addEventListener('click', goDistance);
@@ -700,9 +729,20 @@ function saveSettings() {
         }
     });
     saveClubData();
-    closeSettings();
-    if (state.currentHole) {
-        updateDistances();
+    const saveBtn = document.getElementById('saveSettings');
+    if (saveBtn) {
+        const orig = saveBtn.textContent;
+        saveBtn.textContent = 'Sparat!';
+        saveBtn.disabled = true;
+        setTimeout(() => {
+            saveBtn.textContent = orig;
+            saveBtn.disabled = false;
+            closeSettings();
+            if (state.currentHole) updateDistances();
+        }, 600);
+    } else {
+        closeSettings();
+        if (state.currentHole) updateDistances();
     }
 }
 
@@ -758,16 +798,24 @@ function startLocationTracking() {
                 lng: position.coords.longitude,
                 altitude: position.coords.altitude || 0
             };
+            const retryBtn = document.getElementById('gpsRetryBtn');
+            const distEl = document.getElementById('distanceToGreen');
+            if (retryBtn) retryBtn.style.display = 'none';
+            if (distEl) distEl.classList.remove('gps-error');
             if (state.currentHole) {
-                // Fetch weather once when GPS becomes available and weather not yet loaded
                 if (!state.weatherData) fetchWeather();
                 updateDistances();
             }
         },
         (error) => {
-            console.error('GPS error:', error);
+            log('GPS error:', error);
             const distEl = document.getElementById('distanceToGreen');
-            if (distEl) distEl.innerHTML = '<span class="loading">❌ GPS-fel. Kontrollera att plats är på.</span>';
+            const retryBtn = document.getElementById('gpsRetryBtn');
+            if (distEl) {
+                distEl.innerHTML = '<span class="loading">❌ GPS-fel. Aktivera plats i inställningar.</span>';
+                distEl.classList.add('gps-error');
+            }
+            if (retryBtn) retryBtn.style.display = 'inline-block';
         },
         { enableHighAccuracy: true, maximumAge: 0, timeout: 5000 }
     );
@@ -1136,6 +1184,15 @@ function setupBanguideImageZoom() {
     wrap.addEventListener('mouseleave', () => { mouseDown = false; });
 }
 
+function syncDistanceTeeButtons() {
+    const tee = state.selectedTee || 50;
+    document.querySelectorAll('.distance-tee-btn').forEach((btn) => {
+        const isActive = Number(btn.dataset.tee) === tee;
+        btn.classList.toggle('active', isActive);
+        btn.setAttribute('aria-pressed', isActive);
+    });
+}
+
 // Banguide-sida: uppdatera hålnummer, bild och information om hålet
 function updateBanguidePage() {
     const hole = state.currentHole || 1;
@@ -1174,17 +1231,21 @@ function updateBanguidePage() {
                     <span class="banguide-tee-label">Tee:</span>
                     ${TEE_IDS.map(t => `<button type="button" class="banguide-tee-btn ${t === tee ? 'active' : ''}" data-tee="${t}" aria-pressed="${t === tee}">${t}</button>`).join('')}
                 </p>
+                <p class="tee-hint">Högre siffra = längre bana</p>
             `;
             infoEl.querySelectorAll('.banguide-tee-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
                     state.selectedTee = Number(btn.dataset.tee);
+                    syncDistanceTeeButtons();
                     updateBanguidePage();
+                    if (state.currentHole && state.userPosition) updateDistances();
                 });
             });
         } else {
             infoEl.innerHTML = '<p>Information om hålet visas här.</p>';
         }
     }
+    syncDistanceTeeButtons();
 }
 
 function addCompassPermissionButton() {
@@ -1915,6 +1976,42 @@ function calculateBearing(pos1, pos2) {
     const θ = Math.atan2(y, x);
     
     return (θ * 180 / Math.PI + 360) % 360;
+}
+
+// GPS "Försök igen" – manuell retry vid GPS-fel
+function retryGps() {
+    if (!navigator.geolocation) return;
+    const retryBtn = document.getElementById('gpsRetryBtn');
+    const distEl = document.getElementById('distanceToGreen');
+    if (retryBtn) retryBtn.disabled = true;
+    if (distEl) distEl.innerHTML = '<span class="loading">📍 Hämtar position...</span>';
+    navigator.geolocation.getCurrentPosition(
+        (position) => {
+            state.userPosition = {
+                lat: position.coords.latitude,
+                lng: position.coords.longitude,
+                altitude: position.coords.altitude || 0
+            };
+            if (retryBtn) {
+                retryBtn.style.display = 'none';
+                retryBtn.disabled = false;
+            }
+            if (distEl) distEl.classList.remove('gps-error');
+            if (!state.weatherData) fetchWeather();
+            if (state.currentHole) updateDistances();
+        },
+        () => {
+            if (retryBtn) {
+                retryBtn.style.display = 'inline-block';
+                retryBtn.disabled = false;
+            }
+            if (distEl) {
+                distEl.innerHTML = '<span class="loading">❌ GPS-fel. Aktivera plats i inställningar.</span>';
+                distEl.classList.add('gps-error');
+            }
+        },
+        { enableHighAccuracy: true, maximumAge: 0, timeout: 15000 }
+    );
 }
 
 // Knappen "Uppdatera position och siktråd" – hämtar ny position och uppdaterar siktråden

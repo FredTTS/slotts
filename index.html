@@ -42,6 +42,10 @@
             <section class="card hole-selector" id="holeSelector" data-layout-id="holeSelector" aria-label="Hålval">
                 <h2>Välj hål</h2>
                 <div class="hole-buttons" id="holeButtons" aria-live="polite" aria-atomic="true"></div>
+                <div class="onboarding-banner" id="onboardingBanner" style="display: none;">
+                    <p>Konfigurera dina klubbor i inställningar (kugghjulet) för bästa rekommendation.</p>
+                    <button type="button" class="onboarding-dismiss" id="onboardingDismiss" aria-label="Stäng">×</button>
+                </div>
             </section>
 
             <!-- Påverkan på avstånd (eget kort) -->
@@ -101,18 +105,29 @@
                 <!-- Sida 2: Avstånd till green (matchar knappordning Hem → Avstånd → Banguide) -->
                 <div class="page page-distance" id="pageDistance">
                     <header class="header header-distance">
-                        <div class="header-content">
+                        <div class="header-content header-distance-content">
                             <h1 id="distancePageHeading" class="distance-page-title" tabindex="-1">Avstånd till green – Hål <span id="distancePageHoleNumber">1</span></h1>
+                            <div class="distance-tee-select" aria-label="Välj tee">
+                                <span class="distance-tee-label">Tee:</span>
+                                <div class="distance-tee-btns">
+                                    <button type="button" class="distance-tee-btn" data-tee="47" aria-pressed="false">47</button>
+                                    <button type="button" class="distance-tee-btn active" data-tee="50" aria-pressed="true">50</button>
+                                    <button type="button" class="distance-tee-btn" data-tee="54" aria-pressed="false">54</button>
+                                    <button type="button" class="distance-tee-btn" data-tee="58" aria-pressed="false">58</button>
+                                </div>
+                                <span class="tee-hint">Högre siffra = längre bana</span>
+                            </div>
                         </div>
                     </header>
                     <main class="distance-page-content">
                         <section class="card distance-display" id="distanceDisplay" data-layout-id="distanceDisplay">
                             <div class="distance-main">
                                 <div class="distance-label">Avstånd till mitten på Green</div>
-                                <div class="distance-value-wrap">
+                                <div class="distance-value-wrap" id="distanceToGreenWrap">
                                     <div class="distance-value" id="distanceToGreen">
                                         <span class="loading">📍 Hämtar position...</span>
                                     </div>
+                                    <button type="button" class="gps-retry-btn" id="gpsRetryBtn" style="display: none;" aria-label="Försök hämta position igen">Försök igen</button>
                                 </div>
                                 <div class="distance-to-pin-row">
                                     <span class="distance-to-pin-label">Avstånd till flaggan:</span>
@@ -167,12 +182,13 @@
                         <section class="card wind-adjustment-card" id="windAdjustmentCard" data-layout-id="windAdjustmentCard">
                             <h3>Vart ska jag sikta?</h3>
                             <div class="aim-content" id="aimContent">
-                                <p class="aim-waiting" id="aimWaiting">Väntar på position och väder…</p>
+                                <p class="aim-waiting" id="aimWaiting">Väntar på position och väder… <span class="aim-waiting-hint">GPS och väder hämtas automatiskt.</span></p>
                                 <ul class="aim-list" id="aimList" aria-label="Siktråd utifrån vind, höjd, lufttryck och avstånd"></ul>
                             </div>
                             <button type="button" class="aim-update-btn" id="updateAimBtn" aria-label="Uppdatera din position och siktråden">
                                 📍 Uppdatera position och siktråd
                             </button>
+                            <p class="aim-hint">Tryck om siktråden verkar fel eller positionen är osäker</p>
                         </section>
                         <section class="card hole-notes-card" id="holeNotesCard" data-layout-id="holeNotesCard">
                             <h3>Anteckningar – hål <span id="holeNotesHoleNumber">1</span></h3>
