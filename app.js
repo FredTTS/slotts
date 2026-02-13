@@ -1191,6 +1191,8 @@ function updateBanguidePage() {
     const expandBtn = document.getElementById('banguideExpandBtn');
     const infoEl = document.getElementById('banguideInfo');
     if (numEl) numEl.textContent = hole;
+    const navNumEl = document.getElementById('banguideNavHoleNumber');
+    if (navNumEl) navNumEl.textContent = hole;
     if (previewNumEl) previewNumEl.textContent = hole;
     if (expandBtnHoleEl) expandBtnHoleEl.textContent = hole;
     if (expandBtn) expandBtn.setAttribute('aria-label', `Öppna banguide för hål ${hole}`);

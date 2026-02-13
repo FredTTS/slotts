@@ -230,6 +230,14 @@ body {
     color: white;
 }
 
+.banguide-hole-nav-number {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--primary-dark);
+    min-width: 1.5rem;
+    text-align: center;
+}
+
 .banguide-section {
     background: var(--card-bg);
     border-radius: 1rem;
